@@ -1,40 +1,25 @@
 # Development handoff
 
-Checkpoint: September 9, 2026. Modularization is in progress; the application is functional. This checkpoint includes the development tooling and the first three extractions. No push or deployment was requested.
+Checkpoint: September 9, 2026. The application is modularized, strictly typed, functional, testable, and buildable. This checkpoint contains the completed extraction and its verification coverage.
 
-## Non-negotiable release requirement
+## Release requirement
 
-The user must be able to double-click one self-contained `dist/index.html` and use the app offline in a browser. No server, installation, CDN, remote font, or adjacent runtime asset is permitted. Source `index.html` is a development entry point; distribute the built file. Never edit `dist` manually. See [AGENTS.md](../AGENTS.md) and [architecture.md](architecture.md).
-
-`Pitch-Tracker.html` remains the unchanged upstream baseline from commit `94777d5`. Develop in `index.html` and `src/`. Preserve behavior and the v1 saved-data format during extraction; separate feature changes from refactoring.
+Distribute the single built `dist/index.html`, which opens by double-click under `file://` and works offline. No server, Node installation, internet, CDN, remote font, or adjacent runtime file is required by users. Never edit `dist` manually. `Pitch-Tracker.html` is the unchanged upstream baseline from `94777d5`; develop in `index.html` and `src/`.
 
 ## Completed
 
-- Installed and locked TypeScript, Vite, vite-plugin-singlefile, Vitest, Playwright, ESLint, and Prettier. Added a Windows GitHub Actions verification workflow and release artifact upload. The workflow has not yet been exercised remotely.
-- Extracted CSS to `src/styles.css`; builds inline both CSS and module JavaScript into one HTML file.
-- Extracted pure note parsing, cents evaluation/classification, and pitch detection into `src/domain/pitch.ts`. Tuning and noise gate are explicit inputs.
-- Added v1 data types in `src/domain/tracker.ts` and pure backup validation/parsing in `src/domain/backup.ts`.
-- Extracted tracker load/save/restore into `src/persistence/tracker-store.ts` behind `KeyValueStorage`, with a lazy browser adapter. Existing storage keys, revision conflict detection, recovery copies, and replacement import semantics are retained. Failed saves no longer advance the in-memory revision.
-- Replaced all inline UI event attributes and UI event-property assignments with named actions and delegated listeners in `src/ui/events.ts`. Forms, dynamically rendered controls, nested button content, and disabled controls are covered. No runtime evaluation of attribute code is used.
+- Removed all classic application scripts and the global `startTracker` bridge. `src/main.ts` imports and wires the application directly.
+- Extracted controller actions, per-instance state, session/roster/history/settings renderers, dialogs, theme management, keyboard/lifecycle listeners, microphone management, and detection into strict TypeScript modules. Templates and source HTML are now formatted.
+- Moved session queries and transitions into browser-independent domain modules, including creation/finish/resume, class selection, scoring, attendance, fair next/random selection, snapshots, and undo.
+- Preserved v1 records, revision protection, recovery-backed restore, original measurements, UI actions, and native form behavior. Added the existing optional `Attempt.originalStatus` field to the type and round-trip coverage.
+- Kept callbacks bound to a stable application object while restore and undo replace data/session objects. Added domain and browser coverage for subsequent actions using current state.
+- Replaced the legacy-global synthetic audio test with browser device API stubs. Added permission denial, delayed-request cleanup, reference playback, device disconnection, and single-recording coverage.
+- Reproduced and fixed a cancellation race: Escape during a pending microphone permission request could arm a check later. Separate check generations now invalidate that pending check.
+- Added explicit listener/timer cleanup and development hot-replacement cleanup. Stopping audio also cleans up active reference tones.
 
-## Current integration boundary
+See [architecture.md](architecture.md) for the module map, dependency direction, state ownership, and extension guidance. Theme entries now live in `src/ui/themes.ts`.
 
-The source `index.html` still contains classic scripts for themes, mutable application state, controller operations, HTML render functions, audio orchestration, and lifecycle/keyboard listeners. It is intentionally not yet fully type checked.
-
-`src/main.ts` imports the typed modules and calls the temporary global `startTracker(domain, services)` after parsing. That function initializes storage and rendering, then returns action callbacks closing over the current state. The entry point binds delegated UI listeners once. Keep saved-data validation behind this initialization boundary until the bridge is replaced.
-
-The action callbacks themselves still reside in the classic controller. Removing inline event attributes did not finish controller or rendering extraction. Theme preference storage also remains separate from the tracker storage adapter.
-
-## Next work, in order
-
-1. Extract controller and state into typed modules: session creation/finish/resume, active selection, scoring, attendance, next/random selection, undo, and action callbacks. Preserve live state references; callbacks must not capture stale snapshots after restore or undo.
-2. Extract renderers for session/roster, history, settings, and dialogs. Keep named `data-ui-*` actions and escaped user content. Preserve focus behavior, browser form validation, and dialog submission.
-3. Extract theme management and audio orchestration, including microphone lifecycle, stable-hold checks, reference tones, cancellation, and cleanup. Keep pure pitch math independent of browser APIs.
-4. Remove the global bootstrap bridge when the controller can be imported directly. Extend strict typing to the remaining app instead of hiding errors with broad casts or disabling checks.
-5. Manually verify real microphone permissions and input, reference playback, keyboard accessibility, narrow layouts, and printing. Automated synthetic audio tests do not verify physical devices.
-6. Push only when requested; confirm the remote workflow passes after pushing.
-
-## Test and build commands
+## Verification
 
 Use Node 22.22.3 and npm. For a fresh checkout:
 
@@ -44,15 +29,29 @@ npx playwright install chromium firefox
 npm run verify
 ```
 
-`npm run verify` performs type checking, linting, formatting checks, build, unit tests, and browser tests. The current passing baseline is **33 unit tests and 30 browser tests (63 total)**. Browser tests use the built release under `file://`, with networking disabled and ordinary browser security settings. A copied-file test exercises relocation to a folder containing spaces.
+The checkpoint suite has **39 unit tests and 40 browser tests (79 total)**. `npm run verify` includes type checking, linting, formatting, build, and all tests. Browser checks use the actual built release under offline file URLs in Chromium and Firefox.
 
-`npm run dev` is optional development tooling. `npm run build` produces the distributable `dist/index.html`; Node is not needed to use that file. Generated outputs, browser downloads, reports, and node_modules are not committed.
+Desktop and 390-pixel session layouts were visually inspected in headless Chromium; the narrow page had no horizontal overflow or page errors. History print rendering was inspected and a PDF generated. Expand history details before printing when student details are needed. Keyboard and dialog behavior have automated coverage.
 
-## Test seams and limitations to preserve
+Real microphone permissions, physical input, reference playback through speakers, and hands-on accessibility checks still need a person with the target browser/hardware. Synthetic audio tests cannot verify those. The Windows GitHub Actions workflow has not been run remotely in this task.
 
-- `tests/e2e/workflows.spec.ts` has a synthetic audio test that currently accesses classic lexical globals through `page.evaluate`. When removing those globals, replace this seam with injected audio-device dependencies or browser API stubs; do not expose production globals solely for tests or drop the coverage.
-- Storage failure tests inject denied access, quota errors, malformed data, and a newer stored revision. Conflict coverage models another writer without relying on browser-specific file-URL storage-event delivery.
-- Browser storage belongs to the browser profile/file location, not the HTML file. Moving the release may expose a different store. JSON export/import is the portable backup path.
-- Recovery and primary writes are separate operations, not a transaction. A failed primary restore may update the recovery slot while preserving primary data. Revision checks are not an atomic cross-window lock.
-- Type definitions should be checked against all existing runtime fields during controller extraction; for example, corrected attempts preserve an optional `originalStatus` field in the existing controller, which is not yet declared in `Attempt`.
-- Source HTML and the upstream baseline are excluded from Prettier during the transition; newly extracted modules are formatted and checked normally.
+## Next development step
+
+The extraction is complete; feature development can proceed. The next recorded feature is **PT-001: focus-mode auto-advance**, documented in [roadmap.md](roadmap.md). Settle its behavior before implementation:
+
+- Whether manual correct scores trigger advancement.
+- Whether low/high results re-arm detection for the same student.
+- How a sustained tone is prevented from scoring the next student.
+- Roster boundary behavior and whether the toggle persists.
+
+Use `src/domain/session.ts` for existing Next selection, `src/app/session-controller.ts` for recording coordination, `src/audio/detection.ts` for accepted holds, and `src/ui/session-view.ts` for the toggle. Keep feature changes separate from this refactor and preserve the single-file offline contract.
+
+Push only when explicitly requested; after a requested push, verify the remote workflow.
+
+## Constraints to preserve
+
+- Methods declare `this: App`: call them on the application object or use closures when passing them to browser APIs. Do not capture stale `db` or session objects in callbacks.
+- Keep domain code independent of DOM, storage, and audio. Add behavior tests at the appropriate boundary rather than exposing production globals for tests.
+- Moving the release may change its browser storage. JSON backup/restore is the portable path.
+- Recovery and primary writes are separate operations; revision checks are not an atomic cross-window lock. Invalid or failed restores must preserve primary data and current UI state.
+- Source changes are checked strictly; do not add broad casts or disable checks to accommodate new code.

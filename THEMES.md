@@ -4,7 +4,7 @@ Run `npm run build`, then open `dist/index.html` directly in your browser. Selec
 
 ## Add a theme
 
-Inside `index.html`, find `THEME_REGISTRY`. Add an entry, then rebuild:
+Inside `src/ui/themes.ts`, find `THEME_REGISTRY`. Add an entry, then rebuild:
 
 ```js
 {

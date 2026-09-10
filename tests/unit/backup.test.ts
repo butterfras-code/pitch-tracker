@@ -5,6 +5,8 @@ import { trackerFixture } from '../fixtures/tracker';
 describe('v1 backup validation', () => {
   it('round-trips all v1 data and leaves the input and extra fields intact', () => {
     const data = { ...trackerFixture(), extension: 'preserved' };
+    data.sessions[0].attempts[0].originalStatus = 'low';
+    data.sessions[0].attempts[0].source = 'corrected';
     const before = JSON.stringify(data);
     expect(validateBackup(data)).toBe(data);
     expect(parseBackup(before)).toEqual(data);

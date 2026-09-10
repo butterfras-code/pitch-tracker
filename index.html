@@ -1,209 +1,44 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pitch Tracker · Session studio</title><link rel="stylesheet" href="/src/styles.css">
-<script>
-// THEME REGISTRY: copy an entry, choose a unique id/name, and override tokens.
-// Missing tokens inherit Classic. The selector populates automatically.
-// All assets are local/system fonts, so themes work offline.
-const THEME_REGISTRY = [
-  {
-    id: 'cel-mech', name: 'Cel-Shaded Mech', treatment: 'mech',
-    tokens: {
-      bg:'#111115', card:'#18181c', ink:'#f5f5f7', muted:'#b5b5c3', line:'#535361',
-      accent:'#00c2ff', soft:'#30303b', low:'#001b26', high:'#26000b',
-      danger:'#ff83a2', control:'#24242c', 'primary-ink':'#111115', 'primary-hover':'#fff36a',
-      'badge-bg':'#343440', 'low-bg':'#65d9ff', correct:'#172000', 'correct-bg':'#e7f58b',
-      'high-bg':'#ff83a2', 'help-bg':'#24242c', track:'#42424d', 'focus-ring':'#ffe600',
-      'notice-bg':'#ffe600', 'notice-ink':'#171700', radius:'3px', 'control-radius':'2px',
-      'panel-shadow':'5px 5px 0 #ff2e63', 'button-shadow':'2px 2px 0 #000',
-      'heading-font':'"Arial Black", "Trebuchet MS", sans-serif',
-      'body-font':'"Trebuchet MS", system-ui, sans-serif', edge:'#ff2e63', highlight:'#ffe600',
-      'page-pattern':'repeating-linear-gradient(135deg, transparent, transparent 12px, #ffffff03 12px, #ffffff03 24px)',
-      scheme:'dark'
-    }
-  },
-  { id: 'classic', name: 'Classic Studio', tokens: {} }
-];
-const DEFAULT_THEME = 'cel-mech';
-const THEME_STORAGE_KEY = 'mouthpiece.pitchtracker.theme.v1';
-let appliedThemeTokens = [];
-function applyTheme(id) {
-  const theme = THEME_REGISTRY.find(theme => theme.id === id)
-    || THEME_REGISTRY.find(theme => theme.id === DEFAULT_THEME);
-  const root = document.documentElement;
-  appliedThemeTokens.forEach(key => root.style.removeProperty('--' + key));
-  Object.entries(theme.tokens).forEach(([key,value]) => root.style.setProperty('--' + key,value));
-  appliedThemeTokens = Object.keys(theme.tokens);
-  root.dataset.theme = theme.id;
-  root.dataset.treatment = theme.treatment || '';
-  const selector = document.getElementById('themeSelect');
-  if (selector) selector.value = theme.id;
-  return theme;
-}
-let savedTheme;
-try { savedTheme = localStorage.getItem(THEME_STORAGE_KEY); } catch {}
-applyTheme(savedTheme || DEFAULT_THEME);
-</script></head><body><header><div><div class="eyebrow">Mouthpiece practice · Offline edition</div><h1>Pitch Tracker</h1></div><div class="row"><label class="theme-picker noprint">Theme<select id="themeSelect"></select></label><small id="saveStatus" role="status">Loading…</small><button data-ui-click="backup">Back up data</button></div></header><div id="storageWarning" class="notice hidden" role="alert"></div><nav class="tabs" aria-label="Main"><button data-ui-click="switch-tab" data-tab="session" class="on">Session</button><button data-ui-click="switch-tab" data-tab="history">History & progress</button><button data-ui-click="switch-tab" data-tab="admin">Classes & settings</button><button data-ui-click="switch-tab" data-tab="help">Help</button></nav><main id="main"></main><dialog id="modal"><div id="modalBody"></div></dialog><div id="toast" role="status" class="hidden"></div><input type="file" data-ui-change="import-backup" id="importFile" accept="application/json,.json" hidden>
-<script>
-'use strict';
-const themeSelect = document.getElementById('themeSelect');
-THEME_REGISTRY.forEach(theme => themeSelect.add(new Option(theme.name, theme.id)));
-themeSelect.value = document.documentElement.dataset.theme;
-themeSelect.addEventListener('change', () => {
-  const theme = applyTheme(themeSelect.value);
-  try { localStorage.setItem(THEME_STORAGE_KEY, theme.id); }
-  catch { toast('Theme applied for this visit. Browser storage could not save your preference.'); }
-});
-window.addEventListener('storage', event => {
-  if (event.key === THEME_STORAGE_KEY) applyTheme(event.newValue || DEFAULT_THEME);
-});
-
-const KEY='mouthpiece.pitchtracker.v1';
-const instruments=['Flute','Clarinet','Saxophone','Oboe','Bassoon','Trumpet','French Horn','Trombone','Euphonium','Tuba'];
-const pitches=['A','F#','Ab','C','F','C','F','F','F','F'];
-const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const clone=v=>JSON.parse(JSON.stringify(v));
-function fresh(){const c={id:uid(),name:'Demo class',students:['Maya','Lucas','Sofia','Ethan','Liam','Noah','Emma','Ava','James','Oliver'].map((name,i)=>({id:uid(),name,instrument:instruments[i],archived:false}))};return {schema:1,classes:[c],configs:Object.fromEntries(instruments.map((n,i)=>[n,{pitch:pitches[i],min:i===1?0:i===9?-30:-25,max:i===1?100:i===9?30:25}])),settings:{a4:440,hold:2,stability:35,gate:0.015,advance:false},sessions:[],classId:c.id,activeSession:null,activeStudent:null,revision:0,lastBackup:null};}
-let db,storageBlocked=false,loadedRaw=null;
-let pitchDomain,dataServices,trackerStore;
-let tab='session',search='',filter='all',focusMode=false,historyStudent='all',toastTimer,undoStack=[];
-function warning(message){$('storageWarning').textContent=message;$('storageWarning').classList.remove('hidden')}
-
-function save(){if(storageBlocked){$('saveStatus').textContent='Not saved \u00b7 export needed';return false}try{trackerStore.save(db);$('saveStatus').textContent='Saved on this browser \u00b7 '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});return true}catch(e){storageBlocked=true;if(e instanceof dataServices.StorageConflictError){warning('Another window changed this tracker. Saving is paused to avoid overwriting it. Back up this window, then reload to use the latest saved data.')}else{warning('Browser storage is unavailable or full. Your current work is still open. Download a backup before closing.')}$('saveStatus').textContent='Not saved \u00b7 export needed';return false}}
-function toast(t){$('toast').textContent=t;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),3500)}
-function cls(){return db.classes.find(c=>c.id===db.classId)}function ses(){return db.sessions.find(s=>s.id===db.activeSession)}function pupil(){return ses()?.roster.find(s=>s.id===db.activeStudent)}function present(){return ses()?.roster.filter(s=>!ses().absent.includes(s.id))||[]}function attempts(id,s=ses()){return s?.attempts.filter(a=>!id||a.studentId===id)||[]}function rate(a){return a.length?Math.round(a.filter(x=>x.status==='correct').length/a.length)+'%':'—'}
-function options(arr,value){return arr.map(x=>`<option value="${esc(x)}" ${x===value?'selected':''}>${esc(x)}</option>`).join('')}
-function classOptions(){return db.classes.map(c=>`<option value="${c.id}" ${c.id===db.classId?'selected':''}>${esc(c.name)}</option>`).join('')}
-function statusName(s){return {low:'Too low',correct:'In range',high:'Too high'}[s]||'Not tested'}
-function stamp(d){return new Date(d).toLocaleString()}
-function switchTab(t){cancelCheck();tab=t;render()}
-
-function render(){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));$('main').classList.toggle('focus-mode',focusMode&&tab==='session');$('main').innerHTML=tab==='session'?sessionHTML():tab==='history'?historyHTML():tab==='admin'?adminHTML():helpHTML();if(tab==='session')renderCards()}
-function sessionHTML(){const s=ses(),p=pupil(),a=attempts(),done=present().filter(x=>attempts(x.id).length).length;return `<div class="row spread noprint" style="margin-bottom:18px"><div class="row"><label>Class<select id="classSelect" data-ui-change="change-class">${classOptions()}</select></label><div><strong>${s?esc(s.name):'Ready for a new session'}</strong><div class="muted">${s?stamp(s.started):'Your roster, your pace.'}</div></div></div><div class="row">${s?`<button data-ui-click="toggle-focus">${focusMode?'Show roster':'Focus view'}</button><button data-ui-click="session-notes">Session notes</button><button data-ui-click="end-session">Finish session</button>`:`<button class="primary" data-ui-click="new-session">Start session</button>`}</div></div>${!s?`<div class="panel empty"><h2>Make every turn count.</h2><p style="margin:12px 0">Start with ${cls().students.filter(s=>!s.archived).length} students in ${esc(cls().name)}, or manage your classes first.</p><button class="primary" data-ui-click="new-session">Start session</button></div>`:`<div class="panel stats"><div><div class="stat">${done}<small> / ${present().length}</small></div><small>Students checked</small></div><div><div class="stat">${a.length}</div><small>Attempts</small></div><div><div class="stat">${rate(a)}</div><small>Attempts in range</small></div><div><div class="stat" id="elapsed">${elapsed(s)}</div><small>Session elapsed</small></div><div style="margin-left:auto"><button data-ui-click="undo" ${undoStack.length?'':'disabled'}>Undo last change</button></div></div><div class="layout"><section class="panel focus stack"><div class="row spread"><span class="eyebrow">On the stand</span><span class="badge">${present().length-done} left to check</span></div><div><h2>${p?esc(p.name):'Choose a student'}</h2><p class="muted">${p?esc(p.instrument):'Use the roster or pick next.'}</p></div>${p?`<div class="help">Target <strong>${esc(db.configs[p.instrument].pitch)}</strong> · ${db.configs[p.instrument].min} to +${db.configs[p.instrument].max} cents<br>${parseNote(db.configs[p.instrument].pitch).octave===null?'Any octave':'Exact octave'} · concert pitch · A4 = ${db.settings.a4} Hz</div>`:''}<div class="tuner"><div class="note" id="liveNote">—</div><div class="muted" id="liveHz">${mic?'Listening for a clear tone':'Microphone off'}</div><div class="meter"><i class="needle" id="needle"></i></div><div id="liveCents">${p?'Cents relative to target':'Select a student to compare'}</div><div class="progress"><i id="holdProgress"></i></div><small id="checkHint">${checking?'Hold a steady tone…':'Checks record one attempt after a steady hold.'}</small></div><div class="row"><button id="micButton" data-ui-click="toggle-mic">${mic?'Stop microphone':'Enable microphone'}</button><button data-ui-click="reference-tone" ${p?'':'disabled'}>Hear target</button></div><button class="primary full" id="checkButton" data-ui-click="start-check" ${p&&!s.absent.includes(p.id)?'':'disabled'}>Check pitch · ${db.settings.hold}s hold</button><button id="cancelButton" class="full ${checking?'':'hidden'}" data-ui-click="cancel-check">Cancel check</button><div><small>Or record your judgment</small><div class="scorebar" style="margin-top:6px">${['low','correct','high'].map((v,i)=>`<button class="${v}" data-ui-click="record" data-status="${v}" ${p&&!s.absent.includes(p.id)?'':'disabled'}>${statusName(v)}<br><small>${i+1}</small></button>`).join('')}</div></div><div class="row"><button class="primary" data-ui-click="next-student">Next student →</button><button data-ui-click="random-student">Random</button><button data-ui-click="active-student-notes" ${p?'':'disabled'}>Notes</button></div><label><input type="checkbox" ${db.settings.advance?'checked':''} data-ui-change="advance"> Advance after recording</label><small>Keys: 1 / 2 / 3 score · N next · R random · Space check · Esc cancel · Ctrl/Cmd+Z undo</small></section><section class="roster-area"><div class="row spread" style="margin-bottom:12px"><h2>Class roster</h2><div class="row"><input id="search" aria-label="Search students" placeholder="Find a student…" value="${esc(search)}" data-ui-input="search"><select aria-label="Filter roster" data-ui-change="filter-roster">${options(['all','not tested','needs practice','absent'],filter)}</select></div></div><div class="cards" id="cards"></div></section></div>`}`}
-function elapsed(s){const sec=Math.floor((Date.now()-s.started)/1000);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')}
-setInterval(()=>{if($('elapsed')&&ses())$('elapsed').textContent=elapsed(ses())},1000);
-function renderCards(){if(!$('cards')||!ses())return;const s=ses();const list=s.roster.filter(p=>{let a=attempts(p.id),last=a.at(-1);return (p.name+' '+p.instrument).toLowerCase().includes(search.toLowerCase())&&(filter==='all'||filter==='absent'&&s.absent.includes(p.id)||filter==='not tested'&&!a.length&&!s.absent.includes(p.id)||filter==='needs practice'&&last&&last.status!=='correct')});$('cards').innerHTML=list.map(p=>{const a=attempts(p.id),last=a.at(-1),abs=s.absent.includes(p.id);return `<article class="student ${p.id===db.activeStudent?'selected':''} ${abs?'absent':''}"><div class="row spread" style="margin:0"><button class="name" data-ui-click="select-student" data-id="${p.id}">${esc(p.name)}</button><button aria-label="History for ${esc(p.name)}" data-ui-click="student-notes" data-id="${p.id}">↗</button></div><small>${esc(p.instrument)} · ${esc(db.configs[p.instrument].pitch)}</small><div class="row spread"><span class="badge ${last?.status||''}">${abs?'Absent':statusName(last?.status)}</span><small>${a.length} tries · ${rate(a)}</small></div><div class="row scorebar">${['low','correct','high'].map(v=>`<button class="score ${v}" data-ui-click="record" data-status="${v}" data-id="${p.id}" ${abs?'disabled':''}>${statusName(v)} · ${a.filter(x=>x.status===v).length}</button>`).join('')}</div><div class="row spread"><label><input type="checkbox" ${abs?'checked':''} data-ui-change="attendance" data-id="${p.id}"> Absent</label><small>${s.notes[p.id]?'Note added':''}</small></div></article>`}).join('')||'<div class="empty">No students match this view.</div>'}
-function selectStudent(id){cancelCheck();db.activeStudent=id;save();render()}
-function changeClass(id){stopMic();db.classId=id;db.activeSession=db.sessions.find(s=>s.classId===id&&!s.ended)?.id||null;db.activeStudent=ses()?.roster.find(p=>!ses().absent.includes(p.id))?.id||null;undoStack=[];save();render()}
-function showDialog(html){$('modalBody').innerHTML=html;$('modal').showModal()}
-function closeDialog(){$('modal').close()}
-function newSession(){const roster=cls().students.filter(s=>!s.archived);if(!roster.length){toast('Add students in Classes & settings first.');return}showDialog(`<h2>Start a session</h2><p class="muted">${esc(cls().name)} · ${roster.length} students</p><form data-ui-submit="create-session"><label>Session name<input id="sessionName" required maxlength="120" value="${esc(new Date().toLocaleDateString()+' · Mouthpiece practice')}"></label><div class="row" style="margin-top:18px"><button class="primary">Start session</button><button type="button" data-ui-click="close-dialog">Cancel</button></div></form>`)}
-function createSession(){const name=$('sessionName').value.trim();if(!name)return;const s={id:uid(),classId:db.classId,className:cls().name,name,started:Date.now(),ended:null,roster:clone(cls().students.filter(p=>!p.archived)),absent:[],attempts:[],notes:{},note:''};db.sessions.push(s);db.activeSession=s.id;db.activeStudent=s.roster[0]?.id||null;undoStack=[];save();closeDialog();render()}
-function endSession(){if(!confirm('Finish this session and save it to history? You can resume it later.'))return;stopMic();ses().ended=Date.now();db.activeSession=null;db.activeStudent=null;undoStack=[];save();tab='history';render()}
-function remember(){undoStack.push({id:ses().id,data:clone(ses()),active:db.activeStudent});if(undoStack.length>50)undoStack.shift()}
-function undo(){const u=undoStack.pop();if(!u||u.id!==ses()?.id)return;cancelCheck();db.sessions[db.sessions.findIndex(s=>s.id===u.id)]=u.data;db.activeStudent=u.active;save();render();toast('Last change undone.')}
-function attendance(id,abs){cancelCheck();remember();ses().absent=ses().absent.filter(x=>x!==id);if(abs)ses().absent.push(id);if(abs&&db.activeStudent===id)db.activeStudent=present()[0]?.id||null;save();render()}
-function pickNext(random){const pool=present();if(!pool.length){toast('No students marked present.');return}const min=Math.min(...pool.map(p=>attempts(p.id).length));let candidates=pool.filter(p=>attempts(p.id).length===min);if(candidates.length>1)candidates=candidates.filter(p=>p.id!==db.activeStudent);selectStudent(candidates[random?Math.floor(Math.random()*candidates.length):0].id)}
-function record(status,id=db.activeStudent,measurement=null){if(!ses()||!ses().roster.some(p=>p.id===id)||ses().absent.includes(id))return;cancelCheck();remember();const p=ses().roster.find(p=>p.id===id);ses().attempts.push({id:uid(),studentId:id,name:p.name,instrument:p.instrument,time:Date.now(),status,source:measurement?'microphone':'manual',frequency:measurement?.frequency??null,cents:measurement?.cents??null,target:clone(db.configs[p.instrument]),a4:db.settings.a4});db.activeStudent=id;save();if(db.settings.advance)pickNext(false);else render();toast(p.name+' · '+statusName(status))}
-function sessionNotes(){showDialog(`<h2>Session notes</h2><form data-ui-submit="session-notes"><textarea id="snote" maxlength="10000" aria-label="Session notes">${esc(ses().note)}</textarea><button class="primary">Save notes</button> <button type="button" data-ui-click="close-dialog">Cancel</button></form>`)}
-function studentDetail(id){const s=ses(),p=s?.roster.find(p=>p.id===id)||cls().students.find(p=>p.id===id);if(!p)return;const all=db.sessions.filter(x=>x.classId===db.classId).flatMap(x=>x.attempts.filter(a=>a.studentId===id));showDialog(`<h2>${esc(p.name)}</h2><p class="muted">${all.length} lifetime attempts · ${rate(all)} in range</p>${s?`<form data-ui-submit="student-notes" data-id="${id}"><label>Notes for this session<textarea id="pnote" maxlength="10000">${esc(s.notes[id]||'')}</textarea></label><button class="primary">Save notes</button> <button type="button" data-ui-click="close-dialog">Close</button></form>`:'<button data-ui-click="close-dialog">Close</button>'}<h3 style="margin-top:20px">Recent attempts</h3>${attemptTable(all.slice(-15).reverse())}`)}
-function attemptTable(a,editable=false,sid=''){return a.length?`<div class="tablewrap"><table><thead><tr><th>When / student</th><th>Result</th><th>Measurement</th>${editable?'<th>Correct</th>':''}</tr></thead><tbody>${a.map(x=>`<tr><td>${esc(x.name)}<br><small>${stamp(x.time)}</small></td><td><span class="badge ${x.status}">${statusName(x.status)}</span><br><small>${esc(x.source)} · target ${esc(x.target.pitch)}</small></td><td>${x.frequency===null?'Manual':x.frequency.toFixed(1)+' Hz / '+Math.round(x.cents)+'¢'}</td>${editable?`<td><button data-ui-click="edit-attempt" data-session-id="${sid}" data-id="${x.id}">Edit</button></td>`:''}</tr>`).join('')}</tbody></table></div>`:'<p class="empty">No attempts yet.</p>'}
-function historyHTML(){const ss=db.sessions.filter(s=>s.classId===db.classId).slice().reverse(),students=new Map();ss.forEach(s=>s.roster.forEach(p=>students.set(p.id,p.name)));const all=ss.flatMap(s=>s.attempts).filter(a=>historyStudent==='all'||a.studentId===historyStudent);return `<div class="row spread" style="margin-bottom:20px"><h2>History & progress</h2><div class="row noprint"><select aria-label="History class" data-ui-change="history-class">${classOptions()}</select><select aria-label="Student history" data-ui-change="history-student"><option value="all">All students</option>${[...students].map(([id,n])=>`<option value="${id}" ${historyStudent===id?'selected':''}>${esc(n)}</option>`).join('')}</select><button data-ui-click="export-csv">Export CSV</button><button data-ui-click="print">Print</button></div></div><div class="panel stats"><div><div class="stat">${ss.length}</div><small>Sessions</small></div><div><div class="stat">${all.length}</div><small>Attempts</small></div><div><div class="stat">${rate(all)}</div><small>Attempts in range</small></div></div>${ss.map(s=>{const a=s.attempts.filter(a=>historyStudent==='all'||a.studentId===historyStudent);return `<section class="panel"><div class="row spread"><div><h3>${esc(s.name)} <span class="badge">${s.ended?'Finished':'In progress'}</span></h3><small>${stamp(s.started)} · ${a.length} attempts · ${rate(a)} in range</small></div><div class="row noprint"><button data-ui-click="resume-session" data-id="${s.id}">${s.ended?'Resume':'Open'}</button><button data-ui-click="export-csv" data-id="${s.id}">CSV</button><button class="danger" data-ui-click="delete-session" data-id="${s.id}">Delete</button></div></div>${s.note?`<p class="history-note" style="margin-top:12px">${esc(s.note)}</p>`:''}<details style="margin-top:14px"><summary>Student summary & attempts</summary><div class="tablewrap"><table><thead><tr><th>Student</th><th>Attendance</th><th>Low / in range / high</th><th>Notes</th></tr></thead><tbody>${s.roster.filter(p=>historyStudent==='all'||p.id===historyStudent).map(p=>{const pa=s.attempts.filter(x=>x.studentId===p.id);return `<tr><td>${esc(p.name)}<br><small>${esc(p.instrument)}</small></td><td>${s.absent.includes(p.id)?'Absent':'Present'}</td><td>${['low','correct','high'].map(v=>pa.filter(a=>a.status===v).length).join(' / ')}</td><td class="history-note">${esc(s.notes[p.id]||'')}</td></tr>`}).join('')}</tbody></table></div>${attemptTable(a.slice().reverse(),true,s.id)}</details></section>`}).join('')||'<div class="panel empty">Completed sessions and student progress will appear here.</div>'}`}
-function resumeSession(id){const other=db.sessions.find(s=>s.classId===db.classId&&!s.ended&&s.id!==id);if(other){toast('Finish the current session before resuming another.');return}stopMic();const s=db.sessions.find(s=>s.id===id);s.ended=null;db.activeSession=id;db.activeStudent=s.roster.find(p=>!s.absent.includes(p.id))?.id||null;undoStack=[];save();tab='session';render()}
-function deleteSession(id){if(!confirm('Delete this session and all its attempts? Export a backup first if you may need them.'))return;stopMic();db.sessions=db.sessions.filter(s=>s.id!==id);if(db.activeSession===id){db.activeSession=null;db.activeStudent=null}undoStack=[];save();render()}
-function editAttempt(sid,id){const s=db.sessions.find(s=>s.id===sid),a=s.attempts.find(a=>a.id===id);showDialog(`<h2>Correct attempt · ${esc(a.name)}</h2><p class="muted">Original measurement is preserved when you change the result.</p><form data-ui-submit="edit-attempt" data-session-id="${sid}" data-id="${id}"><label>Result<select id="editResult">${options(['low','correct','high'],a.status)}</select></label><div class="row" style="margin-top:18px"><button class="primary">Save correction</button><button type="button" class="danger" data-ui-click="remove-attempt" data-session-id="${sid}" data-id="${id}">Delete attempt</button><button type="button" data-ui-click="close-dialog">Cancel</button></div></form>`)}
-function applyAttemptEdit(sid,id){if(sid===ses()?.id)remember();const a=db.sessions.find(s=>s.id===sid).attempts.find(a=>a.id===id);a.originalStatus??=a.status;a.status=$('editResult').value;a.source='corrected';save();closeDialog();render()}
-function removeAttempt(sid,id){if(!confirm('Delete this attempt?'))return;if(sid===ses()?.id)remember();const s=db.sessions.find(s=>s.id===sid);s.attempts=s.attempts.filter(a=>a.id!==id);save();closeDialog();render()}
-function adminHTML(){return `<div class="row spread" style="margin-bottom:20px"><div><h2>Classes & settings</h2><p class="muted">Rosters persist. Past sessions retain their original names and instruments.</p></div><div class="row"><button data-ui-click="backup">Download backup</button><button data-ui-click="restore-backup">Restore backup</button></div></div><div class="panel"><div class="row spread"><div class="row"><select aria-label="Manage class" data-ui-change="change-class">${classOptions()}</select><button data-ui-click="new-class">New class</button><button data-ui-click="rename-class">Rename</button></div><button class="primary" data-ui-click="add-students">Add students</button></div><p class="help" style="margin:16px 0">Roster edits apply to the next session. Archive a student to remove them from future rosters while keeping their history.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Instrument</th><th>Status</th><th>Manage</th></tr></thead><tbody>${cls().students.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.instrument)}</td><td>${p.archived?'Archived':'Active'}</td><td><button data-ui-click="edit-student" data-id="${p.id}">Edit</button> <button data-ui-click="archive-student" data-id="${p.id}">${p.archived?'Restore':'Archive'}</button></td></tr>`).join('')}</tbody></table></div></div><form class="panel" data-ui-submit="settings"><h2>Pitch targets & detection</h2><p class="muted">Concert pitch. Use A, F#, Bb for any octave; A4 or Bb3 for an exact octave. Targets are teacher-defined, not instrument recommendations.</p><div class="tablewrap"><table id="configTable"><thead><tr><th>Instrument</th><th>Target</th><th>Min cents</th><th>Max cents</th></tr></thead><tbody>${Object.entries(db.configs).map(([n,c])=>`<tr data-instrument="${esc(n)}"><td>${esc(n)}</td><td><input aria-label="${esc(n)} target" class="pitch" value="${esc(c.pitch)}" required></td><td><input aria-label="${esc(n)} minimum cents" class="min" type="number" min="-600" max="600" value="${c.min}" required></td><td><input aria-label="${esc(n)} maximum cents" class="max" type="number" min="-600" max="600" value="${c.max}" required></td></tr>`).join('')}</tbody></table></div><div class="fields" style="margin-top:20px"><label>A4 reference (Hz)<input id="a4" type="number" min="400" max="480" step="0.1" value="${db.settings.a4}" required></label><label>Steady hold (seconds)<input id="hold" type="number" min="0.5" max="5" step="0.1" value="${db.settings.hold}" required></label><label>Allowed pitch spread (cents)<input id="stability" type="number" min="5" max="100" value="${db.settings.stability}" required></label><label>Noise gate (RMS; lower = more sensitive)<input id="gate" type="number" min="0.001" max="0.2" step="0.001" value="${db.settings.gate}" required></label></div><div class="row" style="margin-top:18px"><button class="primary">Save settings</button><button type="button" data-ui-click="add-instrument">Add instrument</button></div><p id="settingsError" role="alert" class="danger"></p></form>`}
-function classDialog(rename=false){showDialog(`<h2>${rename?'Rename class':'New class'}</h2><form data-ui-submit="class" data-rename="${rename}"><label>Class name<input id="className" maxlength="120" required value="${rename?esc(cls().name):''}"></label><div class="row" style="margin-top:18px"><button class="primary">Save</button><button type="button" data-ui-click="close-dialog">Cancel</button></div></form>`)}
-function saveClass(rename){const name=$('className').value.trim();if(!name)return;if(rename)cls().name=name;else{stopMic();const c={id:uid(),name,students:[]};db.classes.push(c);db.classId=c.id;db.activeSession=null;db.activeStudent=null;undoStack=[]}save();closeDialog();render()}
-function addStudent(){showDialog(`<h2>Add students</h2><p class="muted">One per line: Name, Instrument. Existing students are preserved. Names may contain commas; the last comma separates the instrument.</p><form data-ui-submit="new-students"><textarea id="rosterInput" required placeholder="Alex, Trumpet&#10;Sam, Clarinet" aria-label="Students"></textarea><p id="rosterError" class="danger" role="alert"></p><div class="row"><button class="primary">Add to roster</button><button type="button" data-ui-click="close-dialog">Cancel</button></div></form>`)}
-function saveNewStudents(){const lines=$('rosterInput').value.split('\n').map(l=>l.trim()).filter(Boolean),added=[];try{if(!lines.length)throw Error('Enter at least one student.');for(const [i,l] of lines.entries()){const cut=l.lastIndexOf(','),name=l.slice(0,cut).trim(),inst=l.slice(cut+1).trim();const instrument=Object.keys(db.configs).find(n=>n.toLowerCase()===inst.toLowerCase());if(cut<1||!name||name.length>120||!instrument)throw Error('Line '+(i+1)+': use Name, Instrument with a configured instrument.');added.push({id:uid(),name,instrument,archived:false})}cls().students.push(...added);save();closeDialog();render();toast(added.length+' students added for future sessions.')}catch(e){$('rosterError').textContent=e.message}}
-function editStudent(id){const p=cls().students.find(p=>p.id===id);showDialog(`<h2>Edit student</h2><form data-ui-submit="student" data-id="${id}"><div class="fields"><label>Name<input id="studentName" value="${esc(p.name)}" maxlength="120" required></label><label>Instrument<select id="studentInstrument">${options(Object.keys(db.configs),p.instrument)}</select></label></div><div class="row" style="margin-top:18px"><button class="primary">Save</button><button type="button" data-ui-click="close-dialog">Cancel</button></div></form>`)}
-function saveStudent(id){const name=$('studentName').value.trim();if(!name)return;Object.assign(cls().students.find(p=>p.id===id),{name,instrument:$('studentInstrument').value});save();closeDialog();render()}
-function archiveStudent(id){const p=cls().students.find(p=>p.id===id);p.archived=!p.archived;save();render()}
-function addInstrument(){const name=prompt('Instrument name (save any pending settings first):');if(!name?.trim())return;const n=name.trim();if(n.length>120||['__proto__','constructor','prototype'].includes(n)||Object.keys(db.configs).some(k=>k.toLowerCase()===n.toLowerCase())){toast('Use a unique instrument name.');return}db.configs[n]={pitch:'C',min:-25,max:25};save();render()}
-function parseNote(str){return pitchDomain.parseNote(str)}
-function saveSettings(){try{const configs={};document.querySelectorAll('#configTable tbody tr').forEach(row=>{const pitch=row.querySelector('.pitch').value.trim(),min=+row.querySelector('.min').value,max=+row.querySelector('.max').value;parseNote(pitch);if(min>max)throw Error(row.dataset.instrument+': minimum must be ≤ maximum.');configs[row.dataset.instrument]={pitch,min,max}});const settings={...db.settings,a4:+$('a4').value,hold:+$('hold').value,stability:+$('stability').value,gate:+$('gate').value};validate({...db,configs,settings});cancelCheck();db.configs=configs;db.settings=settings;save();toast('Pitch settings saved. Existing measurements keep their original targets.')}catch(e){$('settingsError').textContent=e.message}}
-function helpHTML(){return `<div class="panel stack" style="max-width:850px"><h2>A complete tracker, in one file.</h2><p>Open this HTML file directly in a modern desktop browser. No installation, account, server, external fonts, or internet connection is required.</p><h3>Start here</h3><p>In Classes & settings, create your class and add students. Verify your mouthpiece targets, then start a session. Mark absent students and select a name, or use Next / Random. Record a manual judgment or enable the microphone and run a steady-hold check.</p><h3>Choose your theme</h3><p>Use the Theme selector at the top of any screen. Cel-Shaded Mech is the default; Classic Studio restores the original appearance. Your choice saves in this browser separately from class data and is not included in JSON backups. Switching themes keeps your current session and unsaved form entries.</p><h3>What gets saved</h3><p>Classes, settings, attendance, notes, every attempt, and your active session save automatically in localStorage. Reloading resumes your work. Undo covers the last 50 session changes in this open window; it resets on reload or switching sessions. History also lets you correct or delete individual attempts.</p><h3>Keep a backup</h3><p>Browser storage is tied to this browser, profile, and local file location. Moving or renaming the HTML file may open a separate data store. Private browsing, clearing browser data, or changing computers can remove or hide your records. Download a JSON backup after class and before moving the file. Restore replaces all tracker data after validation and confirmation; it does not merge. CSV is for spreadsheets, not restoration.</p><div class="row"><button data-ui-click="backup">Download JSON backup</button><button data-ui-click="restore-backup">Restore JSON backup</button>${loadedRaw&&storageBlocked?'<button data-ui-click="download-unreadable">Download unreadable stored data</button>':''}</div><p class="muted">Last backup requested: ${db.lastBackup?stamp(db.lastBackup):'Never'}. Confirm downloaded files exist before closing.</p><h3>Microphone checks</h3><p>Microphone permission is requested only when you enable it. Audio is analyzed locally and never recorded or uploaded. Allow microphone access in your browser. If local-file permissions or your device block it, manual scoring still works.</p><p>The detector looks for a single periodic tone between about 55 and 1,600 Hz. A check requires a continuous stable pitch; silence, uncertain pitch, switching students, leaving the tab, or playing a reference tone cancels or resets the hold. A stable tone can be low or high—it need not be in range to count. Room noise, harmonics, and multiple players can confuse detection; use your judgment and correct results when needed.</p><p>Targets without an octave compare against the nearest octave of that pitch class. Targets with an octave compare against that exact frequency. Reference tones for octave-free targets use octave 4. Min/max cents are inclusive; zero is valid. Hear target pauses detection briefly so it cannot score itself.</p><h3>During class</h3><p>1 / 2 / 3 = low / in range / high. N = next, R = random, Space = check. Escape cancels a check. Ctrl/Cmd+Z undoes the latest session change. Shortcuts are disabled while typing or using a dialog. Next and Random prioritize the fewest attempts and exclude absences.</p><h3>Local administration</h3><p>Anyone with access to this browser profile can access the tracker. The admin tab is organizational, not password protection. Use separate browser profiles or operating-system accounts when needed.</p></div>`}
-function download(content,name,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000)}
-function backup(){db.lastBackup=Date.now();save();download(JSON.stringify(db,null,2),'pitch-tracker-backup-'+new Date().toISOString().slice(0,10)+'.json','application/json');toast('Backup download requested. Keep it somewhere safe.')}
-function csvCell(v){let s=String(v??'');if(/^[\s]*[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
-function exportCSV(sid){const ss=db.sessions.filter(s=>sid?s.id===sid:s.classId===db.classId);const rows=[['Class','Session','Started','Student','Instrument','Attendance','Attempt time','Result','Source','Hz','Cents','Target','Min cents','Max cents','A4 Hz','Student notes','Session notes']];for(const s of ss)for(const p of s.roster){if(historyStudent!=='all'&&p.id!==historyStudent)continue;const a=s.attempts.filter(a=>a.studentId===p.id);for(const x of a.length?a:[null])rows.push([s.className,s.name,new Date(s.started).toISOString(),x?.name||p.name,x?.instrument||p.instrument,s.absent.includes(p.id)?'Absent':'Present',x?new Date(x.time).toISOString():'',x?.status,x?.source,x?.frequency,x?.cents,x?.target.pitch,x?.target.min,x?.target.max,x?.a4,s.notes[p.id]||'',s.note])}download('\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'pitch-tracker-results.csv','text/csv;charset=utf-8')}
-function validate(d){return dataServices.validateBackup(d)}
-async function importBackup(e){const file=e.target.files[0];e.target.value='';if(!file)return;try{if(file.size>30*1024*1024)throw Error('Backup is larger than the 30 MB import limit.');const incoming=validate(JSON.parse(await file.text()));if(!confirm(`Replace all current data with ${incoming.classes.length} classes and ${incoming.sessions.length} sessions from this backup? Download your current backup first if needed.`))return;const restored=trackerStore.restore(incoming);stopMic();db=restored;storageBlocked=false;loadedRaw=JSON.stringify(db);$('storageWarning').classList.add('hidden');$('saveStatus').textContent='Backup restored · saved on this browser';undoStack=[];historyStudent='all';closeDialogIfOpen();render();toast('Backup restored.')}catch(err){toast('Restore failed: '+err.message)}};
-function closeDialogIfOpen(){if($('modal').open)closeDialog()}
-let mic=false,stream=null,ctx=null,analyser=null,source=null,raf=null,pendingMic=false,micGeneration=0,checking=null,holdSamples=[],holdStart=null,lastFrame=0,lastAnalysis=0,muteUntil=0,checkDeadline=0;
-const noteNames=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-function context(){if(!ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw Error('Web Audio is unavailable in this browser.');ctx=new AC()}return ctx}
-async function enableMic(){if(mic)return true;if(pendingMic)return false;pendingMic=true;const generation=++micGeneration;try{if(!navigator.mediaDevices?.getUserMedia)throw Error('Microphone access is unavailable for this local file. Use a browser that permits local microphone access, or score manually.');await context().resume();const result=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});if(generation!==micGeneration){result.getTracks().forEach(t=>t.stop());return false}stream=result;source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=4096;source.connect(analyser);mic=true;stream.getAudioTracks()[0].onended=()=>{stopMic();toast('Microphone disconnected. Manual scoring is available.');render()};lastFrame=performance.now();lastAnalysis=0;raf=requestAnimationFrame(audioLoop);return true}catch(e){toast(e.name==='NotAllowedError'?'Microphone permission denied. Allow access in the browser, or use manual scoring.':e.message);return false}finally{pendingMic=false}}
-async function toggleMic(){if(mic||pendingMic)stopMic();else await enableMic();render()}
-function stopMic(){micGeneration++;mic=false;cancelCheck();cancelAnimationFrame(raf);source?.disconnect();source=null;analyser=null;if(stream){stream.getTracks().forEach(t=>{t.onended=null;t.stop()});stream=null}}
-function cancelCheck(){checking=null;holdSamples=[];holdStart=null;if($('holdProgress'))$('holdProgress').style.width='0%';if($('cancelButton'))$('cancelButton').classList.add('hidden');if($('checkHint'))$('checkHint').textContent='Checks record one attempt after a steady hold.'}
-async function startCheck(){if(checking){cancelCheck();render();return}if(!pupil()||ses().absent.includes(db.activeStudent))return;const id=db.activeStudent,sid=ses().id;if(await enableMic()){if(tab!=='session'||ses()?.id!==sid||db.activeStudent!==id)return;cancelCheck();checking={id,sid};checkDeadline=performance.now()+20000;render()}}
-function evaluate(freq,config,a4){return pitchDomain.evaluate(freq,config,a4)}
-function detectPitch(buf,sr,gate){return pitchDomain.detectPitch(buf,sr,gate)}
-const buffer=new Float32Array(4096);
-function audioLoop(now){if(!mic)return;raf=requestAnimationFrame(audioLoop);if(now-lastAnalysis<70)return;lastAnalysis=now;const gap=now-lastFrame;lastFrame=now;if(now<muteUntil){holdSamples=[];holdStart=null;return}analyser.getFloatTimeDomainData(buffer);const freq=detectPitch(buffer,ctx.sampleRate,db.settings.gate);if(checking&&now>checkDeadline){cancelCheck();toast('No stable hold detected in 20 seconds. Try again or record manually.');render()}if(!freq){holdSamples=[];holdStart=null;if($('liveNote')){$('liveNote').textContent='—';$('liveHz').textContent='Listening for a clear tone';$('liveCents').textContent='No reliable pitch';$('holdProgress').style.width='0%';$('needle').style.left='50%'}return}const midi=Math.round(69+12*Math.log2(freq/db.settings.a4));if($('liveNote')){$('liveNote').textContent=noteNames[(midi%12+12)%12]+(Math.floor(midi/12)-1);$('liveHz').textContent=freq.toFixed(1)+' Hz';if(pupil()){const result=evaluate(freq,db.configs[pupil().instrument],db.settings.a4);$('liveCents').textContent=(result.cents>=0?'+':'')+Math.round(result.cents)+' cents · '+statusName(result.status);$('needle').style.left=Math.max(0,Math.min(100,50+result.cents/4))+'%'}}
-if(checking){if(checking.sid!==ses()?.id||checking.id!==db.activeStudent){cancelCheck();return}if(gap>250){holdSamples=[];holdStart=null}const cents=1200*Math.log2(freq),lo=holdSamples.length?Math.min(...holdSamples):cents,hi=holdSamples.length?Math.max(...holdSamples):cents;if(Math.max(hi,cents)-Math.min(lo,cents)>db.settings.stability){holdSamples=[];holdStart=null}if(holdStart===null)holdStart=now;holdSamples.push(cents);const duration=(now-holdStart)/1000;if($('holdProgress'))$('holdProgress').style.width=Math.min(100,duration/db.settings.hold*100)+'%';if(duration>=db.settings.hold){const sorted=holdSamples.slice().sort((a,b)=>a-b),median=sorted[Math.floor(sorted.length/2)],id=checking.id,result=evaluate(2**(median/1200),db.configs[pupil().instrument],db.settings.a4);record(result.status,id,result)}}}
-async function referenceTone(){if(!pupil())return;cancelCheck();muteUntil=performance.now()+2200;try{const ac=context();await ac.resume();const n=parseNote(db.configs[pupil().instrument].pitch),m=n.midi??60+n.pc,osc=ac.createOscillator(),gain=ac.createGain();osc.frequency.value=db.settings.a4*2**((m-69)/12);gain.gain.setValueAtTime(0,ac.currentTime);gain.gain.linearRampToValueAtTime(.12,ac.currentTime+.03);gain.gain.setValueAtTime(.12,ac.currentTime+1.1);gain.gain.linearRampToValueAtTime(0,ac.currentTime+1.3);osc.connect(gain);gain.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.35);osc.onended=()=>{osc.disconnect();gain.disconnect()};toast('Reference tone · detection pauses briefly.')}catch(e){toast(e.message)}}
-document.addEventListener('keydown',e=>{if($('modal').open||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName)||tab!=='session'||!ses())return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;if(['1','2','3'].includes(e.key)){e.preventDefault();record(['low','correct','high'][+e.key-1])}else if(e.key.toLowerCase()==='n')pickNext(false);else if(e.key.toLowerCase()==='r')pickNext(true);else if(e.code==='Space'){e.preventDefault();startCheck()}else if(e.key==='Escape'){cancelCheck();render()}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelCheck();if($('holdProgress'))$('holdProgress').style.width='0%'}});
-window.addEventListener('pagehide',stopMic);window.addEventListener('storage',e=>{if(e.key===KEY){storageBlocked=true;warning('This tracker was changed in another window. Back up any unsaved work here, then reload. Saving is paused to prevent conflicts.')}});
-// Called by the bundled module after all classic-script declarations are initialized.
-function startTracker(domain,services){
-pitchDomain=domain;dataServices=services;trackerStore=services.store;
-const loaded=trackerStore.load();loadedRaw=loaded.raw;storageBlocked=loaded.blocked;db=loaded.data||fresh();
-if(storageBlocked)warning('Saved data could not be read. Existing storage has been left untouched. Export your current work before closing; use Help to download the unreadable data or restore a backup.');
-if(!storageBlocked)save();else $('saveStatus').textContent='Not saved · export needed';render();
-return {
-click: {
-"backup": ()=>backup(),
-"session-notes": ()=>sessionNotes(),
-"end-session": ()=>endSession(),
-"new-session": ()=>newSession(),
-"undo": ()=>undo(),
-"toggle-mic": ()=>toggleMic(),
-"reference-tone": ()=>referenceTone(),
-"start-check": ()=>startCheck(),
-"close-dialog": ()=>closeDialog(),
-"add-students": ()=>addStudent(),
-"add-instrument": ()=>addInstrument(),
-"toggle-focus": ()=>{focusMode=!focusMode;render()},
-"cancel-check": ()=>{cancelCheck();render()},
-"next-student": ()=>pickNext(false),
-"random-student": ()=>pickNext(true),
-"active-student-notes": ()=>studentDetail(db.activeStudent),
-"record": ({data})=>record(data.status,data.id),
-"select-student": ({data})=>selectStudent(data.id),
-"student-notes": ({data})=>studentDetail(data.id),
-"resume-session": ({data})=>resumeSession(data.id),
-"export-csv": ({data})=>exportCSV(data.id),
-"delete-session": ({data})=>deleteSession(data.id),
-"edit-student": ({data})=>editStudent(data.id),
-"archive-student": ({data})=>archiveStudent(data.id),
-"print": ()=>window.print(),
-"edit-attempt": ({data})=>editAttempt(data.sessionId,data.id),
-"remove-attempt": ({data})=>removeAttempt(data.sessionId,data.id),
-"restore-backup": ()=>$('importFile').click(),
-"new-class": ()=>classDialog(),
-"rename-class": ()=>classDialog(true),
-"download-unreadable": ()=>download(loadedRaw,'pitch-tracker-unreadable.json','application/json'),
-"switch-tab": ({data})=>switchTab(data.tab)
-},
-change: {
-"change-class": ({value})=>changeClass(value),
-"advance": ({checked})=>{db.settings.advance=checked;save()},
-"filter-roster": ({value})=>{filter=value;renderCards()},
-"attendance": ({data,checked})=>attendance(data.id,checked),
-"history-class": ({value})=>{historyStudent='all';changeClass(value)},
-"history-student": ({value})=>{historyStudent=value;render()},
-"import-backup": ({event})=>importBackup(event)
-},
-input: {
-"search": ({value})=>{search=value;renderCards()}
-},
-submit: {
-"create-session": ()=>createSession(),
-"settings": ()=>saveSettings(),
-"new-students": ()=>saveNewStudents(),
-"session-notes": ()=>{remember();ses().note=$('snote').value;save();closeDialog()},
-"student-notes": ({data})=>{remember();ses().notes[data.id]=$('pnote').value;save();closeDialog();render()},
-"edit-attempt": ({data})=>applyAttemptEdit(data.sessionId,data.id),
-"class": ({data})=>saveClass(data.rename==='true'),
-"student": ({data})=>saveStudent(data.id)
-}
-};
-
-}
-</script><script type="module" src="/src/main.ts"></script></body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pitch Tracker · Session studio</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <div class="eyebrow">Mouthpiece practice · Offline edition</div>
+        <h1>Pitch Tracker</h1>
+      </div>
+      <div class="row">
+        <label class="theme-picker noprint"
+          >Theme<select id="themeSelect"></select></label
+        ><small id="saveStatus" role="status">Loading…</small
+        ><button data-ui-click="backup">Back up data</button>
+      </div>
+    </header>
+    <div id="storageWarning" class="notice hidden" role="alert"></div>
+    <nav class="tabs" aria-label="Main">
+      <button data-ui-click="switch-tab" data-tab="session" class="on">
+        Session</button
+      ><button data-ui-click="switch-tab" data-tab="history">
+        History & progress</button
+      ><button data-ui-click="switch-tab" data-tab="admin">
+        Classes & settings</button
+      ><button data-ui-click="switch-tab" data-tab="help">Help</button>
+    </nav>
+    <main id="main"></main>
+    <dialog id="modal"><div id="modalBody"></div></dialog>
+    <div id="toast" role="status" class="hidden"></div>
+    <input
+      type="file"
+      data-ui-change="import-backup"
+      id="importFile"
+      accept="application/json,.json"
+      hidden
+    />
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

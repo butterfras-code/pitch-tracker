@@ -1,29 +1,24 @@
-import * as pitchDomain from './domain/pitch';
-import { validateBackup } from './domain/backup';
+import { createApplication, initializeApplication } from './app/application';
 import { browserStorage } from './persistence/browser-storage';
-import {
-  createTrackerStore,
-  StorageConflictError,
-} from './persistence/tracker-store';
-import { bindUiEvents, type UiBindings } from './ui/events';
+import { createTrackerStore } from './persistence/tracker-store';
+import { createBindings } from './ui/actions';
+import { bindUiEvents } from './ui/events';
+import { bindLifecycle } from './ui/lifecycle';
+import { initializeThemes } from './ui/themes';
 
-const dataServices = {
-  validateBackup,
-  StorageConflictError,
-  store: createTrackerStore(browserStorage),
-};
+const app = createApplication(createTrackerStore(browserStorage));
+const disposeThemes = initializeThemes((message) => app.toast(message));
+initializeApplication(app);
+const disposeEvents = bindUiEvents(document, createBindings(app));
+const disposeLifecycle = bindLifecycle(app);
 
-declare global {
-  interface Window {
-    startTracker: (
-      domain: typeof pitchDomain,
-      services: typeof dataServices,
-    ) => UiBindings;
-  }
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    app.disposed = true;
+    disposeThemes();
+    disposeEvents();
+    disposeLifecycle();
+    void app.ctx?.close();
+    app.ctx = null;
+  });
 }
-
-// Temporary bridge while the existing controller and lexical state remain.
-// Module scripts run after parsing: storage validation can safely use the domain
-// functions from the very first load, including a previously saved session.
-const bindings = window.startTracker(pitchDomain, dataServices);
-bindUiEvents(document, bindings);

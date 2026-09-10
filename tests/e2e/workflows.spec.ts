@@ -1,7 +1,7 @@
+import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { expect, test } from '@playwright/test';
 
 const key = 'mouthpiece.pitchtracker.v1';
 test.beforeEach(async ({ page }) => {
@@ -43,67 +43,6 @@ test('theme switches persist after reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'classic');
 });
 
-test('audio loop uses current tuning and gate when recording a synthetic tone', async ({
-  page,
-}) => {
-  await page.getByRole('button', { name: 'Start session' }).first().click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
-
-  // Replace only the audio device boundary. Exercise the real legacy loop,
-  // bundled domain functions, hold classification, and recording path.
-  const result = await page.evaluate<{
-    gated: string;
-    attempt: {
-      status: string;
-      source: string;
-      a4: number;
-      frequency: number;
-      cents: number;
-    };
-  }>(`(() => {
-    db.settings.a4 = 442;
-    db.settings.gate = 0.3;
-    db.settings.hold = 0.1;
-    db.configs[pupil().instrument] = { pitch: 'A4', min: -1, max: 1 };
-    ctx = { sampleRate: 48000 };
-    analyser = { getFloatTimeDomainData(samples) {
-      for (let i = 0; i < samples.length; i++) {
-        samples[i] = 0.2 * Math.sin(2 * Math.PI * 442 * i / 48000);
-      }
-    } };
-    mic = true;
-    try {
-      audioLoop(1000);
-      cancelAnimationFrame(raf);
-      const gated = $('liveCents').textContent;
-      db.settings.gate = 0.01;
-      checking = { id: db.activeStudent, sid: ses().id };
-      checkDeadline = 10000;
-      audioLoop(1100);
-      cancelAnimationFrame(raf);
-      audioLoop(1201);
-      cancelAnimationFrame(raf);
-      return { gated, attempt: ses().attempts.at(-1) };
-    } finally {
-      stopMic();
-      ctx = null;
-    }
-  })()`);
-
-  expect(result.gated).toBe('No reliable pitch');
-  expect(result.attempt).toMatchObject({
-    status: 'correct',
-    source: 'microphone',
-    a4: 442,
-    target: { pitch: 'A4', min: -1, max: 1 },
-  });
-  expect(result.attempt.frequency).toBeCloseTo(442, 0);
-  expect(result.attempt.cents).toBeCloseTo(0, 0);
-});
-
 test('backup round trip restores data and malformed imports preserve it', async ({
   page,
 }) => {
@@ -131,4 +70,37 @@ test('backup round trip restores data and malformed imports preserve it', async 
   expect(await page.evaluate((key) => localStorage.getItem(key), key)).toBe(
     before,
   );
+});
+
+test('delegated actions use restored data and the current session after undo', async ({
+  page,
+}) => {
+  const { trackerFixture } = await import('../fixtures/tracker');
+  const data = trackerFixture();
+  data.sessions[0].attempts = [];
+  data.sessions[0].roster[0].name = 'Restored <Maya>';
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.locator('#importFile').setInputFiles({
+    name: 'restored.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(data)),
+  });
+  await expect(page.locator('.focus h2')).toHaveText('Restored <Maya>');
+  await page.locator('.focus').getByRole('button', { name: 'Too low' }).click();
+  await page.getByRole('button', { name: 'Undo last change' }).click();
+  await page
+    .locator('.focus')
+    .getByRole('button', { name: 'In range' })
+    .click();
+  const saved = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key)!),
+    key,
+  );
+  expect(saved.sessions[0].attempts).toHaveLength(1);
+  expect(saved.sessions[0].attempts[0]).toMatchObject({
+    name: 'Restored <Maya>',
+    status: 'correct',
+  });
+  await page.reload();
+  await expect(page.locator('.student').first()).toContainText('1 tries');
 });

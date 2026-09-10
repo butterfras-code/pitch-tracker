@@ -1,4 +1,4 @@
-import type { PitchTarget, PitchStatus } from './pitch';
+import type { PitchStatus, PitchTarget } from './pitch';
 
 export interface Student {
   id: string;
@@ -18,6 +18,7 @@ export interface Attempt {
   instrument: string;
   time: number;
   status: PitchStatus;
+  originalStatus?: PitchStatus;
   source: 'manual' | 'microphone' | 'corrected';
   frequency: number | null;
   cents: number | null;

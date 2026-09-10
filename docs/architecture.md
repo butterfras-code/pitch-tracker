@@ -2,51 +2,74 @@
 
 ## Release contract
 
-Users double-click one HTML file. Node and npm are development tools only. The production artifact contains its JavaScript, CSS, and assets and must work without a local server or network access. Vite with vite-plugin-singlefile performs packaging. Assets must be imported through the module graph; do not use a public directory for external release assets.
+Users double-click one self-contained `dist/index.html`. Node and npm are development tools only. Vite with vite-plugin-singlefile embeds all JavaScript and CSS; the release has no runtime imports, adjacent assets, CDN, server, service worker, or network requirement. Never edit `dist` manually. `Pitch-Tracker.html` remains the unchanged upstream baseline from `94777d5`.
 
-## Stack and boundaries
+## Module map
 
-TypeScript with strict checking, Vite, Vitest, Playwright, ESLint, and Prettier. No UI framework is needed for the initial extraction.
+The application uses strict TypeScript without a UI framework. `index.html` contains the static shell and one module entry point. There are no classic application scripts or global bootstrap bridge.
 
-As the existing source is imported, extract pure rules and models into src/domain, storage adapters into src/persistence, and DOM rendering/event handling into src/ui. src/main.ts wires the application together. Create these modules when actual code is available rather than inventing abstractions in advance.
+| Location                                              | Responsibility                                                                                                                        |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/main.ts`                                         | Creates the application, loads data, initializes themes, binds events and lifecycle cleanup.                                          |
+| `src/app/application.ts`, `state.ts`                  | Explicit `App` contract, method composition, and per-instance mutable state.                                                          |
+| `src/domain/session.ts`, `session-changes.ts`         | Session queries, fair next/random selection, roster snapshots, scoring, attendance, finish/resume, class selection, and bounded undo. |
+| `src/domain/tracker.ts`, `defaults.ts`, `identity.ts` | v1 data types, initial demo data, IDs, and snapshots.                                                                                 |
+| `src/domain/pitch.ts`, `backup.ts`                    | Pure pitch math and validation of portable backups.                                                                                   |
+| `src/app/*-controller.ts`, `selectors.ts`             | Coordinate domain transitions, forms, persistence, dialogs, and audio cancellation.                                                   |
+| `src/ui/*-view.ts`, `dialogs.ts`, `render.ts`         | Escaped HTML templates, native forms, current-view rendering, and feedback.                                                           |
+| `src/ui/events.ts`, `actions.ts`, `lifecycle.ts`      | Delegated named actions, keyboard handling, elapsed timer, visibility and storage events.                                             |
+| `src/ui/themes.ts`, `styles.css`                      | Local theme registry and styles bundled into the release.                                                                             |
+| `src/audio/microphone.ts`, `detection.ts`             | Device permission, stream and reference-tone lifecycle, pitch analysis, stable holds, and recording.                                  |
+| `src/persistence/`                                    | Browser storage adapter and load/save/recovery-backed restore.                                                                        |
 
-Vitest covers rules, state transitions, validation, and migrations. Playwright exercises the release under file:// in Chromium and Firefox, including offline launch from a copied file with spaces in its path. Unit tests characterize the existing note parsing, cents boundaries, octave handling, pitch detection, and packaging. Browser tests cover scoring, undo, attendance, reload, themes, backup restore, and the real audio loop with synthetic input to verify gate, tuning, and automatic recording.
+Runtime dependency direction:
 
-## Measurable guard rails
+```mermaid
+flowchart TD
+  Main[main.ts] --> App[Application composition]
+  Main --> Events[UI bindings and lifecycle]
+  App --> Controllers[Controllers]
+  App --> Views[Views and dialogs]
+  App --> Audio[Audio orchestration]
+  Controllers --> Domain[Domain rules and models]
+  Controllers --> Storage[Persistence]
+  Controllers --> Helpers[UI helpers]
+  Audio --> Domain
+  Audio --> Helpers
+  Views --> Helpers
+  Storage --> Domain
+```
 
-1. Standalone: one output HTML file, launches after copying to a different directory, with browser networking disabled and no external requests or script errors.
-2. Behavior: record the existing primary tracking workflow, representative calculations, and boundary cases before extracting their implementation.
-3. Data integrity: preserve existing data; test save/reload, export/import equivalence, supported migrations, and malformed import rejection before modifying persistence.
-4. Modularity: domain logic is independently testable without DOM or browser storage.
-5. Reproducibility: npm ci followed by npm run verify succeeds with the documented Node version and installed test browsers.
-6. Scope: preserve behavior during modularization; discuss new features separately.
+Modules refer to `App` through **type-only** imports; they do not import the composition root at runtime. Methods explicitly declare `this: App`. Call them on the application object, and wrap calls passed to browser APIs in closures so the receiver is retained. Do not destructure unbound methods.
 
-## Existing persistence
+`SessionState` contains only data and undo snapshots. Domain transitions accept that state explicitly and have no DOM, audio, storage, or rendering dependencies. Optional time, ID, and random inputs support deterministic tests. Controllers own side effects. New rules belong in the domain; new UI behavior belongs in the relevant controller/view pair.
 
-Browser storage for file URLs varies by browser and file location. An HTML file does not automatically contain data saved through browser storage. The existing app uses mouthpiece.pitchtracker.v1 in localStorage with schema 1, revision conflict protection, validated replacement imports, and JSON backup downloads. Preserve these protections. Do not promise persistence across moving the HTML file.
+The shared application object stays stable while `app.db` and session objects may be replaced by restore or undo. Delegated callbacks query current state on each invocation. Do not close over old data or session snapshots. Restores clear undo only after successful persistence.
 
-## Module boundaries and migration
+## Data and persistence
 
-The upstream baseline remains unchanged in Pitch-Tracker.html. The source index.html retains the classic controller, render functions, and lexical state; src/styles.css is extracted and inlined at build time. The next step is to move the controller and rendering into modules, now that DOM event attributes no longer depend on global function names.
+The saved format remains schema 1 with storage key `mouthpiece.pitchtracker.v1`. Attempt types now declare the pre-existing optional `originalStatus` field; this is not a migration. Validation preserves extra fields and does not normalize data. Invalid imports do not overwrite valid data. Original measurements and targets remain attached to corrected attempts.
 
-Pitch parsing, cents evaluation/classification, and detection live in src/domain/pitch.ts with explicit tuning and gate inputs. Unit tests import the module directly. Thin controller wrappers delegate without duplicating pitch math.
+`createTrackerStore` accepts `KeyValueStorage`. Its browser adapter reads localStorage lazily, so denied access is handled inside load/save. Failed saves do not advance the in-memory revision. Controllers surface blocked-save warnings while leaving manual tracking usable.
 
-TrackerData and v1 types live in src/domain/tracker.ts. Pure validation/parsing lives in src/domain/backup.ts, preserving valid v1 fields without normalization or migration. src/persistence/tracker-store.ts owns load, revision checks, save, and recovery-backed restore through KeyValueStorage. browser-storage.ts accesses localStorage lazily so denied access is handled inside load/save. The UI still owns confirmation dialogs, downloads, file-size checks, and blocked-save warnings. Theme preferences remain separate.
+Restore validates before confirmation, saves a recovery copy, and replaces primary storage before updating UI state. Recovery and primary writes are separate operations, not a transaction: a failed primary restore may update the recovery copy while preserving primary data. Revision checks detect known stale writers but are not an atomic cross-window lock.
 
-A failed save leaves the in-memory revision unchanged. Restore replaces UI state only after successful storage writes. Recovery and primary writes are separate operations: a failed primary restore may update the recovery copy but preserves primary data. Revision checks detect known stale writers; they are not an atomic cross-window lock.
+Storage belongs to a browser profile/file location, not the HTML file. Moving or renaming the release may expose a different store. JSON export/import is the portable backup path. Theme preference storage remains separate and is not included in backups.
 
-src/main.ts injects domain and storage services into the temporary startTracker bridge after HTML parsing. The controller loads/validates saved data, renders, and returns an explicit action registry. The entry point then binds the UI listeners once. Type checking covers extracted modules, tooling, and tests; the remaining classic controller is not yet type checked.
+## UI and audio lifecycle
 
-## UI event contract
+Static and generated controls use `data-ui-click`, `data-ui-change`, `data-ui-input`, and `data-ui-submit` with named actions. IDs and arguments use separate data attributes. The event layer executes only registered actions, handles nested button content, ignores disabled controls, and preserves native form validation and Enter submission. No attribute code is evaluated.
 
-src/ui/events.ts delegates click, change, input, and submit events from document. Static markup and generated views use data-ui-click, data-ui-change, data-ui-input, and data-ui-submit with named actions. IDs and other arguments are separate data attributes. Only registered actions execute; no event-attribute JavaScript, eval, or string-to-function conversion is used.
+Templates escape user content. Required DOM elements have typed accessors; optional tuner and view elements are checked before access. Theme changes do not rerender forms or interrupt checks.
 
-The controller supplies closures over its current state. The listener resolves the nearest action control, handles nested button content, ignores disabled controls, and supplies current form values, checked state, and data attributes. It prevents native navigation for registered form submissions while retaining browser validation and Enter submission. Delegation survives innerHTML replacement without rebinding; bindUiEvents also returns a disposer for future remounting. Theme, keyboard, visibility, and storage listeners already used addEventListener and retain their existing behavior.
+Microphone requests use a generation counter to stop late streams after cancellation. Checks use a separate generation counter so Escape, view changes, or other cancellations during a pending permission request cannot arm a later check. Silence, frame gaps, instability, reference playback, and session/student changes reset or cancel steady holds. A completed hold records once using the current target and tuning.
 
-Browser tests cover class creation/rename, roster edits/archive, custom targets/settings, search/filter, focus view, notes, next/random selection, advance, history correction/deletion/resume, downloads/import picker, keyboard behavior, unknown actions, disabled controls, and repeated rerenders. Release checks reject inline UI event attributes.
+Stopping audio cancels animation frames, disconnects the input, stops tracks and active reference tones, and invalidates pending requests. Event binders return cleanup callbacks; development hot replacement removes listeners/timers and closes the old audio context. Page exit stops input and reference playback.
 
-Vite embeds the module bundle and CSS in dist/index.html. The release remains one HTML file with no runtime imports or adjacent files. Real microphone permission and hardware behavior require manual browser checks.
+## Verification
 
-## Persistence verification
+`npm run verify` runs strict type checking, linting, formatting, the single-file build, unit tests, and browser tests. Domain tests exercise state transitions, undo limits, roster/target snapshots, selection, and data replacement. Persistence tests exercise malformed records, denied reads, failed writes, revisions, recovery copies, and round trips including corrected attempts.
 
-Unit tests cover v1 round trips, malformed records and relationships, invalid targets/settings, corrupt storage, denied reads, failed saves, stale revisions, recovery-copy preservation, and restore write failures. Browser tests inject denied access, quota errors, corrupt records, and newer revisions under file URLs and verify that manual tracking remains usable and prior stored data is preserved. Physical microphone behavior still needs manual verification.
+Playwright runs the built file offline in Chromium and Firefox with ordinary browser security settings. Coverage includes relocation to a path with spaces, manual workflows, forms, keyboard behavior, themes, imports, storage failures, and actions after restore/undo.
+
+Audio browser tests stub only browser device APIs in test code. The production application has no test globals; its actual analysis loop, stable-hold rules, tuning, gate, and recording path run unchanged. Tests also exercise permission denial, delayed permission, cancellation, reference playback, and device disconnection. Synthetic input cannot verify physical microphones, real permission prompts, speakers, or room acoustics.

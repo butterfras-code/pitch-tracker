@@ -95,3 +95,7 @@ export function detectPitch(
     f = sr / (tau + offset);
   return Number.isFinite(f) && f >= 54.99 && f <= 1601 ? f : null;
 }
+
+export function isPitchStatus(value: unknown): value is PitchStatus {
+  return value === 'low' || value === 'correct' || value === 'high';
+}
