@@ -1,21 +1,29 @@
 # Pitch Tracker
 
-An offline, single-file mouthpiece practice tracker with class rosters, session history, manual scoring, microphone pitch checks, and selectable themes.
+An offline mouthpiece practice tracker with rosters, sessions, manual scoring, microphone pitch checks, and selectable themes. Source imported from https://github.com/butterfras-code/pitch-tracker.
 
-## Download and run
+## Development
 
-1. On GitHub, choose **Code → Download ZIP**.
-2. Extract the ZIP on your computer.
-3. Open **Pitch-Tracker.html** in a modern browser.
+Use Node 22.22.3 or a compatible newer supported version and npm.
 
-No installation or internet connection is required. Microphone access depends on your browser's permissions for local files; manual scoring is always available.
+```sh
+npm ci
+npx playwright install chromium firefox
+npm run dev
+```
 
-## Themes
+The development server is optional tooling. End users need only the built HTML and a browser.
 
-**Cel-Shaded Mech** is the default. Use the Theme selector to switch to **Classic Studio**. Your selection is saved in your browser.
+## Build and verify
 
-See [THEMES.md](THEMES.md) to add themes through the theme registry.
+```sh
+npm run verify
+```
 
-## Moving between computers
+This runs type checking, linting, formatting checks, the production build, packaging tests, and browser tests. Playwright opens file URLs directly with networking disabled; no test web server is used.
 
-Class records and sessions are stored in your browser, not in this repository. Use **Back up data** on the original computer, transfer the JSON backup, then use **Classes & settings → Restore backup** on the new computer. Moving or renaming the HTML file can also change which browser storage is available.
+Double-click `dist/index.html` to open the release. The original `Pitch-Tracker.html` remains an unchanged baseline; use `index.html` and `src/` for development. Copy that file anywhere to distribute it. `npm run build` only builds; `npm test` rebuilds and runs the packaging unit tests; `npm run test:e2e` rebuilds and runs browser tests.
+
+Current checks cover pitch calculations, packaging, offline launch and relocation, scoring, undo, attendance, reload, theme persistence, and backup restoration in Chromium and Firefox. Microphone hardware and permission behavior require manual testing. Records live in browser storage, not inside the HTML. Back up data before moving or renaming the file. Restore replaces existing records after validation and confirmation. Cel-Shaded Mech is the default theme; Classic Studio is available in the selector. See [THEMES.md](THEMES.md) for theme guidance (edit the registry in index.html during this transition).
+
+See [architecture](docs/architecture.md) and [guard rails](AGENTS.md).

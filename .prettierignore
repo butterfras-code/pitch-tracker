@@ -3,6 +3,6 @@ dist/
 test-results/
 playwright-report/
 coverage/
-*.local
-/Pitch-Tracker.zip
-/Mech-preview.png
+package-lock.json
+Pitch-Tracker.html
+index.html
