@@ -89,3 +89,98 @@ for (const width of [390, 1440]) {
     );
   });
 }
+
+for (const [width, height] of [
+  [1366, 768],
+  [1920, 1080],
+  [390, 844],
+]) {
+  test.describe(`Pitch Press split ${width}x${height}`, () => {
+    test.use({
+      viewport: { width, height },
+      contextOptions: { screen: { width, height } },
+    });
+    test('paper hierarchy stays readable offline without changing the workspace', async ({
+      page,
+    }, testInfo) => {
+      await classroomPage(page, 30);
+      await page
+        .getByRole('button', { name: 'Split view', exact: true })
+        .click();
+      if (width > 390) {
+        await page
+          .getByRole('button', { name: 'Full screen', exact: true })
+          .click();
+        await expect
+          .poll(() => page.evaluate(() => !!document.fullscreenElement))
+          .toBe(true);
+      } else {
+        await page
+          .getByRole('button', { name: 'Hide controls', exact: true })
+          .click();
+      }
+      const picker = page.locator('#themeSelect');
+      await picker.selectOption('pitch-press', { force: true });
+      await page.evaluate(() => document.fonts.ready);
+      const data = await saved(page);
+      await expect(page.locator('.session-target')).toHaveCSS(
+        'background-color',
+        'rgb(21, 21, 21)',
+      );
+      await expect(page.locator('.session-target')).toHaveCSS(
+        'color',
+        'rgb(255, 249, 234)',
+      );
+      await expect(page.locator('.target-frequency')).toHaveCSS(
+        'color',
+        'rgb(255, 249, 234)',
+      );
+      await expect(page.locator('.current-display')).toHaveCSS(
+        'background-color',
+        'rgb(255, 249, 234)',
+      );
+      await expect(page.locator('.student.selected')).toHaveCSS(
+        'background-color',
+        'rgb(255, 230, 0)',
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`press-split-${width}.png`),
+        fullPage: true,
+      });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      if (width > 390) {
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollHeight <= innerHeight,
+          ),
+        ).toBe(true);
+        const cards = page.locator('#cards');
+        await cards.evaluate((e) => {
+          e.scrollTop = e.scrollHeight;
+        });
+        expect(await cards.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
+      }
+      await picker.selectOption('cel-mech', { force: true });
+      await expect(page.locator('.session-target')).not.toHaveCSS(
+        'background-color',
+        'rgb(21, 21, 21)',
+      );
+      await picker.selectOption('pitch-press', { force: true });
+      expect(await saved(page)).toEqual(data);
+      await page.keyboard.press('Tab');
+      await page.locator('.target-playback').focus();
+      await expect(page.locator('.target-playback')).toHaveCSS(
+        'outline-style',
+        'solid',
+      );
+      await expect(page.locator('.target-playback')).toHaveCSS(
+        'outline-color',
+        'rgb(255, 230, 0)',
+      );
+    });
+  });
+}

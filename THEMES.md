@@ -14,7 +14,7 @@ Theme preferences use `mouthpiece.pitchtracker.theme.v1`, separately from tracke
 
 ## Big Button Sound Club
 
-Select **Big Button Sound Club** in the Theme picker for cream molded surfaces, recessed navy displays, red playback, cobalt actions, yellow accents and green success feedback inspired by the supplied toy mockup. `src/themes/big-button.theme.ts` supplies existing contract tokens; `src/themes/big-button.css` adds paint-only toy decoration. Layout, copy, music artwork and behavior remain shared. System font stacks preserve offline operation without new assets.
+Select **Big Button Sound Club** in the Theme picker for warm ivory molded surfaces, a dotted vintage speaker-grille backdrop, saturated blue displays, cherry-red playback, primary yellow selection and green controls inspired by vintage Fisher-Price cassette players and pull-along telephones. The recessed dots are CSS gradients, with clean reading surfaces above them. `src/themes/big-button.theme.ts` supplies existing contract tokens; `src/themes/big-button.css` adds paint-only toy decoration. Layout, copy, music artwork and behavior remain shared. System font stacks preserve offline operation without new assets.
 
 ## Lisa Lives!
 
@@ -27,3 +27,7 @@ Select **Lisa Lives!** for the neon mockup-inspired variant: rainbow leopard/zeb
 ## Boom Pow
 
 **Boom Pow** turns the shared workspace into a pop-art comic: cyan Ben-Day print, yellow bursts, black ink outlines, ivory panels and red playback. Bangers provides comic lettering while body copy stays readable. Artwork and font are bundled offline; layout and live meter behavior stay shared.
+
+## Pitch Press
+
+**Pitch Press** pairs clean ivory paper with condensed ink lettering, fine editorial rules, and a dark concert-target block edged in vermilion. Cobalt identifies primary actions; yellow marks the current student and in-range feedback. The live tuner sits on a separate warm-paper surface. Subtle grain is limited to the page backdrop, keeping controls and student records crisp. Existing local Anton, Alfa Slab One, paper grain and masthead ink assets remain bundled offline. All session geometry stays shared, with Full Screen Split View as the primary experience.

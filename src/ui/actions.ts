@@ -14,7 +14,6 @@ export function createBindings(app: App): UiBindings {
       'session-view': ({ data }) =>
         app.workspace?.setView(data.view ?? 'split'),
       'session-sidebar': () => app.workspace?.toggleSidebar(),
-      'session-settings': () => app.workspace?.toggleSettings(),
       'session-fullscreen': () => app.workspace?.fullscreen(),
       'show-current': () => {
         app.search = '';

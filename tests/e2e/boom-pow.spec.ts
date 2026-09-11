@@ -101,7 +101,7 @@ for (const [width, height] of [
       await picker.selectOption('big-button', { force: true });
       await expect(page.locator('.tuner')).toHaveCSS(
         'background-color',
-        'rgb(10, 35, 75)',
+        'rgb(0, 84, 189)',
       );
       await picker.selectOption('boom-pow', { force: true });
       await page.reload();

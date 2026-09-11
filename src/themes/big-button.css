@@ -1,61 +1,84 @@
 /* Toy treatment is paint only. Shared CSS owns all geometry and content. */
-:root[data-treatment='toy'] {
+:root[data-theme='big-button'] {
   scrollbar-color: var(--edge) var(--card);
   caret-color: var(--accent);
 }
-:root[data-treatment='toy'] ::selection {
+:root[data-theme='big-button'] ::selection {
   background: var(--badge-bg);
   color: var(--ink);
 }
-:root[data-treatment='toy'] header h1 {
+:root[data-theme='big-button'] header h1 {
   color: var(--highlight);
   text-shadow:
-    0 1px 1px #fff2cf,
-    0 2px 2px #7b281b55;
+    0 1px 1px var(--card),
+    0 2px 2px color-mix(in srgb, var(--highlight) 35%, transparent);
 }
-:root[data-treatment='toy'] .session-target {
-  background: linear-gradient(150deg, #153562, var(--display-bg) 65%);
+:root[data-theme='big-button'] .session-target {
+  background: var(--display-bg);
   color: var(--display-ink);
   border-radius: var(--display-radius);
   box-shadow: var(--display-shadow);
 }
-:root[data-treatment='toy'] .target-frequency {
+:root[data-theme='big-button'] .target-frequency {
   color: var(--display-ink);
 }
-:root[data-treatment='toy'] .target-playback {
-  background-color: #c92113;
+:root[data-theme='big-button'] .target-playback {
+  background-color: var(--highlight);
   color: var(--primary-ink);
-  border-color: #78180f;
+  border-color: var(--danger);
 }
-:root[data-treatment='toy'] .target-playback:hover:not(:disabled) {
-  background-color: #a91b10;
+:root[data-theme='big-button'] .target-playback:hover:not(:disabled) {
+  background-color: var(--danger);
 }
-:root[data-treatment='toy'] .target-playback:active:not(:disabled) {
+:root[data-theme='big-button'] .target-playback:active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
-:root[data-treatment='toy']
+:root[data-theme='big-button']
   .student-actions
   [data-ui-click='previous-student'] {
   background-color: var(--badge-bg);
   color: var(--ink);
 }
-:root[data-treatment='toy'] .tuner {
-  border-color: #07172d;
+:root[data-theme='big-button'] .tuner {
+  border-color: var(--primary-hover);
   border-radius: var(--display-radius);
 }
-:root[data-treatment='toy'] .meter {
+:root[data-theme='big-button'] .meter {
   box-shadow: inset 0 2px 4px #0006;
 }
-:root[data-treatment='toy'] .progress {
+:root[data-theme='big-button'] .progress {
   box-shadow: inset 0 2px 3px #0003;
 }
-:root[data-treatment='toy'] .classroom-feedback {
+:root[data-theme='big-button'] .classroom-feedback {
   border-radius: var(--help-radius);
   box-shadow:
     inset 0 2px 4px #7b684744,
     0 1px 1px #fffaea;
 }
-:root[data-treatment='toy'] :is(.tabs button, .student .name) {
+:root[data-theme='big-button'] :is(.tabs button, .student .name) {
   box-shadow: none;
   background-image: none;
+}
+
+/* Small recessed holes in the ivory casing, kept off reading surfaces. */
+:root[data-theme='big-button'] body {
+  background-size: 8px 8px;
+}
+:root[data-theme='big-button'] .app-header {
+  background-color: var(--card);
+  box-shadow: var(--panel-shadow);
+}
+:root[data-theme='big-button'] .student.selected {
+  background-color: var(--badge-bg);
+  border-color: var(--accent);
+}
+:root[data-theme='big-button'] .student-actions [data-ui-click='next-student'] {
+  background-color: var(--correct);
+  color: var(--primary-ink);
+  border-color: var(--correct);
+}
+:root[data-theme='big-button']
+  .student-actions
+  [data-ui-click='next-student']:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--correct) 85%, var(--ink));
 }
