@@ -1,3 +1,5 @@
+import { rangeValue } from '../ui/pitch-settings';
+import { migrateToV2 } from '../domain/backup';
 /** Coordinates roster and settings forms with validation and persistence. */
 import type { TrackerData } from '../domain/tracker';
 import { errorMessage } from '../ui/helpers';
@@ -143,23 +145,27 @@ export const rosterController = {
             throw Error(
               row.dataset.instrument + ': minimum must be ≤ maximum.',
             );
-          configs[row.dataset.instrument!] = { pitch, min, max };
+          const offset = rangeValue(
+            row.querySelector<HTMLInputElement>('.target-offset')!,
+          );
+          configs[row.dataset.instrument!] = { pitch, min, max, offset };
         });
       const settings = {
         ...this.db.settings,
-        a4: +$('a4').value,
-        hold: +$('hold').value,
-        stability: +$('stability').value,
-        gate: +$('gate').value,
+        a4: rangeValue($('a4')),
+        hold: rangeValue($('hold')),
+        stability: rangeValue($('stability')),
+        gate: rangeValue($('gate')),
       };
-      validate({ ...this.db, configs, settings });
+      const upgraded = migrateToV2(this.db);
+      validate({ ...upgraded, configs, settings });
       this.cancelCheck();
-      this.db.configs = configs;
-      this.db.settings = settings;
-      this.save();
-      this.toast(
-        'Pitch settings saved. Existing measurements keep their original targets.',
-      );
+      this.db = { ...upgraded, configs, settings };
+      $('settingsError').textContent = '';
+      if (this.save())
+        this.toast(
+          'Pitch settings saved. Existing measurements keep their original targets.',
+        );
     } catch (e) {
       $('settingsError').textContent = errorMessage(e);
     }

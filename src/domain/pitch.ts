@@ -5,6 +5,8 @@ export interface ParsedNote {
 }
 export interface PitchTarget {
   pitch: string;
+  /** Cents above the named note; introduced in schema 2. */
+  offset?: number;
   min: number;
   max: number;
 }
@@ -44,8 +46,12 @@ export function evaluate(
 ): PitchMeasurement {
   const n = parseNote(config.pitch),
     m = 69 + 12 * Math.log2(freq / a4),
-    target = n.midi ?? Math.round((m - n.pc) / 12) * 12 + n.pc,
-    cents = 1200 * Math.log2(freq / (a4 * 2 ** ((target - 69) / 12)));
+    target =
+      n.midi ??
+      Math.round((m - n.pc - (config.offset ?? 0) / 100) / 12) * 12 + n.pc,
+    cents =
+      1200 * Math.log2(freq / (a4 * 2 ** ((target - 69) / 12))) -
+      (config.offset ?? 0);
   return {
     cents,
     status:
@@ -143,4 +149,18 @@ function lowPass(buf: Float32Array, sr: number): Float32Array {
 
 export function isPitchStatus(value: unknown): value is PitchStatus {
   return value === 'low' || value === 'correct' || value === 'high';
+}
+
+/** Reference tone uses octave 4 when the target accepts any octave. */
+export function targetFrequency(config: PitchTarget, a4: number): number {
+  const note = parseNote(config.pitch);
+  return (
+    a4 *
+    2 ** (((note.midi ?? 60 + note.pc) - 69) / 12 + (config.offset ?? 0) / 1200)
+  );
+}
+
+export function targetLabel(config: PitchTarget): string {
+  const offset = config.offset ?? 0;
+  return config.pitch + (offset ? ` ${offset > 0 ? '+' : ''}${offset}¢` : '');
 }

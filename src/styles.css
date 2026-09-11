@@ -1107,3 +1107,212 @@ body.session-active {
     grid-column: 1 / -1;
   }
 }
+
+/* Graphical target drafts share one pitch axis; handles occupy separate lanes. */
+#configTable {
+  width: 100%;
+  table-layout: fixed;
+}
+#configTable th:first-child {
+  width: 27%;
+}
+#configTable th:nth-child(2) {
+  width: 18%;
+}
+#configTable td {
+  vertical-align: middle;
+}
+.note-selectors {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+.note-selectors label {
+  min-width: 0;
+}
+.note-selectors select {
+  min-width: 0;
+  width: 100%;
+}
+.octave-hint {
+  display: block;
+}
+.clef-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+.pitch-staff {
+  width: 140px;
+  max-width: 100%;
+  height: 115px;
+}
+.clef-toggle span {
+  font-size: 11px;
+}
+.clef-auto {
+  display: block;
+  margin: 6px auto;
+  font-size: 11px;
+}
+.target-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+}
+.target-summary span {
+  font-size: 12px;
+}
+.custom-pitch {
+  border-bottom: 2px dashed currentColor;
+}
+.pitch-sliders {
+  position: relative;
+  height: 96px;
+  margin: 12px 10px 0 48px;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(4.1667% - 1px),
+    #8883 calc(4.1667% - 1px),
+    #8883 4.1667%
+  );
+}
+.accepted-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #319c6355;
+  pointer-events: none;
+  border-inline: 1px solid #319c63;
+}
+.pitch-sliders input[type='range'] {
+  position: absolute;
+  left: -10px;
+  width: calc(100% + 20px);
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: ew-resize;
+  accent-color: #6689cc;
+}
+.pitch-sliders .min-slider {
+  top: 0;
+}
+.pitch-sliders input.target-offset {
+  top: 34px;
+  accent-color: #b47626;
+}
+.pitch-sliders .max-slider {
+  top: 68px;
+}
+.pitch-ticks,
+.range-readouts,
+.slider-endpoints {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.pitch-ticks span {
+  text-align: center;
+}
+.pitch-ticks small {
+  display: block;
+  font-size: 10px;
+}
+.range-readouts {
+  margin: 12px 0;
+}
+.range-readouts b {
+  display: block;
+}
+.target-editor > button {
+  font-size: 12px;
+}
+.detection-heading {
+  margin-top: 30px;
+}
+.detection-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.detection-control {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.detection-control output {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.detection-control input[type='range'] {
+  width: 100%;
+  padding: 0;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  #configTable,
+  #configTable tbody,
+  #configTable tr,
+  #configTable td {
+    display: block;
+    width: 100%;
+  }
+  #configTable thead {
+    display: none;
+  }
+  #configTable tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 125px;
+    border-bottom: 1px solid #8885;
+    padding: 12px 0;
+  }
+  #configTable td {
+    box-sizing: border-box;
+    border: 0;
+  }
+  #configTable .target-editor {
+    grid-column: 1 / -1;
+  }
+  .detection-controls {
+    grid-template-columns: 1fr;
+  }
+}
+.lane-label {
+  position: absolute;
+  left: -48px;
+  line-height: 28px;
+  font-size: 11px;
+  pointer-events: none;
+}
+.pitch-ticks {
+  margin-left: 38px;
+}
+.target-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.target-tools label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.target-tools select {
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .note-selectors {
+    flex-direction: column;
+  }
+}

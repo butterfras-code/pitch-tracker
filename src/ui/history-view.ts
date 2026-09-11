@@ -1,3 +1,4 @@
+import { targetLabel } from '../domain/pitch';
 /** Renders session history, summaries, and original measurement details. */
 import type { App } from '../app/application';
 import { esc, rate, stamp, statusName } from './helpers';
@@ -28,7 +29,7 @@ export const historyView = {
                           >${statusName(x.status)}</span
                         ><br /><small
                           >${esc(x.source)} · target
-                          ${esc(x.target.pitch)}</small
+                          ${esc(targetLabel(x.target))}</small
                         >
                       </td>
                       <td>

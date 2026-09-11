@@ -1,3 +1,4 @@
+import { targetRow, detectionSlider } from './pitch-settings';
 /** Renders roster administration, pitch settings, and offline help. */
 import type { App } from '../app/application';
 import { esc, stamp } from './helpers';
@@ -76,100 +77,36 @@ export const adminView = {
         </div>
       </div>
       <form class="panel" data-ui-submit="settings">
-        <h2>Pitch targets & detection</h2>
+        <h2>Pitch targets</h2>
         <p class="muted">
-          Concert pitch. Use A, F#, Bb for any octave; A4 or Bb3 for an exact
-          octave. Targets are teacher-defined, not instrument recommendations.
+          Choose a concert note and octave, then drag Min, Target, and Max.
+          Moving Target keeps the range width. Min and Max are cents relative to
+          Target. Use arrow keys for precise adjustments.
         </p>
-        <div class="tablewrap">
+        <div class="tablewrap target-table-wrap">
           <table id="configTable">
             <thead>
               <tr>
-                <th>Instrument</th>
-                <th>Target</th>
-                <th>Min cents</th>
-                <th>Max cents</th>
+                <th>Instrument & note</th>
+                <th>Staff · click to switch clef</th>
+                <th>Accepted pitch range</th>
               </tr>
             </thead>
             <tbody>
               ${Object.entries(this.db.configs)
-                .map(
-                  ([n, c]) =>
-                    /* HTML */ `<tr data-instrument="${esc(n)}">
-                      <td>${esc(n)}</td>
-                      <td>
-                        <input
-                          aria-label="${esc(n)} target"
-                          class="pitch"
-                          value="${esc(c.pitch)}"
-                          required
-                        />
-                      </td>
-                      <td>
-                        <input
-                          aria-label="${esc(n)} minimum cents"
-                          class="min"
-                          type="number"
-                          min="-600"
-                          max="600"
-                          value="${c.min}"
-                          required
-                        />
-                      </td>
-                      <td>
-                        <input
-                          aria-label="${esc(n)} maximum cents"
-                          class="max"
-                          type="number"
-                          min="-600"
-                          max="600"
-                          value="${c.max}"
-                          required
-                        />
-                      </td>
-                    </tr>`,
+                .map(([name, config]) =>
+                  targetRow(name, config, this.db.settings.a4),
                 )
                 .join('')}
             </tbody>
           </table>
         </div>
-        <div class="fields" style="margin-top:20px">
-          <label
-            >A4 reference (Hz)<input
-              id="a4"
-              type="number"
-              min="400"
-              max="480"
-              step="0.1"
-              value="${this.db.settings.a4}"
-              required /></label
-          ><label
-            >Steady hold (seconds)<input
-              id="hold"
-              type="number"
-              min="0.5"
-              max="5"
-              step="0.1"
-              value="${this.db.settings.hold}"
-              required /></label
-          ><label
-            >Allowed pitch spread (cents)<input
-              id="stability"
-              type="number"
-              min="5"
-              max="100"
-              value="${this.db.settings.stability}"
-              required /></label
-          ><label
-            >Noise gate (RMS; lower = more sensitive)<input
-              id="gate"
-              type="number"
-              min="0.001"
-              max="0.2"
-              step="0.001"
-              value="${this.db.settings.gate}"
-              required
-          /></label>
+        <h2 class="detection-heading">Detection</h2>
+        <div class="detection-controls">
+          ${detectionSlider('a4', 'A4 reference (Hz)', this.db.settings.a4, 400, 480, 0.1, 'Hz', '400 Hz', '480 Hz')}
+          ${detectionSlider('hold', 'Steady hold (seconds)', this.db.settings.hold, 0.5, 5, 0.1, 'seconds', 'Shorter hold', 'Longer hold')}
+          ${detectionSlider('stability', 'Allowed pitch spread (cents)', this.db.settings.stability, 5, 100, 1, 'cents', 'Steadier pitch', 'More variation')}
+          ${detectionSlider('gate', 'Noise gate (RMS; lower = more sensitive)', this.db.settings.gate, 0.001, 0.2, 0.001, 'RMS', 'More sensitive', 'More noise filtering')}
         </div>
         <div class="row" style="margin-top:18px">
           <button class="primary">Save settings</button
@@ -251,9 +188,19 @@ export const adminView = {
       <p>
         Targets without an octave compare against the nearest octave of that
         pitch class. Targets with an octave compare against that exact
-        frequency. Reference tones for octave-free targets use octave 4. Min/max
+        frequency. Custom target offsets tune both scoring and reference
+        playback. Reference tones for octave-free targets use octave 4. Min/max
         cents are inclusive; zero is valid. Hear target pauses detection briefly
         so it cannot score itself.
+      </p>
+      <p>
+        Choose a note and octave in Classes &amp; settings. Drag Target to move
+        the accepted range together, or Min and Max to change its edges. Fine
+        scale shows ±200 cents; use Wide for larger adjustments. Arrow keys
+        adjust one step. Reset to note removes custom tuning. The staff uses
+        treble at middle C (C4) and above, bass below; click it to override or
+        choose Auto clef. Detection sliders show their values as you drag. Save
+        settings applies the changes. Older JSON backups remain supported.
       </p>
       <h3>Session views</h3>
       <p>

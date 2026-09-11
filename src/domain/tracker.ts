@@ -39,7 +39,7 @@ export interface Session {
   note: string;
 }
 export interface TrackerData {
-  schema: 1;
+  schema: 1 | 2;
   classes: TrackerClass[];
   configs: Record<string, PitchTarget>;
   settings: {

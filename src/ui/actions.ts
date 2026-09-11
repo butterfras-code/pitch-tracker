@@ -1,3 +1,4 @@
+import { editTarget, editDetection } from './pitch-settings';
 /** Delegated callbacks resolve current application state on every invocation. */
 import { isPitchStatus } from '../domain/pitch';
 import type { App } from '../app/application';
@@ -7,6 +8,9 @@ import { $, download } from './helpers';
 export function createBindings(app: App): UiBindings {
   return {
     click: {
+      'target-clef': ({ element }) => editTarget(element, 'clef'),
+      'target-clef-auto': ({ element }) => editTarget(element, 'auto'),
+      'target-reset': ({ element }) => editTarget(element, 'reset'),
       'session-view': ({ data }) =>
         app.workspace?.setView(data.view ?? 'split'),
       'session-settings': () => app.workspace?.toggleSettings(),
@@ -70,6 +74,8 @@ export function createBindings(app: App): UiBindings {
       'switch-tab': ({ data }) => app.switchTab(data.tab!),
     },
     change: {
+      'target-scale': ({ element }) => editTarget(element, 'scale'),
+      'target-note': ({ element }) => editTarget(element, 'note'),
       'teacher-details': ({ checked }) => app.workspace?.toggleTeacher(checked),
       'microphone-input': ({ value }) => app.changeMicrophone(value),
       'classroom-mode': ({ value }) => {
@@ -104,6 +110,8 @@ export function createBindings(app: App): UiBindings {
       'import-backup': ({ event }) => app.importBackup(event),
     },
     input: {
+      'target-slide': ({ element }) => editTarget(element, 'slide'),
+      'detection-slide': ({ element }) => editDetection(element),
       search: ({ value }) => {
         app.search = value;
         app.renderCards();

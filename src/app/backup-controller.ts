@@ -1,3 +1,4 @@
+import { targetLabel } from '../domain/pitch';
 /** Coordinates downloads, restore, and storage failure feedback. */
 import { errorMessage } from '../ui/helpers';
 import type { App } from './application';
@@ -88,7 +89,7 @@ export const backupController = {
             x?.source,
             x?.frequency,
             x?.cents,
-            x?.target.pitch,
+            x ? targetLabel(x.target) : undefined,
             x?.target.min,
             x?.target.max,
             x?.a4,

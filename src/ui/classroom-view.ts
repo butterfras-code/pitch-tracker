@@ -1,4 +1,5 @@
-﻿import type { Session, TrackerData } from '../domain/tracker';
+import { targetLabel } from '../domain/pitch';
+import type { Session, TrackerData } from '../domain/tracker';
 import type { Round } from '../domain/round';
 import { roundState, roundSummary, retryIds } from '../domain/round';
 export interface SessionModel {
@@ -232,7 +233,7 @@ export class SessionView {
     );
     text('upNext', next ? 'Up next: ' + next.name : 'End of round');
     const identity = p
-      ? `<h2>${esc(p.name)}</h2><p>${esc(p.instrument)} · Target <strong>${esc(m.db.configs[p.instrument]?.pitch)}</strong></p>`
+      ? `<h2>${esc(p.name)}</h2><p>${esc(p.instrument)} · Target <strong>${esc(m.db.configs[p.instrument] ? targetLabel(m.db.configs[p.instrument]) : '')}</strong></p>`
       : '<h2>No present students</h2><p>Update attendance in the dashboard.</p>';
     if (identity !== this.stageKey) {
       $('studentIdentity').innerHTML = identity;

@@ -1,3 +1,4 @@
+import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { expect, test } from '@playwright/test';
 import { classroomPage, saved } from '../fixtures/classroom-page';
 import { recordedAudio, recordings } from '../fixtures/recorded-audio';
@@ -12,8 +13,8 @@ for (const recording of recordings) {
       await page
         .getByRole('button', { name: 'Classes & settings', exact: true })
         .click();
-      await page.getByLabel('Flute target', { exact: true }).fill(target);
-      await page.getByLabel('Steady hold (seconds)').fill('2');
+      await selectTarget(page, 'Flute', target);
+      await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
       await page
         .getByRole('button', { name: 'Save settings', exact: true })
         .click();

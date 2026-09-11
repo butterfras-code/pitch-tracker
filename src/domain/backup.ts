@@ -2,8 +2,7 @@ import { parseNote } from './pitch';
 import type { TrackerData } from './tracker';
 
 function requireValid(condition: unknown): asserts condition {
-  if (!condition)
-    throw new Error('This is not a valid Pitch Tracker v1 backup.');
+  if (!condition) throw new Error('This is not a valid Pitch Tracker backup.');
 }
 function object(value: unknown): asserts value is Record<string, unknown> {
   requireValid(
@@ -34,7 +33,7 @@ function ids(items: unknown[]): Set<unknown> {
   }
   return found;
 }
-function target(value: unknown) {
+function target(value: unknown, schema: unknown) {
   object(value);
   requireValid(
     str(value.pitch) &&
@@ -43,14 +42,19 @@ function target(value: unknown) {
       value.min <= value.max,
   );
   parseNote(value.pitch);
+  requireValid(
+    schema === 1
+      ? value.offset === undefined
+      : value.offset === undefined || finite(value.offset, -600, 600),
+  );
 }
 
-/** Validate v1 without normalizing, migrating, or removing extra fields. */
+/** Validate supported versions without mutating the input. */
 export function validateBackup(value: unknown): TrackerData {
   object(value);
   const d = value;
   requireValid(
-    d.schema === 1 &&
+    (d.schema === 1 || d.schema === 2) &&
       finite(d.revision, 0, Infinity) &&
       Number.isInteger(d.revision),
   );
@@ -66,7 +70,7 @@ export function validateBackup(value: unknown): TrackerData {
         key &&
         !['__proto__', 'constructor', 'prototype'].includes(key),
     );
-    target(config);
+    target(config, d.schema);
   }
   requireValid(Object.keys(configs).length);
   const st = d.settings;
@@ -144,7 +148,7 @@ export function validateBackup(value: unknown): TrackerData {
           (a.cents === null || finite(a.cents, -20000, 20000)) &&
           finite(a.a4, 400, 480),
       );
-      target(a.target);
+      target(a.target, d.schema);
     }
   }
   // All records have now been checked; narrow the validated graph for references.
@@ -166,4 +170,14 @@ export function validateBackup(value: unknown): TrackerData {
 
 export function parseBackup(text: string): TrackerData {
   return validateBackup(JSON.parse(text));
+}
+
+/** Explicit, lossless upgrade when the new target editor is saved. */
+export function migrateToV2(value: TrackerData): TrackerData {
+  const data = structuredClone(validateBackup(value));
+  data.schema = 2;
+  for (const config of Object.values(data.configs)) config.offset ??= 0;
+  for (const session of data.sessions)
+    for (const attempt of session.attempts) attempt.target.offset ??= 0;
+  return validateBackup(data);
 }

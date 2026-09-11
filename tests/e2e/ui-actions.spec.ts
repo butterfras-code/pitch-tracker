@@ -1,3 +1,4 @@
+import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
@@ -66,8 +67,8 @@ test('class, student and settings forms retain their behavior', async ({
   await expect(row).toContainText('Active');
   page.once('dialog', (dialog) => dialog.accept('Custom brass'));
   await page.getByRole('button', { name: 'Add instrument' }).click();
-  await page.getByLabel('Custom brass target', { exact: true }).fill('Bb3');
-  await page.getByLabel('A4 reference (Hz)').fill('442');
+  await selectTarget(page, 'Custom brass', 'Bb3');
+  await setSlider(page.getByLabel('A4 reference (Hz)'), '442');
   await page.getByRole('button', { name: 'Save settings' }).click();
   await expect(page.locator('#toast')).toContainText('Pitch settings saved');
   await page.reload();
@@ -75,8 +76,11 @@ test('class, student and settings forms retain their behavior', async ({
     .getByRole('button', { name: 'Classes & settings', exact: true })
     .click();
   await expect(
-    page.getByLabel('Custom brass target', { exact: true }),
-  ).toHaveValue('Bb3');
+    page.getByLabel('Custom brass note', { exact: true }),
+  ).toHaveValue('Bb');
+  await expect(
+    page.getByLabel('Custom brass octave', { exact: true }),
+  ).toHaveValue('3');
   await expect(page.getByLabel('A4 reference (Hz)')).toHaveValue('442');
 });
 

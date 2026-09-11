@@ -2,7 +2,7 @@
 import { findElement } from '../ui/helpers';
 import { errorMessage } from '../ui/helpers';
 import type { App } from '../app/application';
-import { parseNote } from '../domain/pitch';
+import { targetFrequency } from '../domain/pitch';
 import { $ } from '../ui/helpers';
 
 export const microphone = {
@@ -167,17 +167,15 @@ export const microphone = {
     this.cancelCheck();
     this.muteUntil = performance.now() + 2200;
     const generation = this.micGeneration;
-    const target = this.db.configs[pupil.instrument].pitch,
+    const target = this.db.configs[pupil.instrument],
       a4 = this.db.settings.a4;
     try {
       const ac = this.context();
       await ac.resume();
       if (generation !== this.micGeneration || this.disposed) return;
-      const n = parseNote(target),
-        m = n.midi ?? 60 + n.pc,
-        osc = ac.createOscillator(),
+      const osc = ac.createOscillator(),
         gain = ac.createGain();
-      osc.frequency.value = a4 * 2 ** ((m - 69) / 12);
+      osc.frequency.value = targetFrequency(target, a4);
       gain.gain.setValueAtTime(0, ac.currentTime);
       gain.gain.linearRampToValueAtTime(0.12, ac.currentTime + 0.03);
       gain.gain.setValueAtTime(0.12, ac.currentTime + 1.1);

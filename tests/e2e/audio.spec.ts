@@ -1,4 +1,5 @@
-﻿import { expect, test } from '@playwright/test';
+import { setSlider } from '../fixtures/settings-controls';
+import { expect, test } from '@playwright/test';
 import {
   classroomPage,
   saved,
@@ -16,8 +17,8 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   await page
     .getByRole('button', { name: 'Classes & settings', exact: true })
     .click();
-  await page.getByLabel('A4 reference').fill('442');
-  await page.getByLabel('Noise gate').fill('0.2');
+  await setSlider(page.getByLabel('A4 reference'), '442');
+  await setSlider(page.getByLabel('Noise gate'), '0.2');
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
@@ -30,7 +31,7 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   await page
     .getByRole('button', { name: 'Classes & settings', exact: true })
     .click();
-  await page.getByLabel('Noise gate').fill('0.01');
+  await setSlider(page.getByLabel('Noise gate'), '0.01');
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
@@ -145,7 +146,7 @@ async function twoSecondHold(page: import('@playwright/test').Page) {
   await page
     .getByRole('button', { name: 'Classes & settings', exact: true })
     .click();
-  await page.getByLabel('Steady hold (seconds)').fill('2');
+  await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
