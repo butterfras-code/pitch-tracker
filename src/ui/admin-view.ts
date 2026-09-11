@@ -240,11 +240,13 @@ export const adminView = {
       </p>
       <p>
         The detector looks for a single periodic tone between about 55 and 1,600
-        Hz. A check requires a continuous stable pitch; silence, uncertain
-        pitch, switching students, leaving the tab, or playing a reference tone
-        cancels or resets the hold. A stable tone can be low or high—it need not
-        be in range to count. Room noise, harmonics, and multiple players can
-        confuse detection; use your judgment and correct results when needed.
+        Hz. An in-range result needs reliable, stable pitch for 85% of the hold
+        window: a 2-second hold needs at least 1.7 seconds of good evidence.
+        Brief noise or pitch interruptions are tolerated; time with no reliable
+        pitch does not count. Low or high results require a full stable hold. A
+        longer break, switching students, leaving the tab, or playing a
+        reference tone resets progress. Room noise, harmonics, and multiple
+        players can still confuse detection; review unexpected results.
       </p>
       <p>
         Targets without an octave compare against the nearest octave of that
@@ -286,8 +288,9 @@ export const adminView = {
       </p>
       <h3>Hands-free classroom turns</h3>
       <p>
-        Enable the microphone once. Each turn waits for half a second of quiet,
-        then logs a steady tone automatically. With Auto Advance on, Until
+        Enable the microphone once. Each turn waits for half a second of quiet
+        or about a second of settled background noise without a detected pitch,
+        then listens for a tone automatically. With Auto Advance on, Until
         correct stays for retries; One and done moves on after any completed
         result. Each attempt is saved. The round stops after the last present
         student. Previous student revisits a student without deleting their

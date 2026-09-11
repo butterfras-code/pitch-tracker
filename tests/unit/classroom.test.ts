@@ -28,7 +28,7 @@ describe('microphone handoff and clap commands', () => {
     frequency: number | null = null,
     enabled = true,
   ) => listener.frame(time, rms, frequency, 0.015, enabled);
-  it('requires continuous actual quiet, not loss of pitch, after every reset', () => {
+  it('requires quiet or settled background, not a short loss of pitch, after every reset', () => {
     const l = new ClassroomListener();
     for (let t = 0; t <= 1000; t += 100)
       expect(frame(l, t, 0.2, 440).ready).toBe(false);
@@ -39,6 +39,22 @@ describe('microphone handoff and clap commands', () => {
     expect(frame(l, 2400).ready).toBe(true);
     l.reset();
     expect(frame(l, 2500, 0.2, 440).ready).toBe(false);
+  });
+  it('arms over settled unpitched background and does not learn a sustained note as background', () => {
+    const l = new ClassroomListener();
+    for (let t = 0; t < 800; t += 100)
+      expect(frame(l, t, 0.08, null, false).ready).toBe(false);
+    expect(frame(l, 800, 0.08, null, false).ready).toBe(true);
+    l.reset();
+    for (let t = 900; t <= 5000; t += 100)
+      expect(frame(l, t, 0.08, 440, false).ready).toBe(false);
+  });
+  it('does not mistake fluctuating noise or missing observations for a settled background', () => {
+    const l = new ClassroomListener();
+    for (let t = 0; t <= 3000; t += 100)
+      expect(frame(l, t, t % 200 ? 0.15 : 0.05, null, false).ready).toBe(false);
+    for (let t = 3100; t <= 3700; t += 100) frame(l, t, 0.08, null, false);
+    expect(frame(l, 4500, 0.08, null, false).ready).toBe(false);
   });
   it('does not treat a missing audio interval as continuous silence', () => {
     const l = new ClassroomListener();

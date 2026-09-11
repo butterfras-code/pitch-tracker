@@ -60,7 +60,6 @@ export const microphone = {
         this.toast(this.microphoneError);
         this.render();
       };
-      this.lastFrame = performance.now();
       this.lastAnalysis = 0;
       this.raf = requestAnimationFrame((now) => this.audioLoop(now));
       return true;
@@ -108,12 +107,13 @@ export const microphone = {
     this.classroomListenerReady = false;
     this.classroomListener.reset();
     this.checking = null;
-    this.holdSamples = [];
-    this.holdStart = null;
+    this.pitchHold.reset();
+    this.pitchDisplay.reset();
     if (findElement('holdProgress')) $('holdProgress').style.width = '0%';
     if (findElement('cancelButton')) $('cancelButton').classList.add('hidden');
     if (findElement('checkHint'))
-      $('checkHint').textContent = 'Listening automatically after a quiet gap.';
+      $('checkHint').textContent =
+        'Brief interruptions are OK. Keep the tone steady.';
   },
   async startCheck(this: App): Promise<void> {
     const s = this.ses(),
@@ -134,7 +134,7 @@ export const microphone = {
         return;
       }
       this.cancelCheck();
-      // Automatic arming happens only after fresh quiet audio observations.
+      // Automatic arming requires fresh quiet or settled-background observations.
       this.render();
     }
   },

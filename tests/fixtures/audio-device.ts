@@ -4,6 +4,9 @@ import type { Page } from '@playwright/test';
 export interface SyntheticAudio {
   frequency: number;
   noise: boolean;
+  noiseAmplitude: number;
+  humAmplitude: number;
+  recording: { samples: number[]; started: number } | null;
   requestedDevice: string;
   amplitude: number;
   requests: number;
@@ -25,6 +28,9 @@ export async function installAudioDevice(page: Page): Promise<void> {
     const device: SyntheticAudio = (window.syntheticAudio = {
       frequency: 442,
       noise: false,
+      noiseAmplitude: 0,
+      humAmplitude: 0,
+      recording: null,
       requestedDevice: '',
       amplitude: 0.2,
       requests: 0,
@@ -51,17 +57,33 @@ export async function installAudioDevice(page: Page): Promise<void> {
         };
       }
       createAnalyser() {
+        let seed = 7;
+        let offset = 0;
         return {
           fftSize: 4096,
           getFloatTimeDomainData(samples: Float32Array) {
-            let seed = 7;
+            if (device.recording) {
+              const end = Math.floor(
+                (performance.now() - device.recording.started) * 48,
+              );
+              for (let i = 0; i < samples.length; i++)
+                samples[i] =
+                  device.recording.samples[end - samples.length + i] ?? 0;
+              return;
+            }
             for (let i = 0; i < samples.length; i++) {
               seed = (seed * 16807) % 2147483647;
               samples[i] = device.noise
                 ? (seed / 2147483647 - 0.5) * 0.8
                 : device.amplitude *
-                  Math.sin((2 * Math.PI * device.frequency * i) / 48000);
+                    Math.sin(
+                      (2 * Math.PI * device.frequency * (i + offset)) / 48000,
+                    ) +
+                  device.noiseAmplitude * ((2 * seed) / 2147483647 - 1) +
+                  device.humAmplitude *
+                    Math.sin((2 * Math.PI * 100 * (i + offset)) / 48000);
             }
+            offset += samples.length;
           },
         };
       }

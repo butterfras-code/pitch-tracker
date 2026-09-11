@@ -98,11 +98,11 @@ export const classroomController = {
           ? 'Microphone off'
           : !this.pupil()
             ? 'No present students'
-            : this.holdStart !== null
+            : this.pitchHold.active
               ? 'Keep holding'
               : this.classroomListenerReady
                 ? 'Your turn - play'
-                : 'Waiting for quiet';
+                : 'Waiting for a pause';
   },
   toggleClassroomPause(this: App): void {
     this.classroomPaused = !this.classroomPaused;

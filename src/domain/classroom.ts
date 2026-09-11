@@ -24,12 +24,14 @@ export class ClassroomListener {
   private pulsePitched = false;
   private claps = 0;
   private lastClap = 0;
+  private background: { time: number; rms: number }[] = [];
 
   reset(): void {
     this.quietSince = this.lastTime = this.pulseStart = null;
     this.armed = false;
     this.claps = 0;
     this.pulsePitched = false;
+    this.background = [];
   }
 
   frame(
@@ -42,7 +44,10 @@ export class ClassroomListener {
     let command: 'next' | 'previous' | null = null;
     const gap = this.lastTime !== null && now - this.lastTime > 250;
     this.lastTime = now;
-    if (gap) this.quietSince = null;
+    if (gap) {
+      this.quietSince = null;
+      this.background = [];
+    }
     if (!clapEnabled) {
       this.claps = 0;
       this.pulseStart = null;
@@ -83,6 +88,23 @@ export class ClassroomListener {
       this.quietSince ??= now;
       if (now - this.quietSince >= 500) this.armed = true;
     } else this.quietSince = null;
+    // A settled, unpitched background can separate turns without literal
+    // silence. Never learn a detected sustained note as room noise. Abrupt
+    // changes restart settling, so an impact is not a handoff by itself.
+    if (frequency === null && rms >= gate && Number.isFinite(rms)) {
+      if (
+        this.background.some(
+          (sample) =>
+            Math.max(sample.rms, rms) > Math.min(sample.rms, rms) * 1.5,
+        )
+      )
+        this.background = [];
+      this.background.push({ time: now, rms });
+      if (now - this.background[0].time >= 800) {
+        this.armed = true;
+        this.background.shift();
+      }
+    } else this.background = [];
     if (command) {
       this.reset();
       return { ready: false, command };

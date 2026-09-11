@@ -140,3 +140,96 @@ test('Escape during pending permission cannot start a later automatic check', as
   await expect(page.locator('#classroomStatus')).toHaveText('Paused');
   expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
 });
+
+async function twoSecondHold(page: import('@playwright/test').Page) {
+  await page
+    .getByRole('button', { name: 'Classes & settings', exact: true })
+    .click();
+  await page.getByLabel('Steady hold (seconds)').fill('2');
+  await page
+    .getByRole('button', { name: 'Save settings', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Start listening', exact: true })
+    .click();
+}
+
+test('saves a correct A over background noise and a brief impact; retries without literal silence', async ({
+  page,
+}) => {
+  await twoSecondHold(page);
+  await page.evaluate(() => {
+    window.syntheticAudio.noiseAmplitude = 0.12;
+  });
+  await sound(page, 0, 1000);
+  await expect(page.locator('#classroomStatus')).toHaveText('Your turn - play');
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await page.evaluate(() => {
+    window.syntheticAudio.humAmplitude = 0.03;
+  });
+  await sound(page, 440, 1000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await page.evaluate(() => {
+    window.syntheticAudio.noise = true;
+  });
+  await page.clock.runFor(160);
+  await sound(page, 440, 1080);
+  let attempts = (await saved(page)).sessions[0].attempts;
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0]).toMatchObject({
+    status: 'correct',
+    source: 'microphone',
+  });
+  expect(Math.abs(attempts[0].cents!)).toBeLessThan(10);
+  await sound(page, 440, 2500);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await page.evaluate(() => {
+    window.syntheticAudio.humAmplitude = 0;
+  });
+  await sound(page, 0, 1000);
+  await sound(page, 440, 2300);
+  attempts = (await saved(page)).sessions[0].attempts;
+  expect(attempts).toHaveLength(2);
+  expect(attempts.every((attempt) => attempt.status === 'correct')).toBe(true);
+});
+
+test('noise and alternating wrong pitches cannot create a saved result', async ({
+  page,
+}) => {
+  await twoSecondHold(page);
+  await page.evaluate(() => {
+    window.syntheticAudio.noiseAmplitude = 0.25;
+  });
+  await sound(page, 0, 3000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await page.evaluate(() => {
+    window.syntheticAudio.noiseAmplitude = 0;
+  });
+  for (let i = 0; i < 24; i++) await sound(page, i % 2 ? 494 : 392, 160);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await sound(page, 0, 700);
+  await sound(page, 440, 1000);
+  await page.clock.fastForward(5000);
+  await sound(page, 440, 1000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await sound(page, 440, 1200);
+  expect((await saved(page)).sessions[0].attempts[0].status).toBe('correct');
+});
+
+test('a sustained flat note in moderate noise still saves a measured low result', async ({
+  page,
+}) => {
+  await twoSecondHold(page);
+  await sound(page, 0);
+  await page.evaluate(() => {
+    window.syntheticAudio.noiseAmplitude = 0.12;
+  });
+  await sound(page, 392, 2300);
+  const attempts = (await saved(page)).sessions[0].attempts;
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0]).toMatchObject({ status: 'low', source: 'microphone' });
+  expect(Math.abs(1200 * Math.log2(attempts[0].frequency! / 392))).toBeLessThan(
+    10,
+  );
+});

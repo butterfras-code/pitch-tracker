@@ -1,5 +1,6 @@
 import { ClassroomListener, type AdvanceMode } from '../domain/classroom';
 import type { Round } from '../domain/round';
+import { PitchDisplay, PitchHold } from '../domain/pitch-hold';
 import type { SessionView } from '../ui/classroom-view';
 /** Owns application-instance state; session rules use its browser-independent subset. */
 import type { SessionState } from '../domain/session-changes';
@@ -40,9 +41,8 @@ export interface AppState extends SessionState {
   pendingMic: boolean;
   micGeneration: number;
   checking: { id: string; sid: string } | null;
-  holdSamples: number[];
-  holdStart: number | null;
-  lastFrame: number;
+  pitchHold: PitchHold;
+  pitchDisplay: PitchDisplay;
   lastAnalysis: number;
   muteUntil: number;
   checkDeadline: number;
@@ -88,9 +88,8 @@ export function createState(
     pendingMic: false,
     micGeneration: 0,
     checking: null,
-    holdSamples: [],
-    holdStart: null,
-    lastFrame: 0,
+    pitchHold: new PitchHold(),
+    pitchDisplay: new PitchDisplay(),
     lastAnalysis: 0,
     muteUntil: 0,
     checkDeadline: 0,

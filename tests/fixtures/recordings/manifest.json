@@ -1,0 +1,29 @@
+[
+  {
+    "file": "c.pcm.gz",
+    "original": "C.m4a",
+    "originalSha256": "04b084fcf6e144220865bb8ab02d4901ad81c6dec4e161cc9b58c844cf0cfc16",
+    "sampleRate": 48000,
+    "encoding": "gzip of signed 16-bit little-endian mono PCM",
+    "duration": 4.778645833333333,
+    "referenceHz": 311.126984
+  },
+  {
+    "file": "f-sharp.pcm.gz",
+    "original": "F Sharp.m4a",
+    "originalSha256": "bb467a3959c1d5fcac0eb8d865e9a5eae11d0e8a610c5b88159b429edc2421ff",
+    "sampleRate": 48000,
+    "encoding": "gzip of signed 16-bit little-endian mono PCM",
+    "duration": 7.935979166666667,
+    "referenceHz": 493.883301
+  },
+  {
+    "file": "a-flat.pcm.gz",
+    "original": "A Flat.m4a",
+    "originalSha256": "e8d9d72ed8bf9e5eb4e81f5803237859325af8f2fd5c49856076a89c5107f624",
+    "sampleRate": 48000,
+    "encoding": "gzip of signed 16-bit little-endian mono PCM",
+    "duration": 6.719979166666667,
+    "referenceHz": 880
+  }
+]
