@@ -1,0 +1,93 @@
+/* Build-owned material; all colors and hardware paint remain theme tokens. */
+:root[data-treatment='studio'] {
+  scrollbar-color: var(--line) var(--bg);
+  caret-color: var(--control-ink);
+}
+:root[data-treatment='studio']
+  :is(body, .panel, .student, .current-display, dialog, .behavior-settings) {
+  background-image: url('../assets/vintage-audio-tolex.png');
+  background-size: 480px;
+  background-blend-mode: soft-light;
+}
+:root[data-treatment='studio'] ::selection {
+  background: var(--notice-bg);
+  color: var(--notice-ink);
+}
+:root[data-treatment='studio'] ::placeholder {
+  color: var(--control-ink);
+  opacity: 0.75;
+}
+:root[data-treatment='studio'] .session-target {
+  background-color: var(--control);
+  background-image: var(--control-pattern);
+  color: var(--control-ink);
+  border-radius: var(--display-radius);
+  box-shadow: var(--display-shadow);
+}
+:root[data-treatment='studio'] .target-frequency {
+  color: var(--control-ink);
+}
+:root[data-treatment='studio'] .target-caption {
+  letter-spacing: var(--label-tracking);
+  text-transform: var(--label-transform);
+}
+:root[data-treatment='studio'] :is(.target-playback, .meter-labels) {
+  font-family: var(--label-font);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: var(--label-transform);
+}
+:root[data-treatment='studio'] .target-playback {
+  background-color: var(--accent);
+  color: var(--primary-ink);
+  border-color: var(--edge);
+}
+:root[data-treatment='studio'] .target-playback:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+:root[data-treatment='studio'] .target-playback:active:not(:disabled) {
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-treatment='studio'] .tuner {
+  border-radius: var(--display-radius);
+  border-color: var(--edge);
+  background-image: radial-gradient(
+    ellipse at center,
+    var(--soft),
+    transparent 80%
+  );
+}
+:root[data-treatment='studio'] .meter {
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    to right,
+    var(--display-ink) 0 2px,
+    transparent 2px 10%
+  );
+  box-shadow: inset 0 -2px var(--display-ink);
+}
+:root[data-treatment='studio'] .needle {
+  background: var(--accent);
+  box-shadow: 0 1px 3px var(--edge);
+}
+:root[data-treatment='studio'] .progress {
+  background: color-mix(in srgb, var(--display-ink) 22%, var(--display-bg));
+}
+:root[data-treatment='studio'] .classroom-feedback {
+  color: var(--correct);
+}
+:root[data-treatment='studio'] .student {
+  box-shadow: var(--panel-shadow);
+}
+:root[data-treatment='studio']
+  :is(.student .name, [data-ui-click='show-current']) {
+  color: var(--ink);
+}
+:root[data-treatment='studio'] :is(.tabs button, .student .name) {
+  box-shadow: none;
+  background-image: none;
+}
+:root[data-treatment='studio'] .tabs button.on {
+  color: var(--ink);
+  box-shadow: inset 0 -2px var(--highlight);
+}

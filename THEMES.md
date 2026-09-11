@@ -36,3 +36,7 @@ Select **Big Button Sound Club** in the Theme picker for cream molded surfaces, 
 ## Lisa Lives!
 
 Select **Lisa Lives!** for the neon mockup-inspired variant: rainbow leopard/zebra print, a holographic leopard sticker, hot-pink playback, cyan candy controls and lime center feedback. The theme preserves shared layout and content, including Full Screen Split View. Paint uses theme tokens; two local generated PNG assets are bundled into the standalone HTML. No runtime requests or new dependencies are required.
+
+## Vintage Audio
+
+**Vintage Audio** uses worn black amplifier tolex, recessed ivory target lettering, amber instrument illumination and deep-red switches. The studio treatment preserves shared session layout and live meter behavior. Its local generated texture and existing bundled condensed font work entirely offline.
