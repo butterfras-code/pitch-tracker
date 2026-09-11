@@ -11,6 +11,7 @@ export const historyController = {
     }
     this.stopMic();
     this.resetRound();
+    this.applySessionDefaults();
     this.save();
     this.tab = 'session';
     this.render();

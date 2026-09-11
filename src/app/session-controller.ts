@@ -9,6 +9,7 @@ export const sessionController = {
     this.cancelCheck();
     this.tab = tab;
     this.render();
+    $('main').scrollTop = 0;
   },
   selectStudent(this: App, id: string, rememberSelection = true): void {
     if (!this.ses()?.roster.some((p) => p.id === id)) return;
@@ -31,6 +32,7 @@ export const sessionController = {
     this.stopMic();
     if (!changes.changeClass(this, id)) return;
     this.resetRound();
+    this.applySessionDefaults();
     this.save();
     this.render();
   },
@@ -38,6 +40,7 @@ export const sessionController = {
     if (!changes.createSession(this, $('sessionName').value)) return;
     this.resetRound();
     this.classroomPaused = false;
+    this.applySessionDefaults();
     this.save();
     this.closeDialog();
     this.render();

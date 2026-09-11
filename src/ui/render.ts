@@ -10,6 +10,10 @@ export const render = {
       'session-active',
       this.tab === 'session' && !!this.ses(),
     );
+    document.body.classList.toggle(
+      'admin-active',
+      this.tab === 'admin' || this.tab === 'settings',
+    );
     if (this.tab === 'session' && this.ses()) {
       this.renderClassroom();
       return;
@@ -25,7 +29,9 @@ export const render = {
           ? this.historyHTML()
           : this.tab === 'admin'
             ? this.adminHTML()
-            : this.helpHTML();
+            : this.tab === 'settings'
+              ? this.settingsHTML()
+              : this.helpHTML();
     if (this.tab === 'session') this.renderCards();
   },
   warning(this: App, message: string): void {

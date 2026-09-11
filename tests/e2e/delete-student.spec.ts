@@ -24,9 +24,7 @@ test('student deletion supports cancellation, persists, and preserves session hi
     .first()
     .getByRole('button', { name: 'In range' })
     .click();
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   const row = page
     .getByRole('row')
     .filter({ has: page.getByRole('cell', { name: 'Maya', exact: true }) });
@@ -50,9 +48,7 @@ test('student deletion supports cancellation, persists, and preserves session hi
   await expect(page.locator('.student')).toHaveCount(10);
   await expect(page.locator('.student').first()).toContainText('Maya');
   await expect(page.locator('.student').first()).toContainText('1 tries');
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await expect(row).toHaveCount(0);
   await expect(lucas).toHaveCount(0);
   await page.getByRole('button', { name: 'Session', exact: true }).click();

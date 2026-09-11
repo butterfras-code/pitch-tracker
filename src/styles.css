@@ -1146,6 +1146,8 @@ body.session-active {
   background: transparent;
 }
 .pitch-staff {
+  background: #fff;
+  color: #000;
   width: 140px;
   max-width: 100%;
   height: 115px;
@@ -1315,4 +1317,73 @@ body.session-active {
   .note-selectors {
     flex-direction: column;
   }
+}
+
+/* Classes and Settings use the remaining viewport as their scroll area. */
+body.admin-active {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.admin-active > header,
+.admin-active > .tabs,
+.admin-active > #storageWarning {
+  flex-shrink: 0;
+}
+.admin-active > header {
+  width: 100%;
+}
+.admin-active > .tabs {
+  width: calc(100% - 56px);
+}
+.admin-active > main {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  margin: 0 auto;
+}
+.settings-title {
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) {
+  .admin-active > .tabs {
+    width: calc(100% - 24px);
+    gap: 12px;
+  }
+  .admin-active > .tabs button {
+    min-width: 0;
+  }
+}
+
+.tabs {
+  flex-wrap: wrap;
+}
+.tabs button {
+  flex-shrink: 0;
+}
+
+.settings-shade > summary {
+  cursor: pointer;
+  font-size: 21px;
+  font-weight: 700;
+}
+.settings-shade > summary:focus-visible {
+  outline: 3px solid #d79f36;
+  outline-offset: 4px;
+}
+.shade-content {
+  margin-top: 16px;
+}
+.default-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 18px;
+  align-items: start;
+}
+form[data-ui-submit='settings'] {
+  margin-bottom: 24px;
 }
