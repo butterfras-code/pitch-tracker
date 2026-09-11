@@ -31,6 +31,16 @@ export function createBindings(app: App): UiBindings {
       'session-notes': () => app.sessionNotes(),
       'end-session': () => app.endSession(),
       'new-session': () => app.newSession(),
+      'start-class-session': ({ data }) => {
+        if (!app.db.classes.some((c) => c.id === data.id)) return;
+        app.changeClass(data.id!);
+        if (!app.ses()) app.newSession();
+      },
+      'edit-class': ({ data }) => {
+        if (!app.db.classes.some((c) => c.id === data.id)) return;
+        app.tab = 'admin';
+        app.changeClass(data.id!);
+      },
       undo: () => app.undo(),
       'toggle-mic': () => app.toggleMic(),
       'reference-tone': () => app.referenceTone(),
