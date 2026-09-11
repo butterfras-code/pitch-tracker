@@ -15,6 +15,22 @@ export function bindLifecycle(app: App): () => void {
     'keydown',
     (e) => {
       if (
+        e.altKey &&
+        e.key === 'Enter' &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        !e.isComposing &&
+        app.tab === 'session' &&
+        app.ses() &&
+        !$('modal').open &&
+        !app.pitchFeedback.visible
+      ) {
+        e.preventDefault();
+        if (!e.repeat) void app.workspace?.fullscreen();
+        return;
+      }
+      if (
         $('modal').open ||
         app.pitchFeedback.visible ||
         ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(
