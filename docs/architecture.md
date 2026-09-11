@@ -4,6 +4,8 @@
 
 Users double-click one self-contained `dist/index.html`. Node and npm are development tools only. Vite with vite-plugin-singlefile embeds all JavaScript and CSS; the release has no runtime imports, adjacent assets, CDN, server, service worker, or network requirement. Never edit `dist` manually. `Pitch-Tracker.html` remains the unchanged upstream baseline from `94777d5`.
 
+GitHub Pages serves the same self-contained build as the downloadable release. The verification workflow uploads `dist` as a Pages artifact after all checks pass and deploys it only for `main` pushes or manual runs on `main`. Repository Pages settings must use GitHub Actions as the publishing source. Generated `dist` remains gitignored; the source-root `index.html` is a development entry point and must not be published directly.
+
 ## Module map
 
 The application uses strict TypeScript without a UI framework. `index.html` contains the static shell and one module entry point. There are no classic application scripts or global bootstrap bridge.
