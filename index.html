@@ -7,28 +7,24 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <header>
-      <div>
-        <div class="eyebrow">Mouthpiece practice · Offline edition</div>
-        <h1>Pitch Tracker</h1>
-      </div>
-      <div class="row">
-        <label class="theme-picker noprint"
-          >Theme<select id="themeSelect"></select></label
-        ><small id="saveStatus" role="status">Loading…</small
-        ><button data-ui-click="backup">Back up data</button>
+    <header class="app-header">
+      <h1 class="app-brand">Pitch Tracker</h1>
+      <nav class="tabs" aria-label="Main">
+        <button data-ui-click="switch-tab" data-tab="session" class="on">
+          Session</button
+        ><button data-ui-click="switch-tab" data-tab="history">
+          History & progress</button
+        ><button data-ui-click="switch-tab" data-tab="admin">
+          Classes & settings</button
+        ><button data-ui-click="switch-tab" data-tab="help">Help</button>
+      </nav>
+      <div class="app-utilities noprint">
+        <select id="themeSelect" aria-label="Theme" title="Theme"></select>
+        <button data-ui-click="backup">Back up data</button>
+        <small id="saveStatus" role="status">Loading…</small>
       </div>
     </header>
     <div id="storageWarning" class="notice hidden" role="alert"></div>
-    <nav class="tabs" aria-label="Main">
-      <button data-ui-click="switch-tab" data-tab="session" class="on">
-        Session</button
-      ><button data-ui-click="switch-tab" data-tab="history">
-        History & progress</button
-      ><button data-ui-click="switch-tab" data-tab="admin">
-        Classes & settings</button
-      ><button data-ui-click="switch-tab" data-tab="help">Help</button>
-    </nav>
     <main id="main"></main>
     <dialog id="modal"><div id="modalBody"></div></dialog>
     <div id="toast" role="status" class="hidden"></div>

@@ -1,0 +1,106 @@
+/* Shared app chrome. Themes supply paint; header geometry stays consistent. */
+:root .app-header {
+  --header-gap: 24px;
+  --header-inset: 20px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px var(--header-gap);
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 12px var(--header-inset);
+  border-bottom: 1px solid var(--line);
+  overflow: visible;
+}
+:root .app-header .app-brand {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+:root .app-header .tabs {
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: 16px;
+  border: 0;
+}
+:root .app-header .tabs button {
+  flex: none;
+  min-height: 44px;
+  padding: 10px 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.app-utilities {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) auto;
+  align-items: center;
+  gap: 4px 12px;
+}
+.app-utilities :is(select, button) {
+  min-height: 44px;
+  font-size: 13px;
+}
+.app-utilities select {
+  width: 100%;
+  min-width: 0;
+}
+:root .app-header #saveStatus {
+  display: block;
+  grid-column: 1 / -1;
+  text-align: right;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1199px) {
+  :root .app-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+    padding-bottom: 0;
+  }
+  :root .app-header .tabs {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    overflow-x: auto;
+  }
+  .app-utilities {
+    grid-row: 1;
+    grid-column: 2;
+  }
+}
+@media (max-width: 599px) {
+  :root .app-header {
+    --header-inset: 12px;
+    --header-gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 10px;
+  }
+  :root .app-header .app-brand {
+    font-size: 20px;
+  }
+  .app-utilities {
+    grid-row: 3;
+    grid-column: 1;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  :root .app-header .tabs {
+    grid-row: 2;
+    gap: 16px;
+  }
+  :root .app-header .tabs button {
+    font-size: 12px;
+  }
+}
+:root:fullscreen .session-active > .app-header {
+  display: none;
+}
+@media print {
+  :root .app-header {
+    display: block;
+    padding: 10px;
+  }
+}

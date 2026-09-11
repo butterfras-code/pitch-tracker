@@ -111,22 +111,6 @@ small {
 small {
   font-size: 12px;
 }
-.eyebrow {
-  font-size: 11px;
-  letter-spacing: 1.6px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-header {
-  max-width: 1440px;
-  margin: auto;
-  padding: 25px 28px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
 .row {
   display: flex;
   align-items: center;
@@ -397,10 +381,6 @@ dialog form {
   font-size: 80px;
 }
 @media (max-width: 800px) {
-  header {
-    padding: 18px;
-    align-items: flex-start;
-  }
   .tabs {
     padding: 0 18px;
     gap: 18px;
@@ -578,23 +558,11 @@ button.high:hover {
   background: var(--ink);
   color: var(--bg);
 }
-.theme-picker {
-  min-width: 180px;
-}
-header {
-  flex-wrap: wrap;
-}
-header > .row {
-  justify-content: flex-end;
-}
 /* Optional structural treatment shared by any theme with treatment: 'mech'. */
 :root[data-treatment='mech'] h1 {
   font-style: italic;
   text-transform: uppercase;
   text-shadow: 2px 2px var(--edge);
-}
-:root[data-treatment='mech'] .eyebrow {
-  color: var(--highlight);
 }
 :root[data-treatment='mech'] .panel {
   border: 2px solid var(--accent);
@@ -647,21 +615,9 @@ header > .row {
 :root[data-treatment='mech'] .focus .primary:focus-visible {
   clip-path: none;
 }
-@media (max-width: 600px) {
-  header > .row {
-    width: 100%;
-    justify-content: flex-start;
-  }
-  .theme-picker {
-    flex: 1;
-  }
-}
 @media print {
   :root {
     color-scheme: light;
-  }
-  .theme-picker {
-    display: none !important;
   }
   body,
   main .panel,
@@ -728,13 +684,9 @@ body.session-active {
   display: flex;
   flex-direction: column;
 }
-.session-active > header,
-.session-active > .tabs {
+.session-active > header {
   width: 100%;
   flex: 0 0 auto;
-}
-.session-active > header {
-  padding: 10px 20px;
 }
 .session-active > main {
   flex: 1;
@@ -993,28 +945,8 @@ body.session-active {
   }
 }
 @media (max-width: 599px) {
-  .session-active > header {
-    padding: 6px 10px;
-    gap: 6px;
-  }
-  .session-active > header .eyebrow,
-  .session-active > header .theme-picker,
-  .session-active > header #saveStatus {
-    display: none;
-  }
-  .session-active > header > .row {
-    width: auto;
-  }
   .session-active h1 {
     font-size: 18px;
-  }
-  .session-active > .tabs {
-    padding: 0 8px;
-    gap: 10px;
-  }
-  .session-active > .tabs button {
-    font-size: 12px;
-    padding: 10px 0;
   }
   .session-active > main {
     padding: 8px;

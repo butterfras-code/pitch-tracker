@@ -1,5 +1,9 @@
 # Architecture and acceptance goals
 
+## Application header
+
+`src/header-layout.css` owns the shared app bar geometry after theme paint. The compact title, main navigation, theme selector and backup utilities share one desktop row; navigation wraps to a separate row below 1200px, with utilities also stacking on phones. Save status remains visible next to its backup action, including on phones. The eyebrow and decorative tagline are removed. Themes retain their colors, fonts and control treatments without changing header dimensions. Navigation is inside the header so native fullscreen hides all app chrome together. No controller or saved-data format changes are involved. Offline file-URL browser coverage checks all themes at phone, intermediate, laptop and desktop widths, control overlap, navigation and fullscreen visibility.
+
 ## Release contract
 
 Users double-click one self-contained `dist/index.html`. Node and npm are development tools only. Vite with vite-plugin-singlefile embeds all JavaScript and CSS; the release has no runtime imports, adjacent assets, CDN, server, service worker, or network requirement. Never edit `dist` manually. `Pitch-Tracker.html` remains the unchanged upstream baseline from `94777d5`.
