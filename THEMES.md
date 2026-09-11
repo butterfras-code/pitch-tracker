@@ -32,3 +32,7 @@ Before replacing or moving your existing tracker, download a data backup from th
 ## Big Button Sound Club
 
 Select **Big Button Sound Club** in the Theme picker for cream molded surfaces, recessed navy displays, red playback, cobalt actions, yellow accents and green success feedback inspired by the supplied toy mockup. `src/themes/big-button.theme.ts` supplies existing contract tokens; `src/themes/big-button.css` adds paint-only toy decoration. Layout, copy, music artwork and behavior remain shared. System font stacks preserve offline operation without new assets.
+
+## Lisa Lives!
+
+Select **Lisa Lives!** for the neon mockup-inspired variant: rainbow leopard/zebra print, a holographic leopard sticker, hot-pink playback, cyan candy controls and lime center feedback. The theme preserves shared layout and content, including Full Screen Split View. Paint uses theme tokens; two local generated PNG assets are bundled into the standalone HTML. No runtime requests or new dependencies are required.

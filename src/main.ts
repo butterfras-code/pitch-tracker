@@ -1,4 +1,5 @@
 import './themes/big-button.css';
+import './themes/lisa-lives.css';
 import { createApplication, initializeApplication } from './app/application';
 import { browserStorage } from './persistence/browser-storage';
 import { createTrackerStore } from './persistence/tracker-store';

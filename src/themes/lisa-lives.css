@@ -1,0 +1,96 @@
+/* Rave decoration consumes theme tokens; session geometry remains shared. */
+:root[data-treatment='rave'] {
+  scrollbar-color: var(--line) var(--bg);
+  caret-color: var(--edge);
+}
+:root[data-treatment='rave'] body {
+  background-image: url('../assets/lisa-rainbow-print.png');
+  background-size: 640px;
+}
+:root[data-treatment='rave']
+  :is(header, .tabs, .session-top, .session-sidebar, .dashboard-header) {
+  background-color: var(--bg);
+  border-radius: var(--help-radius);
+}
+:root[data-treatment='rave'] .student {
+  background-color: var(--card);
+  box-shadow: var(--panel-shadow);
+}
+:root[data-treatment='rave'] ::selection {
+  background: var(--highlight);
+  color: var(--bg);
+}
+:root[data-treatment='rave'] ::placeholder {
+  color: var(--control-ink);
+  opacity: 1;
+}
+:root[data-treatment='rave'] .current-display {
+  border-color: var(--edge);
+}
+:root[data-treatment='rave'] .session-target {
+  background-color: var(--display-bg);
+  background-image: url('../assets/lisa-leopard-sticker.png');
+  background-size: clamp(48px, 7vw, 140px);
+  background-position: right 3% top 3%;
+  background-repeat: no-repeat;
+  color: var(--display-ink);
+  border-radius: var(--display-radius);
+  box-shadow: var(--display-shadow);
+}
+:root[data-treatment='rave'] .student .name {
+  color: var(--ink);
+}
+:root[data-treatment='rave'] [data-ui-click='show-current'] {
+  color: var(--edge);
+}
+:root[data-treatment='rave'] .target-caption {
+  color: var(--edge);
+}
+:root[data-treatment='rave'] .target-frequency {
+  color: var(--display-ink);
+}
+:root[data-treatment='rave'] .target-pitch {
+  text-shadow: var(--note-shadow);
+}
+:root[data-treatment='rave'] .target-playback {
+  background-color: var(--accent);
+  color: var(--primary-ink);
+  border-color: var(--highlight);
+}
+:root[data-treatment='rave'] .target-playback:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+:root[data-treatment='rave'] .target-playback:active:not(:disabled) {
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-treatment='rave'] .tuner {
+  border-color: var(--edge);
+  border-radius: var(--display-radius);
+}
+:root[data-treatment='rave'] .meter {
+  background: linear-gradient(
+    to right,
+    var(--low),
+    var(--correct),
+    var(--high)
+  );
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-treatment='rave'] .needle {
+  background: var(--display-bg);
+}
+:root[data-treatment='rave']
+  .classroom-feedback:has(
+    #classroomStatus:not(:empty),
+    #lastResult:not(:empty),
+    #upNext:not(:empty)
+  ) {
+  border-radius: var(--help-radius);
+  background: var(--display-bg);
+  color: var(--display-ink);
+  box-shadow: var(--display-shadow);
+}
+:root[data-treatment='rave'] :is(.tabs button, .student .name) {
+  box-shadow: none;
+  background-image: none;
+}
