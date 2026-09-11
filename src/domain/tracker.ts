@@ -1,3 +1,4 @@
+import type { SessionDefaults } from './session-defaults';
 import type { PitchStatus, PitchTarget } from './pitch';
 
 export interface Student {
@@ -39,7 +40,8 @@ export interface Session {
   note: string;
 }
 export interface TrackerData {
-  schema: 1 | 2;
+  schema: 1 | 2 | 3;
+  sessionDefaults?: SessionDefaults;
   classes: TrackerClass[];
   configs: Record<string, PitchTarget>;
   settings: {

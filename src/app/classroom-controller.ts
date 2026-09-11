@@ -23,7 +23,9 @@ export const classroomController = {
     this.ensureRound();
     const s = this.ses();
     if (!s || !this.roundQueue) return;
-    this.workspace ??= new SessionView();
+    this.workspace ??= new SessionView(
+      this.db.schema === 3 ? this.db.sessionDefaults : undefined,
+    );
     this.workspace.render($('main'), {
       s,
       db: this.db,

@@ -1,3 +1,4 @@
+import type { SessionDefaults } from '../domain/session-defaults';
 import { targetLabel } from '../domain/pitch';
 import type { Session, TrackerData } from '../domain/tracker';
 import type { Round } from '../domain/round';
@@ -79,7 +80,11 @@ export class SessionView {
   dispose(): void {
     this.lifecycle.abort();
   }
-  constructor() {
+  constructor(defaults?: SessionDefaults) {
+    if (defaults) {
+      this.teacher = defaults.teacher;
+      if (defaults.view !== 'auto') this.view = defaults.view;
+    }
     window.addEventListener('resize', () => this.follow(), {
       signal: this.lifecycle.signal,
     });

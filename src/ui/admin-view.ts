@@ -1,3 +1,4 @@
+import { sessionDefaultsHTML } from './session-defaults-view';
 import { targetRow, detectionSlider } from './pitch-settings';
 /** Renders roster administration, pitch settings, and offline help. */
 import type { App } from '../app/application';
@@ -7,7 +8,7 @@ export const adminView = {
   adminHTML(this: App): string {
     return /* HTML */ `<div class="row spread" style="margin-bottom:20px">
         <div>
-          <h2>Classes & settings</h2>
+          <h2>Classes</h2>
           <p class="muted">
             Rosters persist. Past sessions retain their original names and
             instruments.
@@ -75,39 +76,50 @@ export const adminView = {
             </tbody>
           </table>
         </div>
-      </div>
-      <form class="panel" data-ui-submit="settings">
-        <h2>Pitch targets</h2>
-        <p class="muted">
-          Choose a concert note and octave, then drag Min, Target, and Max.
-          Moving Target keeps the range width. Min and Max are cents relative to
-          Target. Use arrow keys for precise adjustments.
-        </p>
-        <div class="tablewrap target-table-wrap">
-          <table id="configTable">
-            <thead>
-              <tr>
-                <th>Instrument & note</th>
-                <th>Staff · click to switch clef</th>
-                <th>Accepted pitch range</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${Object.entries(this.db.configs)
-                .map(([name, config]) =>
-                  targetRow(name, config, this.db.settings.a4),
-                )
-                .join('')}
-            </tbody>
-          </table>
-        </div>
-        <h2 class="detection-heading">Detection</h2>
-        <div class="detection-controls">
-          ${detectionSlider('a4', 'A4 reference (Hz)', this.db.settings.a4, 400, 480, 0.1, 'Hz', '400 Hz', '480 Hz')}
-          ${detectionSlider('hold', 'Steady hold (seconds)', this.db.settings.hold, 0.5, 5, 0.1, 'seconds', 'Shorter hold', 'Longer hold')}
-          ${detectionSlider('stability', 'Allowed pitch spread (cents)', this.db.settings.stability, 5, 100, 1, 'cents', 'Steadier pitch', 'More variation')}
-          ${detectionSlider('gate', 'Noise gate (RMS; lower = more sensitive)', this.db.settings.gate, 0.001, 0.2, 0.001, 'RMS', 'More sensitive', 'More noise filtering')}
-        </div>
+      </div> `;
+  },
+  settingsHTML(this: App): string {
+    return /* HTML */ `<h2 class="settings-title">Settings</h2>
+      <form data-ui-submit="settings">
+        <details class="panel settings-shade" open>
+          <summary>Pitch targets</summary>
+          <div class="shade-content">
+            <p class="muted">
+              Choose a concert note and octave, then drag Min, Target, and Max.
+              Moving Target keeps the range width. Min and Max are cents
+              relative to Target. Use arrow keys for precise adjustments.
+            </p>
+            <div class="tablewrap target-table-wrap">
+              <table id="configTable">
+                <thead>
+                  <tr>
+                    <th>Instrument & note</th>
+                    <th>Staff · click to switch clef</th>
+                    <th>Accepted pitch range</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${Object.entries(this.db.configs)
+                    .map(([name, config]) =>
+                      targetRow(name, config, this.db.settings.a4),
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+        <details class="panel settings-shade" open>
+          <summary>Detection</summary>
+          <div class="shade-content">
+            <div class="detection-controls">
+              ${detectionSlider('a4', 'A4 reference (Hz)', this.db.settings.a4, 400, 480, 0.1, 'Hz', '400 Hz', '480 Hz')}
+              ${detectionSlider('hold', 'Steady hold (seconds)', this.db.settings.hold, 0.5, 5, 0.1, 'seconds', 'Shorter hold', 'Longer hold')}
+              ${detectionSlider('stability', 'Allowed pitch spread (cents)', this.db.settings.stability, 5, 100, 1, 'cents', 'Steadier pitch', 'More variation')}
+              ${detectionSlider('gate', 'Noise gate (RMS; lower = more sensitive)', this.db.settings.gate, 0.001, 0.2, 0.001, 'RMS', 'More sensitive', 'More noise filtering')}
+            </div>
+          </div>
+        </details>
         <div class="row" style="margin-top:18px">
           <button class="primary">Save settings</button
           ><button type="button" data-ui-click="add-instrument">
@@ -115,7 +127,8 @@ export const adminView = {
           </button>
         </div>
         <p id="settingsError" role="alert" class="danger"></p>
-      </form>`;
+      </form>
+      ${sessionDefaultsHTML(this.db)}`;
   },
   helpHTML(this: App): string {
     return /* HTML */ `<div class="panel stack" style="max-width:850px">
@@ -127,7 +140,7 @@ export const adminView = {
       </p>
       <h3>Start here</h3>
       <p>
-        In Classes & settings, create your class and add students. Verify your
+        In Classes, create your class and add students. In Settings, verify your
         mouthpiece targets, then start a session. Mark absent students and
         select a name, or use Next / Random. Record a manual judgment or enable
         the microphone to log steady tones automatically.
@@ -194,13 +207,24 @@ export const adminView = {
         so it cannot score itself.
       </p>
       <p>
-        Choose a note and octave in Classes &amp; settings. Drag Target to move
-        the accepted range together, or Min and Max to change its edges. Fine
-        scale shows ±200 cents; use Wide for larger adjustments. Arrow keys
-        adjust one step. Reset to note removes custom tuning. The staff uses
-        treble at middle C (C4) and above, bass below; click it to override or
-        choose Auto clef. Detection sliders show their values as you drag. Save
-        settings applies the changes. Older JSON backups remain supported.
+        Choose a note and octave in Settings. Drag Target to move the accepted
+        range together, or Min and Max to change its edges. Fine scale shows
+        ±200 cents; use Wide for larger adjustments. Arrow keys adjust one step.
+        Reset to note removes custom tuning. The staff uses treble at middle C
+        (C4) and above, bass below; click it to override or choose Auto clef.
+        Detection sliders show their values as you drag. Save settings applies
+        the changes. Older JSON backups remain supported.
+      </p>
+      <h3>Settings and session defaults</h3>
+      <p>
+        Pitch targets, Detection, and Session defaults can each be collapsed.
+        Collapsing keeps unsaved edits. Save settings applies pitch and
+        detection changes; Save session defaults saves session behavior
+        separately. Defaults apply when starting, resuming, switching classes,
+        reopening, or restoring sessions. They do not change the session
+        currently running. Microphone activation remains manual. Saving defaults
+        upgrades the backup format; older app versions cannot read these new
+        backups.
       </p>
       <h3>Session views</h3>
       <p>
@@ -220,9 +244,9 @@ export const adminView = {
       <p>
         Session behavior settings contains advance mode, clap navigation,
         microphone input and Teacher details. Teacher details reveals
-        per-student scoring and note access; it is off when you reopen the file
-        and is not a password or access restriction. Pause, Previous, Next and
-        Undo stay available in every view.
+        per-student scoring and note access; its initial value comes from
+        Session defaults and is not a password or access restriction. Pause,
+        Previous, Next and Undo stay available in every view.
       </p>
       <p>
         At round completion, retry only students whose latest result needs
@@ -244,13 +268,14 @@ export const adminView = {
         results. Undo reverses the last score or navigation.
       </p>
       <p>
-        Clap navigation is off by default. Enable it for two claps to move
-        forward or three to go back. Use distinct claps about a third of a
-        second apart; the app waits half a second after the last clap before
-        deciding. Commands work between tones. Pause listening disables scoring
-        and clap commands. Classroom noise can trigger or obscure claps; disable
-        the control when needed. Advance mode and clap settings are temporary
-        and reset on reopening; they are not included in backups.
+        Clap navigation is initially off unless enabled in Session defaults. Use
+        two claps to move forward or three to go back. Use distinct claps about
+        a third of a second apart; the app waits half a second after the last
+        clap before deciding. Commands work between tones. Pause listening
+        disables scoring and clap commands. Classroom noise can trigger or
+        obscure claps; disable the control when needed. Session overrides reset
+        to Session defaults on reopening. Saved defaults are included in
+        backups.
       </p>
       <h3>During class</h3>
       <p>
@@ -263,7 +288,7 @@ export const adminView = {
       <h3>Local administration</h3>
       <p>
         Anyone with access to this browser profile can access the tracker. The
-        admin tab is organizational, not password protection. Use separate
+        Classes section is organizational, not password protection. Use separate
         browser profiles or operating-system accounts when needed.
       </p>
     </div>`;

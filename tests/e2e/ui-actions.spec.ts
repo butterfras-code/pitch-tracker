@@ -23,9 +23,7 @@ async function startSession(page: Page) {
 test('class, student and settings forms retain their behavior', async ({
   page,
 }) => {
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'New class', exact: true }).click();
   await page.getByLabel('Class name').fill('New band');
   await page
@@ -65,6 +63,7 @@ test('class, student and settings forms retain their behavior', async ({
   await expect(row).toContainText('Archived');
   await row.getByRole('button', { name: 'Restore', exact: true }).click();
   await expect(row).toContainText('Active');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   page.once('dialog', (dialog) => dialog.accept('Custom brass'));
   await page.getByRole('button', { name: 'Add instrument' }).click();
   await selectTarget(page, 'Custom brass', 'Bb3');
@@ -72,9 +71,7 @@ test('class, student and settings forms retain their behavior', async ({
   await page.getByRole('button', { name: 'Save settings' }).click();
   await expect(page.locator('#toast')).toContainText('Pitch settings saved');
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(
     page.getByLabel('Custom brass note', { exact: true }),
   ).toHaveValue('Bb');

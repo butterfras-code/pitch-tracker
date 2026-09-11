@@ -9,9 +9,7 @@ import { selectTarget, setSlider } from '../fixtures/settings-controls';
 
 test.beforeEach(async ({ page }) => {
   await classroomPage(page, 1);
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
 });
 
 test('note selection, custom tuning, clef overrides, bounds and reset', async ({
@@ -57,9 +55,7 @@ test('note selection, custom tuning, clef overrides, bounds and reset', async ({
     max: 40,
   });
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(row.locator('.target-summary')).toContainText(
     'Custom · C4 +18¢',
   );
@@ -165,9 +161,7 @@ test('saving untouched sliders preserves imported fractional settings and tuning
     data,
   );
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();

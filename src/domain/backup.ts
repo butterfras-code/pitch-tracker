@@ -1,3 +1,4 @@
+import { sessionDefaults } from './session-defaults';
 import { parseNote } from './pitch';
 import type { TrackerData } from './tracker';
 
@@ -54,7 +55,7 @@ export function validateBackup(value: unknown): TrackerData {
   object(value);
   const d = value;
   requireValid(
-    (d.schema === 1 || d.schema === 2) &&
+    (d.schema === 1 || d.schema === 2 || d.schema === 3) &&
       finite(d.revision, 0, Infinity) &&
       Number.isInteger(d.revision),
   );
@@ -81,6 +82,19 @@ export function validateBackup(value: unknown): TrackerData {
       finite(st.gate, 0.001, 0.2) &&
       typeof st.advance === 'boolean',
   );
+  if (d.schema === 3) {
+    object(d.sessionDefaults);
+    const defaults = d.sessionDefaults;
+    requireValid(
+      typeof defaults.advance === 'boolean' &&
+        typeof defaults.claps === 'boolean' &&
+        typeof defaults.teacher === 'boolean' &&
+        (defaults.mode === 'until-correct' ||
+          defaults.mode === 'one-and-done') &&
+        ['auto', 'split', 'student', 'class'].includes(String(defaults.view)) &&
+        typeof defaults.view === 'string',
+    );
+  }
   const classIds = ids(d.classes),
     sessionIds = ids(d.sessions);
   requireValid(
@@ -175,9 +189,18 @@ export function parseBackup(text: string): TrackerData {
 /** Explicit, lossless upgrade when the new target editor is saved. */
 export function migrateToV2(value: TrackerData): TrackerData {
   const data = structuredClone(validateBackup(value));
-  data.schema = 2;
+  if (data.schema === 1) data.schema = 2;
   for (const config of Object.values(data.configs)) config.offset ??= 0;
   for (const session of data.sessions)
     for (const attempt of session.attempts) attempt.target.offset ??= 0;
+  return validateBackup(data);
+}
+
+/** Saving session defaults explicitly upgrades older backups without changing sessions. */
+export function migrateToV3(value: TrackerData): TrackerData {
+  const data = migrateToV2(value);
+  const defaults = sessionDefaults(data);
+  data.schema = 3;
+  data.sessionDefaults = defaults;
   return validateBackup(data);
 }

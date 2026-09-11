@@ -10,9 +10,7 @@ for (const recording of recordings) {
     }) => {
       await classroomPage(page, 1);
       const target = useLabel ? recording.label : recording.sounding;
-      await page
-        .getByRole('button', { name: 'Classes & settings', exact: true })
-        .click();
+      await page.getByRole('button', { name: 'Settings', exact: true }).click();
       await selectTarget(page, 'Flute', target);
       await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
       await page
