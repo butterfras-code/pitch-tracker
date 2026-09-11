@@ -45,9 +45,12 @@ export async function settings(page: Page) {
 }
 /** Continue after a recorded-attempt popup, if it has not already expired. */
 export async function dismissFeedback(page: Page): Promise<void> {
-  const popup = page.locator('#pitchFeedback');
-  if (await popup.isVisible())
-    await popup.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.evaluate(() => {
+    const button = document.querySelector<HTMLButtonElement>(
+      '#pitchFeedback[open] .feedback-continue',
+    );
+    button?.click();
+  });
 }
 export async function sound(page: Page, frequency: number, duration = 700) {
   await page.evaluate((f) => {

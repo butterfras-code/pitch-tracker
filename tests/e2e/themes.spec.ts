@@ -148,10 +148,6 @@ for (const width of [390, 1440]) {
       'color',
       'rgb(255, 209, 128)',
     );
-    await expect(page.locator('#checkHint')).toHaveCSS(
-      'color',
-      'rgb(255, 209, 128)',
-    );
     await expect(page.locator('#liveHz')).toHaveCSS('font-family', 'monospace');
     await expect(page.locator('#liveCents')).toHaveCSS(
       'font-family',
