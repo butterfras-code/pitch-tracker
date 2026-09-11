@@ -101,22 +101,20 @@ export function targetRow(
       .replace('♯', '#')
       .replace('♭', 'b');
   const offset = config.offset ?? 0;
-  const scale =
-    Math.max(
-      Math.abs(offset),
-      Math.abs(offset + config.min),
-      Math.abs(offset + config.max),
-    ) > 200
-      ? 1200
-      : 200;
-  return `<tr data-instrument="${esc(name)}" data-clef="auto" data-scale="${scale}"><td><strong>${esc(name)}</strong><div class="note-selectors"><label>Note<select class="note-name" aria-label="${esc(name)} note" data-ui-change="target-note">${notes.map((note) => `<option ${note === base ? 'selected' : ''} value="${note}">${note.replace('#', '♯').replace('b', '♭')}</option>`).join('')}</select></label><label>Octave<select class="note-octave" aria-label="${esc(name)} octave" data-ui-change="target-note"><option value="" ${n.octave === null ? 'selected' : ''}>Any octave</option>${Array.from({ length: 9 }, (_, octave) => `<option ${n.octave === octave ? 'selected' : ''}>${octave}</option>`).join('')}</select></label></div><input type="hidden" class="pitch" value="${esc(config.pitch)}"><input type="hidden" class="min" value="${config.min}"><input type="hidden" class="max" value="${config.max}"><small class="octave-hint">${n.octave === null ? 'Staff and frequency preview use octave 4.' : 'Concert pitch'}</small></td><td class="staff-cell"><button type="button" class="clef-toggle" data-ui-click="target-clef" aria-label="${esc(name)} toggle clef">${staff(config.pitch, offset, 'auto')}</button><button type="button" class="clef-auto" data-ui-click="target-clef-auto">Auto clef</button></td><td class="target-editor"><div class="target-summary">${summary(config, a4)}</div><div class="pitch-sliders"><div class="accepted-band" style="left:${(offset + config.min + scale) / (scale / 50)}%;width:${(config.max - config.min) / (scale / 50)}%"></div>${(['min', 'target', 'max'] as const).map((kind, index) => `<span class="lane-label" style="top:${index * 34}px">${kind === 'target' ? 'Target' : kind === 'min' ? 'Min' : 'Max'}</span><input type="range" class="${kind === 'target' ? 'target-offset' : kind + '-slider'}" aria-label="${esc(name)} ${kind === 'target' ? 'target adjustment' : kind + 'imum pitch'}" aria-valuetext="${signed(kind === 'target' ? offset : config[kind])}" min="${-scale}" max="${scale}" step="1" value="${offset + (kind === 'target' ? 0 : config[kind])}" data-original-value="${offset + (kind === 'target' ? 0 : config[kind])}" data-handle="${kind}" data-ui-input="target-slide">`).join('')}</div><div class="pitch-ticks">${ticks(config.pitch, scale)}</div><div class="range-readouts">${readouts(config)}</div><div class="target-tools"><button type="button" data-ui-click="target-reset">Reset to note</button><label>Scale<select class="pitch-scale" aria-label="${esc(name)} pitch scale" data-ui-change="target-scale"><option value="200" ${scale === 200 ? 'selected' : ''}>Fine · ±200¢</option><option value="1200" ${scale === 1200 ? 'selected' : ''}>Wide · ±1200¢</option></select></label></div></td></tr>`;
+  const extent = Math.max(
+    Math.abs(offset),
+    Math.abs(offset + config.min),
+    Math.abs(offset + config.max),
+  );
+  const scale = extent > 200 ? Math.ceil(extent) : extent > 100 ? 200 : 100;
+  return `<tr data-instrument="${esc(name)}" data-clef="auto" data-scale="${scale}"><td><strong>${esc(name)}</strong><div class="note-selectors"><label>Note<select class="note-name" aria-label="${esc(name)} note" data-ui-change="target-note">${notes.map((note) => `<option ${note === base ? 'selected' : ''} value="${note}">${note.replace('#', '♯').replace('b', '♭')}</option>`).join('')}</select></label><label>Octave<select class="note-octave" aria-label="${esc(name)} octave" data-ui-change="target-note"><option value="" ${n.octave === null ? 'selected' : ''}>Any octave</option>${Array.from({ length: 9 }, (_, octave) => `<option ${n.octave === octave ? 'selected' : ''}>${octave}</option>`).join('')}</select></label></div><input type="hidden" class="pitch" value="${esc(config.pitch)}"><input type="hidden" class="min" value="${config.min}"><input type="hidden" class="max" value="${config.max}"><small class="octave-hint">${n.octave === null ? 'Staff and frequency preview use octave 4.' : 'Concert pitch'}</small></td><td class="staff-cell"><button type="button" class="clef-toggle" data-ui-click="target-clef" aria-label="${esc(name)} toggle clef">${staff(config.pitch, offset, 'auto')}</button><button type="button" class="clef-auto" data-ui-click="target-clef-auto">Auto clef</button></td><td class="target-editor"><div class="target-summary">${summary(config, a4)}</div><div class="pitch-sliders"><div class="accepted-band" style="left:${(offset + config.min + scale) / (scale / 50)}%;width:${(config.max - config.min) / (scale / 50)}%"></div>${(['min', 'target', 'max'] as const).map((kind) => `<input type="range" class="${kind === 'target' ? 'target-offset' : kind + '-slider'}" aria-label="${esc(name)} ${kind === 'target' ? 'target adjustment' : kind + 'imum pitch'}" aria-valuetext="${signed(kind === 'target' ? offset : config[kind])}" min="${-scale}" max="${scale}" step="1" value="${offset + (kind === 'target' ? 0 : config[kind])}" data-original-value="${offset + (kind === 'target' ? 0 : config[kind])}" data-handle="${kind}" data-ui-input="target-slide">`).join('')}</div><div class="pitch-ticks">${ticks(config.pitch, scale)}</div><div class="range-readouts">${readouts(config)}</div><div class="target-tools"><button type="button" data-ui-click="target-reset">Reset to note</button><label>Scale<select class="pitch-scale" aria-label="${esc(name)} pitch scale" data-ui-change="target-scale">${[50, 100, 200, ...(scale > 200 ? [scale] : [])].map((value) => `<option value="${value}" ${scale === value ? 'selected' : ''}>${value === 50 ? 'Fine' : value === 100 ? 'Normal' : value === 200 ? 'Wide' : 'Saved range'} · ±${value}¢</option>`).join('')}</select></label></div></td></tr>`;
 }
 function ticks(pitch: string, scale: number): string {
   const pc = parseNote(pitch).pc;
   return [-scale / 100, -scale / 200, 0, scale / 200, scale / 100]
     .map(
       (delta) =>
-        `<span>${chromatic[(pc + delta + 12) % 12]}<small>${delta === 0 ? 'Selected' : `${delta > 0 ? '+' : ''}${delta * 100}¢`}</small></span>`,
+        `<span>${Number.isInteger(delta) ? chromatic[(((pc + delta) % 12) + 12) % 12] : ''}<small>${delta === 0 ? 'Selected' : `${delta > 0 ? '+' : ''}${delta * 100}¢`}</small></span>`,
     )
     .join('');
 }
@@ -180,15 +178,14 @@ export function editTarget(
   if (action === 'scale') {
     const config = draft(row),
       offset = config.offset ?? 0;
-    const fits =
-      Math.max(
-        Math.abs(offset),
-        Math.abs(offset + config.min),
-        Math.abs(offset + config.max),
-      ) <= 200;
-    row.dataset.scale =
-      input(row, 'pitch-scale').value === '200' && fits ? '200' : '1200';
-    input(row, 'pitch-scale').value = row.dataset.scale;
+    const extent = Math.max(
+      Math.abs(offset),
+      Math.abs(offset + config.min),
+      Math.abs(offset + config.max),
+    );
+    const requested = +input(row, 'pitch-scale').value;
+    if (extent <= requested) row.dataset.scale = String(requested);
+    input(row, 'pitch-scale').value = row.dataset.scale!;
   } else if (action === 'note') {
     input(row, 'pitch').value =
       input(row, 'note-name').value + input(row, 'note-octave').value;

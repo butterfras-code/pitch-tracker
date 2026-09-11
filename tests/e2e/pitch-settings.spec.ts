@@ -174,3 +174,79 @@ test('saving untouched sliders preserves imported fractional settings and tuning
   expect((await saved(page)).configs.Flute.offset).toBe(18.25);
   expect((await saved(page)).settings).toEqual(data.settings);
 });
+
+test('shared track scales and all three handles work without changing saved bounds', async ({
+  page,
+}) => {
+  const row = page.locator('#configTable tr[data-instrument="Flute"]');
+  const scale = row.locator('.pitch-scale');
+  for (const [value, label] of [
+    ['50', 'Fine'],
+    ['100', 'Normal'],
+    ['200', 'Wide'],
+  ]) {
+    await scale.selectOption(value);
+    await expect(scale.locator('option:checked')).toContainText(
+      `${label} · ±${value}¢`,
+    );
+    await expect(row.locator('.target-offset')).toHaveAttribute('max', value);
+    await expect(row.locator('.pitch-ticks')).not.toContainText('undefined');
+  }
+  await scale.selectOption('50');
+  const alignment = await row.evaluate((element) => {
+    const track = element
+      .querySelector('.pitch-sliders')!
+      .getBoundingClientRect();
+    const slider = element
+      .querySelector('.target-offset')!
+      .getBoundingClientRect();
+    const ticks = [...element.querySelectorAll('.pitch-ticks > span')].map(
+      (tick) => tick.getBoundingClientRect().x,
+    );
+    return {
+      start: track.left,
+      end: track.right,
+      sliderStart: slider.left + 12,
+      sliderEnd: slider.right - 12,
+      ticks,
+    };
+  });
+  expect(alignment.sliderStart).toBeCloseTo(alignment.start, 0);
+  expect(alignment.sliderEnd).toBeCloseTo(alignment.end, 0);
+  for (let i = 0; i < 5; i++)
+    expect(alignment.ticks[i]).toBeCloseTo(
+      alignment.start + ((alignment.end - alignment.start) * i) / 4,
+      0,
+    );
+  const handles = row.locator('.pitch-sliders input');
+  const boxes = await handles.evaluateAll((elements) =>
+    elements.map((element) => element.getBoundingClientRect().y),
+  );
+  expect(new Set(boxes).size).toBe(1);
+  for (const kind of ['min-slider', 'target-offset', 'max-slider']) {
+    const handle = row.locator(`.${kind}`);
+    await handle.scrollIntoViewIfNeeded();
+    const box = (await handle.boundingBox())!;
+    const value = Number(await handle.inputValue());
+    const x = box.x + 12 + ((box.width - 24) * (value + 50)) / 100;
+    await page.mouse.move(x, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(x + 8, box.y + box.height / 2, { steps: 4 });
+    await page.mouse.up();
+    expect(Number(await handle.inputValue())).toBeGreaterThan(value);
+  }
+  await row.screenshot({
+    path: `test-results/shared-track-${test.info().project.name}.png`,
+  });
+  await setSlider(
+    row.locator('.min-slider'),
+    await row.locator('.target-offset').inputValue(),
+  );
+  await row.locator('.min-slider').press('ArrowLeft');
+  await expect(row.locator('.range-readouts')).toContainText('Min -1¢');
+  await scale.selectOption('200');
+  await setSlider(row.locator('.max-slider'), '150');
+  await scale.selectOption('50');
+  await expect(scale).toHaveValue('200');
+  await expect(row.locator('.max-slider')).toHaveValue('150');
+});

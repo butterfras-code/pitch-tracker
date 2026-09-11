@@ -196,11 +196,11 @@ export const adminView = {
       <p>
         Choose a note and octave in Classes &amp; settings. Drag Target to move
         the accepted range together, or Min and Max to change its edges. Fine
-        scale shows ±200 cents; use Wide for larger adjustments. Arrow keys
-        adjust one step. Reset to note removes custom tuning. The staff uses
-        treble at middle C (C4) and above, bass below; click it to override or
-        choose Auto clef. Detection sliders show their values as you drag. Save
-        settings applies the changes. Older JSON backups remain supported.
+        scale shows ±50 cents, Normal ±100, and Wide ±200. Arrow keys adjust one
+        step. Reset to note removes custom tuning. The staff uses treble at
+        middle C (C4) and above, bass below; click it to override or choose Auto
+        clef. Detection sliders show their values as you drag. Save settings
+        applies the changes. Older JSON backups remain supported.
       </p>
       <h3>Session views</h3>
       <p>
