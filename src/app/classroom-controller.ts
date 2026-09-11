@@ -15,6 +15,7 @@ export const classroomController = {
       this.roundQueue.ids = this.present().map((p) => p.id);
   },
   resetRound(this: App): void {
+    this.pitchFeedback.clear();
     this.roundQueue = null;
     this.roundComplete = false;
     this.lastClassroomResult = '';
@@ -76,6 +77,7 @@ export const classroomController = {
     }
   },
   startRound(this: App, kind: 'whole' | 'retry'): void {
+    this.pitchFeedback.clear();
     const s = this.ses();
     if (!s) return;
     const next = createRound(s, kind);

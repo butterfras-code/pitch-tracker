@@ -1,0 +1,35 @@
+{
+  "defaults": {
+    "durationMs": 1000,
+    "low": [
+      "Try a little higher.",
+      "Bring the pitch up a little.",
+      "Aim a little higher on the next try."
+    ],
+    "high": [
+      "Try a little lower.",
+      "Bring the pitch down a little.",
+      "Aim a little lower on the next try."
+    ],
+    "correct": ["Right on target!", "Nicely done!", "That's in range!"]
+  },
+  "themes": {
+    "boom-pow": {
+      "low": [
+        "Power up that pitch!",
+        "Next move: a little higher!",
+        "Lift that note into range!"
+      ],
+      "high": [
+        "Bring it down a notch!",
+        "Next move: a little lower!",
+        "Ease that note down into range!"
+      ],
+      "correct": [
+        "POW! Right on target!",
+        "BOOM! That's in range!",
+        "BAM! Nicely done!"
+      ]
+    }
+  }
+}

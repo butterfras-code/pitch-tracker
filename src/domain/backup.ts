@@ -54,7 +54,7 @@ export function validateBackup(value: unknown): TrackerData {
   object(value);
   const d = value;
   requireValid(
-    (d.schema === 1 || d.schema === 2) &&
+    (d.schema === 1 || d.schema === 2 || d.schema === 3) &&
       finite(d.revision, 0, Infinity) &&
       Number.isInteger(d.revision),
   );
@@ -74,6 +74,13 @@ export function validateBackup(value: unknown): TrackerData {
   }
   requireValid(Object.keys(configs).length);
   const st = d.settings;
+  requireValid(
+    d.schema === 3
+      ? st.feedbackDurationMs === null ||
+          (finite(st.feedbackDurationMs, 500, 30000) &&
+            Number.isInteger(st.feedbackDurationMs))
+      : st.feedbackDurationMs === undefined,
+  );
   requireValid(
     finite(st.a4, 400, 480) &&
       finite(st.hold, 0.5, 5) &&
@@ -175,9 +182,20 @@ export function parseBackup(text: string): TrackerData {
 /** Explicit, lossless upgrade when the new target editor is saved. */
 export function migrateToV2(value: TrackerData): TrackerData {
   const data = structuredClone(validateBackup(value));
-  data.schema = 2;
+  if (data.schema === 1) data.schema = 2;
   for (const config of Object.values(data.configs)) config.offset ??= 0;
   for (const session of data.sessions)
     for (const attempt of session.attempts) attempt.target.offset ??= 0;
+  return validateBackup(data);
+}
+
+/** Opt-in upgrade when the user saves a popup-duration preference. */
+export function withFeedbackDuration(
+  value: TrackerData,
+  durationMs: number | null,
+): TrackerData {
+  const data = migrateToV2(value);
+  data.schema = 3;
+  data.settings.feedbackDurationMs = durationMs;
   return validateBackup(data);
 }

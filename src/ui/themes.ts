@@ -17,7 +17,10 @@ function applyTheme(id: string) {
   if (selector) selector.value = theme.id;
   return theme;
 }
-export function initializeThemes(toast: (message: string) => void): () => void {
+export function initializeThemes(
+  toast: (message: string) => void,
+  onThemeChange: () => void = () => {},
+): () => void {
   let savedTheme;
   try {
     savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
@@ -36,6 +39,7 @@ export function initializeThemes(toast: (message: string) => void): () => void {
   themeSelect.addEventListener(
     'change',
     () => {
+      onThemeChange();
       const theme = applyTheme(themeSelect.value);
       try {
         localStorage.setItem(THEME_STORAGE_KEY, theme.id);
@@ -51,6 +55,7 @@ export function initializeThemes(toast: (message: string) => void): () => void {
     'storage',
     (event) => {
       if (event.key === THEME_STORAGE_KEY) {
+        onThemeChange();
         applyTheme(event.newValue || DEFAULT_THEME);
       }
     },

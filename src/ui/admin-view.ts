@@ -1,4 +1,5 @@
 import { targetRow, detectionSlider } from './pitch-settings';
+import { feedbackDurationControl } from './feedback-settings';
 /** Renders roster administration, pitch settings, and offline help. */
 import type { App } from '../app/application';
 import { esc, stamp } from './helpers';
@@ -76,6 +77,10 @@ export const adminView = {
           </table>
         </div>
       </div>
+      <section class="panel" aria-label="Feedback settings">
+        <h2>Feedback popups</h2>
+        ${feedbackDurationControl(this.db.settings.feedbackDurationMs)}
+      </section>
       <form class="panel" data-ui-submit="settings">
         <h2>Pitch targets</h2>
         <p class="muted">

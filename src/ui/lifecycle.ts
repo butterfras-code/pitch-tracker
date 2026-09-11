@@ -16,6 +16,7 @@ export function bindLifecycle(app: App): () => void {
     (e) => {
       if (
         $('modal').open ||
+        app.pitchFeedback.visible ||
         ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(
           document.activeElement?.tagName ?? '',
         ) ||
@@ -55,7 +56,14 @@ export function bindLifecycle(app: App): () => void {
     },
     options,
   );
-  window.addEventListener('pagehide', () => app.stopMic(), options);
+  window.addEventListener(
+    'pagehide',
+    () => {
+      app.pitchFeedback.clear();
+      app.stopMic();
+    },
+    options,
+  );
   window.addEventListener(
     'storage',
     (e) => {
@@ -73,6 +81,7 @@ export function bindLifecycle(app: App): () => void {
     controller.abort();
     clearInterval(elapsedTimer);
     clearTimeout(app.toastTimer);
+    app.pitchFeedback.clear();
     app.stopMic();
   };
 }

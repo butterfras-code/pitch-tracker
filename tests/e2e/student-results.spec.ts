@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { classroomPage, saved } from '../fixtures/classroom-page';
+import {
+  classroomPage,
+  saved,
+  dismissFeedback,
+} from '../fixtures/classroom-page';
 
 test('fullscreen split cards show latest session results across rounds and reloads', async ({
   page,
@@ -15,6 +19,7 @@ test('fullscreen split cards show latest session results across rounds and reloa
       .getByRole('button', { name: result, exact: true })
       .click();
     await expect(card.locator('.student-result, .badge')).toHaveText(result);
+    await dismissFeedback(page);
   }
   await page
     .getByRole('button', { name: 'Undo last change', exact: true })
@@ -62,6 +67,7 @@ for (const width of [390, 1920]) {
           .click();
       for (const status of ['low', 'correct', 'high']) {
         await page.locator(`.tuner-section button.${status}`).click();
+        await dismissFeedback(page);
         await page.locator('#roundLabel').hover();
         const skin = (el: Element) => {
           const css = getComputedStyle(el);

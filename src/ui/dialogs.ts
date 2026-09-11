@@ -4,6 +4,7 @@ import { $, esc, options, rate } from './helpers';
 
 export const dialogs = {
   showDialog(this: App, html: string): void {
+    this.pitchFeedback.clear();
     $('modalBody').innerHTML = html;
     $('modal').showModal();
   },

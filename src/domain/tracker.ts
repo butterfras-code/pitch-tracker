@@ -39,7 +39,7 @@ export interface Session {
   note: string;
 }
 export interface TrackerData {
-  schema: 1 | 2;
+  schema: 1 | 2 | 3;
   classes: TrackerClass[];
   configs: Record<string, PitchTarget>;
   settings: {
@@ -48,6 +48,8 @@ export interface TrackerData {
     stability: number;
     gate: number;
     advance: boolean;
+    /** Schema 3: null uses the shared popup duration default. */
+    feedbackDurationMs?: number | null;
   };
   sessions: Session[];
   classId: string;

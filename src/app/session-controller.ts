@@ -1,11 +1,23 @@
 /** Coordinates session rules with saving, audio cancellation, and the UI. */
-import { $, statusName } from '../ui/helpers';
+import { $ } from '../ui/helpers';
 import type { App } from './application';
 import type { PitchMeasurement, PitchStatus } from '../domain/pitch';
 import { shouldAdvance } from '../domain/classroom';
 import * as changes from '../domain/session-changes';
+import { withFeedbackDuration } from '../domain/backup';
 export const sessionController = {
+  setFeedbackDuration(this: App, value: string): void {
+    const duration = value.trim() === '' ? null : Number(value) * 1000;
+    if (
+      duration !== null &&
+      (!Number.isInteger(duration) || duration < 500 || duration > 30000)
+    )
+      return;
+    this.db = withFeedbackDuration(this.db, duration);
+    this.save();
+  },
   switchTab(this: App, tab: string): void {
+    this.pitchFeedback.clear();
     this.cancelCheck();
     this.tab = tab;
     this.render();
@@ -62,6 +74,7 @@ export const sessionController = {
   },
   undo(this: App): void {
     if (!changes.undo(this)) return;
+    this.pitchFeedback.clear();
     this.cancelCheck();
     this.save();
     this.render();
@@ -119,6 +132,10 @@ export const sessionController = {
     if (shouldAdvance(this.db.settings.advance, this.classroomMode, status))
       this.classroomNavigate(1, false);
     else this.render();
-    this.toast(attempt.name + ' · ' + statusName(status));
+    this.pitchFeedback.show(
+      attempt.name,
+      status,
+      this.db.settings.feedbackDurationMs,
+    );
   },
 };

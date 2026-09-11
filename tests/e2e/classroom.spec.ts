@@ -5,9 +5,11 @@ import {
   settings,
   sound,
   claps,
+  dismissFeedback,
 } from '../fixtures/classroom-page';
 test.beforeEach(async ({ page }) => {
   await classroomPage(page);
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await settings(page);
 });
 test('automatic retries require quiet and complete the round without repeated scores', async ({
@@ -24,15 +26,19 @@ test('automatic retries require quiet and complete the round without repeated sc
   expect(data.sessions[0].attempts[0].status).toBe('low');
   await sound(page, 392, 2500);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await dismissFeedback(page);
   await sound(page, 0);
   await sound(page, 440);
   expect((await saved(page)).activeStudent).toBe('student-2');
   await sound(page, 440, 2500);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
+  await dismissFeedback(page);
   await sound(page, 0);
   await sound(page, 440);
+  await dismissFeedback(page);
   await sound(page, 0);
   await sound(page, 440);
+  await dismissFeedback(page);
   await expect(page.getByText('Round complete', { exact: true })).toBeVisible();
   data = await saved(page);
   expect(data.sessions[0].attempts).toHaveLength(4);
@@ -48,6 +54,7 @@ test('one and done advances any result; switching auto advance off stays put', a
   await sound(page, 0);
   await sound(page, 392);
   expect((await saved(page)).activeStudent).toBe('student-2');
+  await dismissFeedback(page);
   await page.getByLabel('Auto Advance', { exact: true }).uncheck();
   await sound(page, 0);
   await sound(page, 440);
@@ -63,6 +70,7 @@ test('double/triple clap navigation preserves attempts and obeys pause and disab
     .click();
   await sound(page, 0);
   await sound(page, 392);
+  await dismissFeedback(page);
   await claps(page, 2);
   expect((await saved(page)).activeStudent).toBe('student-2');
   await claps(page, 3);
@@ -92,6 +100,7 @@ test('claps can return from round completion without deleting results', async ({
   for (let i = 0; i < 3; i++) {
     await sound(page, 0);
     await sound(page, 440);
+    await dismissFeedback(page);
   }
   await expect(page.getByText('Round complete', { exact: true })).toBeVisible();
   await claps(page, 3);
@@ -105,6 +114,7 @@ test('manual scores follow advance policy', async ({ page }) => {
     .getByRole('button', { name: 'Too low', exact: true })
     .click();
   expect((await saved(page)).activeStudent).toBe('student-1');
+  await dismissFeedback(page);
   await page.getByLabel('Advance mode').selectOption('one-and-done');
   await page
     .locator('.current-display')

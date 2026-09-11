@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { classroomPage, saved, sound } from '../fixtures/classroom-page';
+import {
+  classroomPage,
+  saved,
+  sound,
+  dismissFeedback,
+} from '../fixtures/classroom-page';
 
 for (const [width, height] of [
   [1366, 768],
@@ -52,6 +57,7 @@ for (const [width, height] of [
               .locator('.current-display')
               .getByRole('button', { name: 'In range', exact: true })
               .click();
+            await dismissFeedback(page);
           }
           if (state === 'listening') {
             await page

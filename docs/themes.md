@@ -1,5 +1,23 @@
 # Adding a theme
 
+## Recorded-attempt popups
+
+Edit `src/themes/feedback.json` to customize the popups shown after recorded attempts. The file is imported at build time and embedded in the standalone HTML. `defaults` contains `durationMs` and the three phrase arrays, `low`, `high` and `correct`. `themes` is keyed by the ID in each `.theme.ts` file. Generic feedback and Boom Pow are the initial variants; all other themes inherit generic phrases and their own palette.
+
+For example, a partial entry under `themes` can be:
+
+```json
+"pitch-press": {
+  "correct": ["Print approved!", "Front-page performance!"]
+}
+```
+
+Missing/empty rating arrays inherit that rating's defaults. Nonempty arrays replace the generic pool. `defaults.durationMs` is the single shared duration, set to 1000 (1 second). Timing overrides in theme entries are rejected. Users choose a different duration in Settings (0.5–30 seconds). Phrases must be unique, trimmed, nonempty plain text of at most 100 characters. Unknown theme IDs/keys and malformed content fail verification. Phrases cycle in shuffled order without immediate repeats when multiple choices exist. No template placeholders, HTML or runtime file loading are used; the student's name and factual rating are added by the app.
+
+Appearance uses existing `low`/`low-bg`, `high`/`high-bg`, `correct`/`correct-bg`, `toast-radius`, `control-radius`, `backdrop`, `focus-ring` and button tokens. Optional `feedback-font`, `feedback-weight`, `feedback-transform`, `feedback-shadow`, `feedback-border` and `feedback-animation` tokens override shared defaults. `--feedback-ink` and `--feedback-bg` are local CSS aliases for the active rating. The `comic` treatment adds a bundled decorative burst using `soft`; other treatments use the generic popup. Theme changes close any open popup and reset all appearance tokens. Entrance keyframes are `feedback-arrive` and `feedback-pop`; reduced motion disables both.
+
+The popup is modal and closes automatically or with Continue/Escape. Pitch detection and session shortcuts pause while it is open. The last result remains in the session after dismissal. Wording is theme-defined; timing uses one shared default. Users can override timing in session Settings or Classes & settings; their preference is saved and included in JSON backups. Leaving the duration field blank restores the shared 1-second default. After editing, run `npm run verify` and use the rebuilt `dist/index.html`.
+
 Current status: all appearance tokens, including the 12 new tokens, have shared CSS consumers. The print treatment is implemented for Pitch Press; the toy treatment is implemented for Big Button Sound Club; the six other non-mech treatment names still await decorative CSS. See [Pitch Press design](pitch-press-design.md) for its scoped visual system. See the handoff section below before building reference-inspired themes. Use this guide together with `src/themes/contract.ts`, the authoritative key/default/type definition.
 
 1. Copy `src/themes/theme.template.ts` to `src/themes/my-theme.theme.ts`.

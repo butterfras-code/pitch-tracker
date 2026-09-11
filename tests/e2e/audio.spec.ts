@@ -5,6 +5,7 @@ import {
   saved,
   settings,
   sound,
+  dismissFeedback,
 } from '../fixtures/classroom-page';
 
 test.beforeEach(async ({ page }) => {
@@ -162,6 +163,7 @@ test('saves a correct A over background noise and a brief impact; retries withou
   page,
 }) => {
   await twoSecondHold(page);
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.evaluate(() => {
     window.syntheticAudio.noiseAmplitude = 0.12;
   });
@@ -187,6 +189,7 @@ test('saves a correct A over background noise and a brief impact; retries withou
   expect(Math.abs(attempts[0].cents!)).toBeLessThan(10);
   await sound(page, 440, 2500);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await dismissFeedback(page);
   await page.evaluate(() => {
     window.syntheticAudio.humAmplitude = 0;
   });
@@ -201,6 +204,7 @@ test('noise and alternating wrong pitches cannot create a saved result', async (
   page,
 }) => {
   await twoSecondHold(page);
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.evaluate(() => {
     window.syntheticAudio.noiseAmplitude = 0.25;
   });

@@ -46,7 +46,7 @@ export const DEFAULT_TOKENS = {
   'feedback-weight': '700',
   'feedback-transform': 'none',
   'feedback-shadow': 'none',
-  'feedback-border': 'var(--feedback-ink)',
+  'feedback-border': 'currentColor',
   'feedback-animation': 'feedback-arrive 180ms ease-out',
   'heading-style': 'normal',
   'heading-transform': 'none',

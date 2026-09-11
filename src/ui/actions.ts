@@ -80,6 +80,10 @@ export function createBindings(app: App): UiBindings {
       'switch-tab': ({ data }) => app.switchTab(data.tab!),
     },
     change: {
+      'feedback-duration': ({ value, element }) => {
+        if (element instanceof HTMLInputElement && element.reportValidity())
+          app.setFeedbackDuration(value);
+      },
       'target-scale': ({ element }) => editTarget(element, 'scale'),
       'target-note': ({ element }) => editTarget(element, 'note'),
       'teacher-details': ({ checked }) => app.workspace?.toggleTeacher(checked),

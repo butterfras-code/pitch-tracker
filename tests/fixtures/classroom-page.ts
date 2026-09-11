@@ -36,11 +36,18 @@ export function saved(page: Page): Promise<TrackerData> {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), key);
 }
 export async function settings(page: Page) {
+  await dismissFeedback(page);
   const b = page.getByRole('button', {
     name: 'Session behavior settings',
     exact: true,
   });
   if ((await b.getAttribute('aria-expanded')) !== 'true') await b.click();
+}
+/** Continue after a recorded-attempt popup, if it has not already expired. */
+export async function dismissFeedback(page: Page): Promise<void> {
+  const popup = page.locator('#pitchFeedback');
+  if (await popup.isVisible())
+    await popup.getByRole('button', { name: 'Continue', exact: true }).click();
 }
 export async function sound(page: Page, frequency: number, duration = 700) {
   await page.evaluate((f) => {

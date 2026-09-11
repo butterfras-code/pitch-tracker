@@ -47,6 +47,7 @@ export interface App extends AppState {
   archiveStudent(id: string): void;
   addInstrument(): void;
   saveSettings(): void;
+  setFeedbackDuration(value: string): void;
   cls(): TrackerClass;
   ses(): Session | undefined;
   pupil(): Student | undefined;

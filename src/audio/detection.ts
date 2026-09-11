@@ -16,6 +16,7 @@ export const detection = {
       this.tab !== 'session' ||
       document.hidden ||
       $('modal').open ||
+      this.pitchFeedback.visible ||
       this.classroomPaused ||
       !pupil ||
       this.ses()?.absent.includes(pupil.id)

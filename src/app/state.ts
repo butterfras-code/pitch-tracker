@@ -2,6 +2,7 @@ import { ClassroomListener, type AdvanceMode } from '../domain/classroom';
 import type { Round } from '../domain/round';
 import { PitchDisplay, PitchHold } from '../domain/pitch-hold';
 import type { SessionView } from '../ui/classroom-view';
+import { PitchFeedback } from '../ui/pitch-feedback';
 /** Owns application-instance state; session rules use its browser-independent subset. */
 import type { SessionState } from '../domain/session-changes';
 import type { TrackerData } from '../domain/tracker';
@@ -29,6 +30,7 @@ export interface AppState extends SessionState {
   focusMode: boolean;
   historyStudent: string;
   toastTimer: ReturnType<typeof setTimeout> | undefined;
+  pitchFeedback: PitchFeedback;
   disposed: boolean;
   checkGeneration: number;
   referenceStops: Set<() => void>;
@@ -75,6 +77,7 @@ export function createState(
     focusMode: false,
     historyStudent: 'all',
     toastTimer: undefined,
+    pitchFeedback: new PitchFeedback(),
     undoStack: [],
     disposed: false,
     checkGeneration: 0,

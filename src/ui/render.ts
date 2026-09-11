@@ -14,6 +14,7 @@ export const render = {
       this.renderClassroom();
       return;
     }
+    this.pitchFeedback.clear();
     $('main').classList.toggle(
       'focus-mode',
       this.focusMode && this.tab === 'session',

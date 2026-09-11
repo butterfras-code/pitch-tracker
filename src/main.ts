@@ -5,6 +5,7 @@ import './themes/vintage-audio.css';
 import './themes/boom-pow.css';
 import './session-layout.css';
 import './header-layout.css';
+import './feedback.css';
 import { createApplication, initializeApplication } from './app/application';
 import { browserStorage } from './persistence/browser-storage';
 import { createTrackerStore } from './persistence/tracker-store';
@@ -14,7 +15,10 @@ import { bindLifecycle } from './ui/lifecycle';
 import { initializeThemes } from './ui/themes';
 
 const app = createApplication(createTrackerStore(browserStorage));
-const disposeThemes = initializeThemes((message) => app.toast(message));
+const disposeThemes = initializeThemes(
+  (message) => app.toast(message),
+  () => app.pitchFeedback.clear(),
+);
 initializeApplication(app);
 const disposeEvents = bindUiEvents(document, createBindings(app));
 const disposeLifecycle = bindLifecycle(app);

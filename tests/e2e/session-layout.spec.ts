@@ -4,6 +4,7 @@ import {
   saved,
   settings,
   sound,
+  dismissFeedback,
 } from '../fixtures/classroom-page';
 
 test('views preserve holds; dashboard follows without moving page or keyboard focus', async ({
@@ -186,6 +187,7 @@ test('card updates retain focused controls and manual roster scrolling', async (
     .elementHandle();
   await sound(page, 0);
   await sound(page, 440);
+  await dismissFeedback(page);
   expect(
     await control!.evaluate(
       (el) => el.isConnected && document.activeElement === el,

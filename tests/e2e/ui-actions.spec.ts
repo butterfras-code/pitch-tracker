@@ -2,6 +2,7 @@ import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
+import { dismissFeedback } from '../fixtures/classroom-page';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(pathToFileURL(resolve('dist/index.html')).href);
@@ -103,6 +104,7 @@ test('dynamic session controls, notes and history editing work after rerenders',
     .getByRole('button', { name: 'In range' })
     .click();
   await expect(page.locator('.student')).toContainText('1 tries');
+  await dismissFeedback(page);
   await page.getByLabel('Search students').fill('');
   await page.getByLabel('Filter roster').selectOption('not tested');
   await expect(page.locator('.student')).toHaveCount(9);
@@ -129,6 +131,7 @@ test('dynamic session controls, notes and history editing work after rerenders',
   const selected = await focus.getByRole('heading', { level: 2 }).textContent();
   // Scoring from the current student display must dispatch exactly one score.
   await focus.locator('.current-display button.high').click();
+  await dismissFeedback(page);
   await expect(focus.getByRole('heading', { level: 2 })).not.toHaveText(
     selected!,
   );
@@ -185,6 +188,7 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
   await page.locator('.focus h2').click();
   await page.keyboard.press('2');
   await expect(page.locator('.student').first()).toContainText('1 tries');
+  await dismissFeedback(page);
   await page.keyboard.press('Control+z');
   await expect(page.locator('.student').first()).toContainText('0 tries');
   await page.locator('.current-display button.correct').click();

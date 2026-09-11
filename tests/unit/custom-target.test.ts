@@ -67,6 +67,6 @@ describe('custom target tuning and versioned data', () => {
     const data = trackerFixture();
     data.configs.Flute.offset = 18;
     expect(() => validateBackup(data)).toThrow();
-    expect(() => validateBackup({ ...data, schema: 3 })).toThrow();
+    expect(() => validateBackup({ ...data, schema: 4 })).toThrow();
   });
 });
