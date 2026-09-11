@@ -135,10 +135,10 @@ export const adminView = {
       <h3>Choose your theme</h3>
       <p>
         Use the Theme selector at the top of any screen. Cel-Shaded Mech is the
-        default; Classic Studio restores the original appearance. Your choice
-        saves in this browser separately from class data and is not included in
-        JSON backups. Switching themes keeps your current session and unsaved
-        form entries.
+        default; Pitch Press uses a printed-paper appearance. Your choice saves
+        in this browser separately from class data and is not included in JSON
+        backups. Switching themes keeps your current session and unsaved form
+        entries.
       </p>
       <h3>What gets saved</h3>
       <p>

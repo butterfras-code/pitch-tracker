@@ -108,7 +108,9 @@ test('graphical detection values and tuned playback feed actual measurement', as
   });
   await page.getByRole('button', { name: 'Session', exact: true }).click();
   await settings(page);
-  await page.getByRole('button', { name: 'Hear target', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Hear current target', exact: true })
+    .click();
   const hz = 442 * 2 ** (18 / 1200);
   expect(
     await page.evaluate(() => window.syntheticAudio.oscillatorFrequency),

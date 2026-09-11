@@ -10,3 +10,5 @@
 - Test meaningful behavior and failure cases. Do not add placeholder domain tests or treat the tooling smoke test as functional app coverage.
 - Keep dependencies intentional and lockfile committed. Document architectural decisions in docs/architecture.md.
 - Pitch-Tracker.html is the unchanged upstream baseline. Develop in index.html and src/. The app is strictly typed and bootstrapped from src/main.ts. Keep callbacks bound to the current application instance and extend browser coverage when changing controller or audio behavior. Do not change the v1 saved-data format incidentally.
+- Themeability is an important feature, Never use hardcoded CSS or UI package defaults
+- Full Screen Split View is the First Class experience when making UI changes

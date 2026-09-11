@@ -1,33 +1,16 @@
 # Pitch Tracker themes
 
-Run `npm run build`, then open `dist/index.html` directly in your browser. Select a theme in the header. Cel-Shaded Mech is the default; Classic Studio is also included. Everything works offline without external fonts or libraries. `Pitch-Tracker.html` is the preserved upstream baseline.
+The canonical themes are **Cel-Shaded Mech** (default) and **Pitch Press**, with **Big Button Sound Club** as a toy-inspired variant. Build with `npm run build`, then open `dist/index.html` directly. All work offline with all fonts and artwork bundled into the HTML.
 
-## Add a theme
+All themes use the same session components and layout: a collapsible left sidebar, student identity, concert target and playback, live tuner, feedback, a scoring/navigation footer, and an internally scrolling grid of student cards. Student, Split, and Class modes are controlled by the session, not by the theme. Theme switching changes appearance without rebuilding the UI or interrupting a pitch check.
 
-Inside `src/ui/themes.ts`, find `THEME_REGISTRY`. Add an entry, then rebuild:
+`src/session-layout.css` owns session structure, component visibility, sizing, and responsive behavior. Theme definitions in `src/themes/` supply palette and typography tokens; treatment CSS supplies visual decoration. Theme styles must not add a different session flow or document scrolling. Classic and Nocturne have been removed.
 
-```js
-{
-  id: 'ocean',
-  name: 'Ocean Studio',
-  tokens: {
-    bg: '#eef7fb',
-    accent: '#075985',
-    soft: '#dbeef8',
-    'primary-hover': '#0c4a6e'
-  }
-},
-```
+## Theme development
 
-The selector lists entries automatically. Omitted tokens inherit the Classic values in the two `:root` CSS blocks in `src/styles.css`. Use the Mech entry as a complete dark-theme example. Include `treatment: 'mech'` to reuse its angular controls, panel outlines, and heading treatment; omit it for the standard structure. For new structural styling, choose a new treatment name and scope CSS to `:root[data-treatment="your-treatment"]`.
+Copy `src/themes/theme.template.ts` to a new `*.theme.ts` file only when adding an intentional new theme. The build discovers definitions automatically. `src/themes/contract.ts` validates their appearance tokens and supplies defaults. Use Cel Mech and Pitch Press as the canonical examples; see [the theme contract](docs/themes.md) for details.
 
-Tokens cover page/card/control surfaces, text, borders, primary controls, scoring states, focus rings, notices, typography, radii, shadows, and background patterns. Keep status text readable on its corresponding background and test keyboard focus, forms, dialogs, history, mobile widths, and print output.
-
-Change `DEFAULT_THEME` to a registered ID to change the initial theme. A previously saved choice takes precedence. Removed or unrecognized theme IDs fall back to the default.
-
-Preferences use `mouthpiece.pitchtracker.theme.v1` in localStorage, separately from tracker records. JSON backups do not include the theme. If storage is unavailable, switching still works for the current visit. Theme changes do not rebuild the interface or interrupt a pitch check.
-
-Before replacing or moving your existing tracker, download a data backup from the old file; browser storage may differ by file location. Restore that backup in the updated tracker if needed.
+Theme preferences use `mouthpiece.pitchtracker.theme.v1`, separately from tracker records. Backups contain tracker data, not appearance preferences. The v1 tracker format is unchanged.
 
 ## Big Button Sound Club
 

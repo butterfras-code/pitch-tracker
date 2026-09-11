@@ -103,7 +103,9 @@ test('reference playback cancels holds and disconnection cleans up', async ({
     .click();
   await sound(page, 0);
   await sound(page, 440, 250);
-  await page.getByRole('button', { name: 'Hear target', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Hear current target', exact: true })
+    .click();
   await expect
     .poll(() => page.evaluate(() => window.syntheticAudio.oscillatorFrequency))
     .toBe(440);

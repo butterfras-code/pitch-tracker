@@ -17,7 +17,7 @@ Distribute the single built `dist/index.html`, which opens by double-click under
 - Reproduced and fixed a cancellation race: Escape during a pending microphone permission request could arm a check later. Separate check generations now invalidate that pending check.
 - Added explicit listener/timer cleanup and development hot-replacement cleanup. Stopping audio also cleans up active reference tones.
 
-See [architecture.md](architecture.md) for the module map, dependency direction, state ownership, and extension guidance. Theme entries now live in `src/ui/themes.ts`.
+See [architecture.md](architecture.md) for the module map, dependency direction, state ownership, and extension guidance. Theme definitions now live in `src/themes/*.theme.ts`; see [themes.md](themes.md) for the copy-file/build workflow.
 
 ## Verification
 

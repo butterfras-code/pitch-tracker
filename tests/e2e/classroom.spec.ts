@@ -136,7 +136,9 @@ test('noise, navigation, dialogs and reference playback cannot carry a hold', as
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await sound(page, 440, 1200);
   await sound(page, 0);
-  await page.getByRole('button', { name: 'Hear target', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Hear current target', exact: true })
+    .click();
   await sound(page, 440, 3500);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
 });

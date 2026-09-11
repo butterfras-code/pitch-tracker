@@ -1,0 +1,153 @@
+@font-face {
+  font-family: 'Pitch Press';
+  src: url('../assets/anton.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+}
+.press-brand {
+  display: none;
+}
+:root[data-treatment='print'] {
+  --press-red: #e63212;
+  --press-yellow: #ffe500;
+  --press-grain: url('../assets/press-grain.png');
+  scrollbar-color: var(--ink) var(--bg);
+}
+:root[data-treatment='print'] body {
+  background-image: var(--press-grain);
+}
+:root[data-treatment='print'] ::selection {
+  background: var(--press-yellow);
+  color: var(--ink);
+}
+:root[data-treatment='print'] header h1 {
+  font-weight: 400;
+}
+:root[data-treatment='print'] .standard-brand {
+  display: none;
+}
+:root[data-treatment='print'] .press-brand {
+  display: inline;
+  white-space: nowrap;
+}
+:root[data-treatment='print'] .press-brand > span {
+  color: var(--press-red);
+}
+:root[data-treatment='print'] :is(button, .student-result) {
+  border: 2px solid var(--ink);
+  background-image: var(--press-grain);
+}
+:root[data-treatment='print'] button:active:not(:disabled) {
+  translate: 2px 2px;
+}
+:root[data-treatment='print'] .tabs button {
+  border: 0;
+  box-shadow: none;
+  font:
+    400 1rem 'Pitch Press',
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+:root[data-treatment='print'] .tabs button.on {
+  color: var(--ink);
+  box-shadow: inset 0 -5px var(--press-red);
+}
+:root[data-treatment='print']
+  :is(.panel, .student, dialog, .behavior-settings) {
+  border-width: 2px;
+  background-image: var(--press-grain);
+}
+:root[data-treatment='print'] :is(h2, h3) {
+  font-weight: 400;
+  letter-spacing: 0.015em;
+}
+:root[data-treatment='print'] .student .name {
+  border: 0;
+  box-shadow: none;
+}
+:root[data-treatment='print'] .student.selected {
+  border-color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  background-color: var(--press-yellow);
+}
+:root[data-treatment='print'] .badge {
+  border: 1px solid var(--ink);
+}
+/* Session composition, sizes and feedback content belong to session-layout.css. */
+:root[data-treatment='print'] .current-display {
+  background: transparent;
+  box-shadow: none;
+}
+:root[data-treatment='print'] #studentIdentity {
+  border-bottom-color: var(--ink);
+}
+:root[data-treatment='print']
+  :is(
+    .target-caption,
+    .target-frequency,
+    .target-playback,
+    .meter-labels,
+    #classroomStatus,
+    .student-actions button
+  ) {
+  font-family: 'Pitch Press', sans-serif;
+  text-transform: uppercase;
+}
+:root[data-treatment='print'] .current-display .tuner {
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--ink);
+}
+:root[data-treatment='print'] .meter {
+  border-radius: 0;
+  background:
+    linear-gradient(var(--ink), var(--ink)) center / 3px 100% no-repeat,
+    repeating-linear-gradient(
+        to right,
+        var(--press-red) 0 3px,
+        transparent 3px 10%
+      )
+      left center / 34% 100% no-repeat,
+    repeating-linear-gradient(to right, var(--ink) 0 3px, transparent 3px 10%)
+      center / 32% 100% no-repeat,
+    repeating-linear-gradient(
+        to right,
+        var(--accent) 0 3px,
+        transparent 3px 10%
+      )
+      right center / 34% 100% no-repeat;
+}
+:root[data-treatment='print'] .needle {
+  background: var(--ink);
+}
+:root[data-treatment='print'] .progress {
+  border-radius: 0;
+}
+:root[data-treatment='print']
+  .session-shell[data-result='correct']
+  .classroom-feedback {
+  background-color: var(--press-yellow);
+}
+@media print {
+  .student-actions,
+  .target-playback {
+    display: none;
+  }
+}
+
+@font-face {
+  font-family: 'Press Slab';
+  src: url('../assets/alfa-slab-one.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+:root[data-treatment='print'] .target-pitch {
+  font-family: 'Press Slab', Georgia, serif;
+}
+:root[data-treatment='print'] .press-brand {
+  mask-image: url('../assets/press-ink.png');
+  mask-repeat: repeat;
+}

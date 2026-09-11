@@ -23,7 +23,7 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
   await page.getByRole('button', { name: 'Undo last change' }).click();
   await expect(page.locator('.student').first()).toContainText('0 tries');
   await focus.getByRole('button', { name: 'Too low' }).click();
-  await page.locator('.student').nth(1).getByLabel('Absent').check();
+  await page.locator('.student').nth(1).getByLabel('Absent').click();
   await page.reload();
   if (
     await page
@@ -41,16 +41,19 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
   await expect(page.locator('.student').first()).toContainText('1 tries');
   await expect(
     page.locator('.student').nth(1).getByLabel('Absent'),
-  ).toBeChecked();
+  ).toHaveAttribute('aria-pressed', 'true');
   await expect(
     page.locator('.student').nth(1).getByRole('button', { name: 'In range' }),
   ).toBeDisabled();
 });
 
 test('theme switches persist after reload', async ({ page }) => {
-  await page.getByLabel('Theme').selectOption('classic');
+  await page.getByLabel('Theme').selectOption('pitch-press');
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'classic');
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-theme',
+    'pitch-press',
+  );
 });
 
 test('backup round trip restores data and malformed imports preserve it', async ({

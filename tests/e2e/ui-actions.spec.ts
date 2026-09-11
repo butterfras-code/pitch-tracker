@@ -233,7 +233,7 @@ test('only registered actions execute, and disabled controls stay inactive', asy
   page,
 }) => {
   await startSession(page);
-  await page.locator('.student').first().getByLabel('Absent').check();
+  await page.locator('.student').first().getByLabel('Absent').click();
   const attemptsBefore = await page.evaluate(
     () =>
       JSON.parse(localStorage.getItem('mouthpiece.pitchtracker.v1')!)
