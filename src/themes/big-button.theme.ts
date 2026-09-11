@@ -6,6 +6,7 @@ export default {
   name: 'Big Button Sound Club',
   treatment: 'toy',
   tokens: {
+    'range-animation': 'range-wiggle 700ms ease-in-out infinite',
     scheme: 'light',
     bg: '#E9DDBE',
     card: '#F6EBCD',

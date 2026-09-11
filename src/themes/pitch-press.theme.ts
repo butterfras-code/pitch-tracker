@@ -1,0 +1,83 @@
+import type { ThemeDefinition } from './contract';
+
+/** Pitch Press: letterpress paper, condensed ink, vermilion, yellow and cobalt.
+ * Shared print decoration and bundled assets live in src/themes/pitch-press.css.
+ */
+export default {
+  id: 'pitch-press',
+  name: 'Pitch Press',
+  treatment: 'print',
+  tokens: {
+    'range-animation': 'range-sparkle 1.2s ease-in-out infinite',
+    scheme: 'light',
+    bg: '#FFF4D6',
+    card: '#FFF4D6',
+    control: '#FFF4D6',
+    ink: '#151515',
+    muted: '#595348',
+    line: '#151515',
+    edge: '#151515',
+    accent: '#0645FF',
+    'primary-ink': '#FFF4D6',
+    'primary-hover': '#1733B5',
+    soft: '#E7ECFF',
+    highlight: '#0645FF',
+
+    // Follow the reference dial: vermilion low, yellow matched, cobalt high.
+    low: '#C42B13',
+    'low-bg': '#FFE6DD',
+    correct: '#151515',
+    'correct-bg': '#FFE600',
+    high: '#0645FF',
+    'high-bg': '#E7ECFF',
+    danger: '#A52716',
+    'notice-bg': '#FFE600',
+    'notice-ink': '#151515',
+    'badge-bg': '#FFE600',
+    'help-bg': '#F2E8D0',
+    track: '#D8CFBA',
+    'focus-ring': '#A52716',
+    backdrop: '#151515B3',
+    'slider-track': '#D8CFBA',
+    'slider-band': '#FFE600',
+    'slider-handle': '#0645FF',
+    'slider-target': '#A52716',
+
+    radius: '0px',
+    'control-radius': '0px',
+    'display-radius': '0px',
+    'badge-radius': '0px',
+    'help-radius': '0px',
+    'toast-radius': '0px',
+    'panel-shadow': '4px 4px 0 #151515',
+    'surface-shadow': '3px 3px 0 #151515',
+    'button-shadow': '3px 3px 0 #151515',
+    'surface-border-style': 'solid',
+
+    // Keep data surfaces clean; borders and offset shadows supply texture.
+    'page-pattern': 'none',
+    'surface-pattern': 'none',
+    'control-pattern': 'none',
+    'heading-font': '"Pitch Press", Impact, sans-serif',
+    'body-font': 'Arial, Helvetica, system-ui, sans-serif',
+    'heading-style': 'normal',
+    'heading-transform': 'uppercase',
+    'heading-shadow': 'none',
+    'note-shadow': 'none',
+    'button-weight': '800',
+
+    // Appearance extensions consumed by the shared CSS.
+    'card-ink': '#151515',
+    'control-ink': '#151515',
+    'display-bg': '#FFF4D6',
+    'display-ink': '#151515',
+    'data-font': '"Pitch Press", Impact, sans-serif',
+    'label-font': '"Pitch Press", Impact, sans-serif',
+    'heading-weight': '900',
+    'label-weight': '800',
+    'label-tracking': '0.04em',
+    'label-transform': 'uppercase',
+    'display-shadow': 'none',
+    'button-pressed-shadow': '1px 1px 0 #151515',
+  },
+} satisfies ThemeDefinition;

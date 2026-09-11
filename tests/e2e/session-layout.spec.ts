@@ -1,4 +1,4 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
   classroomPage,
   saved,
@@ -75,9 +75,9 @@ test('teacher details are opt-in; retry rounds, random and undo preserve results
     .click();
   await page.getByRole('button', { name: 'Random', exact: true }).click();
   expect((await saved(page)).activeStudent).toBe('student-1');
-  await expect(page.locator('.student').nth(1)).toContainText(
-    'Not in this round',
-  );
+  await expect(
+    page.locator('.student').nth(1).locator('.student-result, .badge'),
+  ).toHaveText('In range');
   await page
     .locator('.current-display')
     .getByRole('button', { name: 'In range', exact: true })
@@ -114,9 +114,9 @@ test('restoring the same session clears temporary retry membership and completio
       exact: true,
     })
     .click();
-  await expect(page.locator('.student').nth(1)).toContainText(
-    'Not in this round',
-  );
+  await expect(
+    page.locator('.student').nth(1).locator('.student-result, .badge'),
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Next student', exact: true }).click();
   await expect(page.getByText('Round complete', { exact: true })).toBeVisible();
   page.once('dialog', (dialog) => dialog.accept());
@@ -127,7 +127,9 @@ test('restoring the same session clears temporary retry membership and completio
   });
   await expect(page.locator('#toast')).toHaveText('Backup restored.');
   await expect(page.getByText('Round complete', { exact: true })).toBeHidden();
-  await expect(page.locator('.student').nth(1)).toContainText('Not yet tried');
+  await expect(
+    page.locator('.student').nth(1).locator('.student-result, .badge'),
+  ).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'Undo last change', exact: true }),
   ).toBeDisabled();
@@ -283,7 +285,9 @@ test('card navigation and skipped turns can be undone without deleting results',
   await page
     .getByRole('button', { name: 'Undo last change', exact: true })
     .click();
-  await expect(page.locator('.student').first()).toContainText('Not yet tried');
+  await expect(
+    page.locator('.student').first().locator('.student-result, .badge'),
+  ).toHaveCount(0);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
 });
 test('expanded settings do not overlap feedback and enlarged text remains reachable', async ({
@@ -295,10 +299,10 @@ test('expanded settings do not overlap feedback and enlarged text remains reacha
   expect(
     await page.evaluate(() => {
       const f = document
-          .querySelector('#classroomStatus')!
+          .querySelector('.classroom-feedback')!
           .getBoundingClientRect(),
         t = document.querySelector('.tuner')!.getBoundingClientRect();
-      return t.height > 0 && f.bottom > t.top;
+      return t.height > 0 && f.bottom > t.top && t.bottom > f.top;
     }),
   ).toBe(false);
   await page.evaluate(() => {
@@ -314,4 +318,81 @@ test('expanded settings do not overlap feedback and enlarged text remains reacha
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+});
+
+test('live range effects follow pitch and clear on silence, pause and navigation', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  const shell = page.locator('#sessionShell');
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await page
+    .getByRole('button', { name: 'Start listening', exact: true })
+    .click();
+  for (const [frequency, range] of [
+    [410, 'low'],
+    [440, 'correct'],
+    [470, 'high'],
+  ] as const) {
+    await sound(page, 0);
+    await sound(page, frequency, 250);
+    await expect(shell).toHaveAttribute('data-range', range);
+    const button = page.locator(`.tuner-section button.${range}`);
+    expect(
+      await button.evaluate((el) => getComputedStyle(el).animationName),
+    ).not.toBe('none');
+  }
+  await sound(page, 0);
+  await expect(shell).toHaveAttribute('data-range', '');
+  await sound(page, 440, 250);
+  await page
+    .getByRole('button', { name: 'Pause listening', exact: true })
+    .click();
+  await expect(shell).toHaveAttribute('data-range', '');
+  await page
+    .getByRole('button', { name: 'Resume listening', exact: true })
+    .click();
+  await sound(page, 440, 250);
+  await page.getByRole('button', { name: 'Next student', exact: true }).click();
+  await expect(shell).toHaveAttribute('data-range', '');
+  await sound(page, 440, 250);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(
+    await page
+      .locator('.tuner-section .correct')
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe('none');
+});
+
+test('session groups listening input, student identities and tuner scoring', async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await classroomPage(page);
+  await expect(page.locator('#studentIdentity')).not.toContainText('Target');
+  const rect = (selector: string) => page.locator(selector).boundingBox();
+  const mic = (await rect('.input-signal'))!;
+  const tuner = (await rect('.tuner'))!;
+  const scores = (await rect('.tuner-section .scorebar'))!;
+  const listening = (await rect('#pauseListening'))!;
+  expect(mic.y + mic.height).toBeLessThanOrEqual(tuner.y);
+  const status = (await rect('#classroomStatus'))!;
+  expect(status.y).toBeGreaterThanOrEqual(listening.y + listening.height);
+  await expect(page.locator('#upNext')).toContainText('Lucas');
+  const instrument = (await rect('#studentIdentity p'))!;
+  const heading = (await rect('#studentIdentity h2'))!;
+  expect(instrument.y + instrument.height).toBeLessThanOrEqual(heading.y);
+  expect(scores.y).toBeGreaterThanOrEqual(tuner.y + tuner.height);
+  expect(scores.y - tuner.y - tuner.height).toBeLessThanOrEqual(16);
+  const previous = (await rect('[data-ui-click="previous-student"]'))!;
+  const name = (await rect('#studentIdentity'))!;
+  const next = (await rect('[data-ui-click="next-student"]'))!;
+  expect(previous.x + previous.width).toBeLessThanOrEqual(name.x);
+  expect(next.x).toBeGreaterThanOrEqual(name.x + name.width);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Student view', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Hide controls', exact: true })
+    .click();
+  await page.screenshot({ path: testInfo.outputPath('mobile-session.png') });
 });

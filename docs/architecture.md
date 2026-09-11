@@ -20,7 +20,7 @@ The application uses strict TypeScript without a UI framework. `index.html` cont
 | `src/app/*-controller.ts`, `selectors.ts`             | Coordinate domain transitions, forms, persistence, dialogs, and audio cancellation.                                                   |
 | `src/ui/*-view.ts`, `dialogs.ts`, `render.ts`         | Escaped HTML templates, native forms, current-view rendering, and feedback.                                                           |
 | `src/ui/events.ts`, `actions.ts`, `lifecycle.ts`      | Delegated named actions, keyboard handling, elapsed timer, visibility and storage events.                                             |
-| `src/ui/themes.ts`, `styles.css`                      | Local theme registry and styles bundled into the release.                                                                             |
+| `src/themes/`, `src/ui/themes.ts`, `styles.css`       | Local theme registry and styles bundled into the release.                                                                             |
 | `src/audio/microphone.ts`, `detection.ts`             | Device permission, stream and reference-tone lifecycle, pitch analysis, stable holds, and recording.                                  |
 | `src/persistence/`                                    | Browser storage adapter and load/save/recovery-backed restore.                                                                        |
 
@@ -61,6 +61,8 @@ Restore validates before confirmation, saves a recovery copy, and replaces prima
 Storage belongs to a browser profile/file location, not the HTML file. Moving or renaming the release may expose a different store. JSON export/import is the portable backup path. Theme preference storage remains separate and is not included in backups.
 
 ## UI and audio lifecycle
+
+`Alt+Enter` toggles session fullscreen through the existing view action, including when a session control has focus. The lifecycle binding ignores key repeats, composition, extra modifiers, and open dialogs; fullscreen failures use the existing view feedback.
 
 Static and generated controls use `data-ui-click`, `data-ui-change`, `data-ui-input`, and `data-ui-submit` with named actions. IDs and arguments use separate data attributes. The event layer executes only registered actions, handles nested button content, ignores disabled controls, and preserves native form validation and Enter submission. No attribute code is evaluated.
 
@@ -144,17 +146,63 @@ A4 tuning, hold duration, allowed spread, and noise gate use native sliders with
 
 The treble and bass clefs use the Bravura U+E050 and U+E062 outlines (SIL Open Font License; see `docs/licenses/Bravura.txt`), converted to inline filled SVG paths with origins on the G4 and F3 staff lines respectively. Their engraved stroke contrast is preserved without shipping a font or adding runtime dependencies.
 
+## Appearance-only theme contract
+
+Theme definitions are data-only `src/themes/*.theme.ts` modules, automatically bundled by an eager Vite glob. `contract.ts` owns typed keys, complete Classic defaults, resolution and registry validation. `src/ui/themes.ts` only applies resolved tokens and coordinates selection/storage/listeners. Each switch writes the complete token set to prevent previous-theme leakage. Existing theme IDs, default selection and theme storage key are preserved; tracker v1 data is unchanged.
+
+Themes control surface/typographic decoration; shared CSS retains layout, responsive sizing and interaction geometry, and existing inline music SVG remains untouched. The original mech treatment remains an explicitly typed legacy option. No runtime theme fetch or remote assets are introduced. See [themes.md](themes.md) for the copy-file/build workflow, token reference and limits. Unit tests validate discovery, defaults and malformed definitions; offline file-URL browser tests cover appearance, selection persistence, fallback, clean switching, draft retention and unchanged staff geometry at phone and desktop widths.
+
+### Reference-theme contract preparation
+
+`contract.ts` now exports a fixed `ThemeTreatment` vocabulary and adds independent surface/display foregrounds, reading/label typography, heading/label weights, and display/pressed-button shadows. Palette-relative defaults preserve inheritance for existing dark themes. The shared stylesheet now consumes all 12 appearance extensions; the eight non-mech treatments still need decorative CSS implementation. No new theme files, fonts, meter renderers, DOM changes, domain logic, or saved-data fields are included. Cel-Shaded Mech explicitly carries its existing tuner background/shadow in tokens. Label styling is isolated from nested form values, and semantic control colors retain priority. Tuner hints use the display foreground, which makes the default hint brighter and keeps contrasting inset displays readable. Validation checks untyped treatment/scheme values and malformed definitions as well as existing asset restrictions. See the handoff section of `docs/themes.md` before authoring or wiring reference-inspired themes.
+
+Consumer verification captures the existing three themes at phone/desktop widths before wiring, compares typography and geometry afterward, and exercises all new tokens in offline Chromium/Firefox. Coverage includes independent display/card/control colors, numerical and label fonts, font weights, label tracking/transforms, enabled/disabled pressed states, keyboard focus, semantic feedback colors, unchanged clef markup/size, theme reset and unsaved draft retention.
+
+### Pitch Press print treatment
+
+Pitch Press now has a dedicated build-owned stylesheet (`src/themes/pitch-press.css`), imported by the application entry. The theme module remains palette/typography data. The print treatment adds the two-color masthead, paper grain, heavy rules, hard button shadows, a graduated meter and a yellow result panel. Anton and Alfa Slab One are bundled locally under the SIL Open Font License (licenses in `docs/licenses/`); small deterministic paper/ink PNG textures and both fonts are inlined by the single-file build. No runtime requests or dependencies are added.
+
+The existing classroom view supplies a shared concert-target panel and playback/navigation controls through the existing delegated actions. Target frequency uses the same pure `targetFrequency` function as reference playback, including A4 tuning and custom offsets. Octave remains visible as a subordinate numeral. Live microphone readings remain separately labeled in the tuner; the poster never substitutes the target for a measurement. The result color reflects the latest saved attempt for the current student in this round, clears on navigation to an untested student, and is never driven by decorative timers. Tracker v1 data and scoring/audio logic are unchanged.
+
+All themes use the same viewport-bound session workspace; Split retains the dashboard and Class suppresses the poster. Theme styles must not change workspace height, scrolling, or panel topology. Print decoration disappears when switching themes; the shared target, tuner, feedback, and controls remain mounted. Offline file-URL coverage at phone and desktop widths exercises target playback, actual audio scoring, result styling, next-student navigation, theme reset, and Class view. The mockup governs the print palette and display styling; real student identity, teacher controls and live signal feedback remain available around the poster.
+
+### Viewport session workspace
+
+`src/session-layout.css` owns session geometry and is loaded after theme paint. Session controls, content-view selection, fullscreen, and behavior settings live in a collapsible left sidebar. Expanded settings and the sidebar scroll internally when space is limited. The toggle remains visible and exposes its state through `aria-expanded` and `aria-controls`; collapsing removes controls from keyboard navigation. Sidebar state belongs to the current `SessionView`, survives renders, and adds no saved-data fields. The existing site header and navigation remain above the session; native fullscreen hides them until exit.
+
+The document does not scroll during an active session. Flex/grid minimum sizes constrain the workspace, student panel, and roster to the remaining viewport. The roster scrolls internally and retains current-student following; student overflow remains reachable internally on small screens and with enlarged text. Shared target sizing bounds decorative typography so theme artwork cannot expand the workspace. Offline file-URL tests cover collapse/reopen, all themes and content views, short landscape/phone/desktop viewports, roster overflow, and fullscreen exit.
+
+### Two canonical themes
+
+Cel-Shaded Mech and Pitch Press are the only build-discovered theme definitions. Classic and Nocturne were deleted; no migration or retired-theme handling was added. Both retained themes use the same target, playback, tuner, feedback, and quick-action components in DOM reading order. Neutral component classes and shared layout rules replace print-only visibility and ordering. Class-mode suppression and responsive flow are owned by `src/session-layout.css`; theme CSS retains decorative treatment. Changing themes never recreates the session or changes audio/scoring state.
+
+### Shared session hierarchy
+
+The full-screen Split workspace allocates two-thirds of its width to the current student and one-third to individual student cards. The student panel places identity first, concert target/playback beside live measurement, then a single status and next-student hint. Controls stay on the left to preserve vertical space; each student retains a distinct card with their name, instrument, progress and attendance. A shared footer groups microphone diagnostics, manual scoring and the only Previous/Next controls. Playback has one entry point; the view no longer duplicates it in settings or under feedback. At standard laptop and desktop sizes the entire working path is visible without internal scrolling. Narrow/short screens and enlarged content retain internal scrolling; container queries adapt Split to the actual available stage width. Class view always reserves space for the roster.
+
+Both skins share DOM, visibility, dimensions, responsive rules and interaction handlers. Pitch Press supplies colors, texture and typeface only for session components; theme-generated feedback text and theme-specific session sizing were removed. Theme changes retain the session element, selection, attempts and live audio. The v1 tracker format is unchanged. Full-screen offline browser tests at 1366x768 and 1920x1080 assert simultaneous visibility in idle, result and listening states, a single playback/navigation entry point, equal panel geometry between skins and navigation after switching.
+
 ### Big Button Sound Club variant
 
 The build discovers `big-button.theme.ts` alongside the two canonical themes. Its `toy` treatment is imported before shared session layout and changes only palette, typography, radii, backgrounds and shadows. Target and live-reading surfaces use cream text on recessed navy; playback is red and primary controls are cobalt. No DOM, layout rules, controller logic, dependencies, runtime assets or persistence formats change. Offline file-URL Chromium/Firefox coverage checks phone and desktop session geometry, data and element retention, palette reset, selection persistence and navigation.
+
+The session type scale is intended for a 65-inch classroom display: ordinary controls scale from 18px to 24px at a 1920px viewport, secondary text stays at least 18px (20px at 1920px), and card names scale from 24px to 28px. Viewport-relative sizes continue growing for higher-resolution displays. Cards retain their individual visual identity; larger type intentionally reduces how many fit onscreen. Both skins consume the same scale.
+
+Live session microphone level stays above the tuner, followed by manual range scoring. Listening status (including Microphone off) appears beneath the listening control in the sidebar. Previous/next buttons flank the current and upcoming student identities, with instruments above names and the upcoming student muted; the target appears only in the target display. Audio detection publishes transient `data-range` on the session shell using the existing pitch evaluator; silence, pause and student changes clear it. This presentation state is never persisted. Themes define `range-animation` (default glow; Big Button wiggle; Pitch Press sparkle). Shared CSS provides an active outline and suppresses animation for reduced-motion preferences.
 
 ### Lisa Lives! variant
 
 `src/themes/lisa-lives.theme.ts` supplies the neon palette, layered sheen, chromatic type shadows and recessed display tokens. `src/themes/lisa-lives.css` implements the `rave` treatment using only token references for paint. Two build-owned PNGs supply rainbow animal print and a transparent leopard sticker, inlined by the single-file build. Asset URLs are direct background declarations because large data URLs exceed browser custom-property limits; browser tests require both assets to decode. The sticker is a decorative background, never a control or replacement for target text. No geometry, DOM, controller or persistence changes are added. Fullscreen Split checks at 1366x768 and 1920x1080 plus a phone check exercise geometry preservation, mounted session and saved-data retention, target playback, navigation, preference persistence and clean theme reset under offline file URLs in Chromium and Firefox.
 
+Session roster cards display the latest saved session result (Too low, In range, Too high), including across round restarts and reloads. Untested cards omit the result badge; skipped-turn labels remain available when applicable. Static results share the scoring buttons' theme skin. Attendance uses an icon-only pressed button flush with each card's bottom-right corner, with an accessible Absent label and a state-dependent tooltip. The delegated toggle remains bound to the current application instance and preserves recorded results. Round summaries still use round-local progress. This presentation change does not alter persistence.
+
+Tall desktop split views (session stage at least 1200px wide and 800px tall) stack the target above the microphone/tuner/scoring group and allocate three fifths of the content width to the roster. Shorter or narrower stages retain the existing side-by-side target/tuner layout. Roster columns remain responsive with readable card widths; large classes scroll independently and navigation continues to follow the active student. This is shared geometry across themes, with no saved preference or data-format change.
+
 ### Vintage Audio variant
 
 `vintage-audio.theme.ts` defines the studio hardware palette, typography and inset/raised shadows. The `studio` stylesheet adds a build-owned tolex texture, an ivory target surface and an amber tuner with printed linear graduations. It retains the existing meter and needle rather than introducing a decorative reading. Paint uses contract tokens; only the local material asset is a stylesheet URL, inlined by the build. The existing bundled Anton face supplies condensed equipment lettering. No layout, DOM, controller or persistence changes are included. Offline phone and fullscreen Split checks cover geometry, decoded texture, playback, navigation, selection persistence and clean theme reset in Chromium and Firefox.
+
+Session metadata forms a slim inline header inside the top margin of the current-student panel. Hide controls is at the top of the sidebar. There is no metadata strip above the workspace. With controls hidden, Show controls appears at the upper-left of this inline header without overlapping student navigation. Both buttons share the existing sidebar action, and focus transfers to the visible control after toggling.
 
 ### Boom Pow variant
 

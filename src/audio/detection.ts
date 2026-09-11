@@ -96,6 +96,10 @@ export const detection = {
         $('holdProgress').style.width = hold.progress * 100 + '%';
     }
     const displayFrequency = this.pitchDisplay.frame(now, freq);
+    const sessionShell = findElement('sessionShell');
+    if (!displayFrequency || !pupil) {
+      if (sessionShell) sessionShell.dataset.range = '';
+    }
     if (!displayFrequency) {
       if (findElement('liveNote')) {
         $('liveNote').textContent = '—';
@@ -116,6 +120,7 @@ export const detection = {
           this.db.configs[pupil.instrument],
           this.db.settings.a4,
         );
+        if (sessionShell) sessionShell.dataset.range = result.status;
         $('liveCents').textContent =
           (result.cents >= 0 ? '+' : '') +
           Math.round(result.cents) +
