@@ -1,3 +1,4 @@
+import { sessionDefaults } from './session-defaults';
 import { parseNote } from './pitch';
 import type { TrackerData } from './tracker';
 
@@ -88,6 +89,19 @@ export function validateBackup(value: unknown): TrackerData {
       finite(st.gate, 0.001, 0.2) &&
       typeof st.advance === 'boolean',
   );
+  if (d.schema === 3) {
+    object(d.sessionDefaults);
+    const defaults = d.sessionDefaults;
+    requireValid(
+      typeof defaults.advance === 'boolean' &&
+        typeof defaults.claps === 'boolean' &&
+        typeof defaults.teacher === 'boolean' &&
+        (defaults.mode === 'until-correct' ||
+          defaults.mode === 'one-and-done') &&
+        ['auto', 'split', 'student', 'class'].includes(String(defaults.view)) &&
+        typeof defaults.view === 'string',
+    );
+  }
   const classIds = ids(d.classes),
     sessionIds = ids(d.sessions);
   requireValid(
@@ -195,7 +209,19 @@ export function withFeedbackDuration(
   durationMs: number | null,
 ): TrackerData {
   const data = migrateToV2(value);
+  const defaults = sessionDefaults(data);
   data.schema = 3;
   data.settings.feedbackDurationMs = durationMs;
+  data.sessionDefaults = defaults;
+  return validateBackup(data);
+}
+
+/** Saving session defaults explicitly upgrades older backups without changing sessions. */
+export function migrateToV3(value: TrackerData): TrackerData {
+  const data = migrateToV2(value);
+  const defaults = sessionDefaults(data);
+  data.schema = 3;
+  data.settings.feedbackDurationMs ??= null;
+  data.sessionDefaults = defaults;
   return validateBackup(data);
 }

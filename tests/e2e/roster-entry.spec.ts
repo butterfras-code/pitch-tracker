@@ -6,9 +6,7 @@ test('ALL header assigns a shared instrument and validates the whole batch', asy
   page,
 }) => {
   await page.goto(pathToFileURL(resolve('dist/index.html')).href);
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   const rows = page.locator('#main .panel').first().locator('tbody tr');
   await expect(rows).toHaveCount(10);
   await page.getByRole('button', { name: 'Add students', exact: true }).click();
@@ -35,9 +33,7 @@ test('ALL header assigns a shared instrument and validates the whole batch', asy
   await expect(rows.nth(11)).toContainText('Rivera, Sam');
   await expect(rows.nth(11)).toContainText('French Horn');
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await expect(rows).toHaveCount(12);
   await expect(rows.nth(11)).toContainText('French Horn');
   await page.getByRole('button', { name: 'Add students', exact: true }).click();

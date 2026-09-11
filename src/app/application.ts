@@ -1,3 +1,4 @@
+import { sessionDefaultsController } from './session-defaults-controller';
 import { classroomController } from './classroom-controller';
 /** Composes typed application methods around one live state object. */
 import type { PitchMeasurement, PitchStatus } from '../domain/pitch';
@@ -23,6 +24,8 @@ import { sessionView } from '../ui/session-view';
 import type { AppState } from './state';
 import { createState } from './state';
 export interface App extends AppState {
+  applySessionDefaults(): void;
+  saveSessionDefaults(): void;
   ensureRound(): void;
   resetRound(): void;
   renderClassroom(): void;
@@ -69,6 +72,7 @@ export interface App extends AppState {
     measurement?: PitchMeasurement | null,
   ): void;
   adminHTML(): string;
+  settingsHTML(): string;
   helpHTML(): string;
   showDialog(html: string): void;
   closeDialog(): void;
@@ -101,6 +105,7 @@ export function createApplication(store: AppState['trackerStore']): App {
     createState(fresh(), store),
     sessionController,
     classroomController,
+    sessionDefaultsController,
     historyController,
     rosterController,
     backupController,
@@ -119,6 +124,7 @@ export function initializeApplication(app: App): void {
   app.loadedRaw = loaded.raw;
   app.storageBlocked = loaded.blocked;
   app.db = loaded.data || app.db;
+  app.applySessionDefaults();
   if (app.storageBlocked)
     app.warning(
       'Saved data could not be read. Existing storage has been left untouched. Export your current work before closing; use Help to download the unreadable data or restore a backup.',

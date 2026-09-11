@@ -15,9 +15,7 @@ test.beforeEach(async ({ page }) => {
 test('audio loop uses current tuning and gate and records a hold exactly once', async ({
   page,
 }) => {
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await setSlider(page.getByLabel('A4 reference'), '442');
   await setSlider(page.getByLabel('Noise gate'), '0.2');
   await page
@@ -29,9 +27,7 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
     .click();
   await sound(page, 442);
   await expect(page.locator('#liveCents')).toHaveText('No reliable pitch');
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await setSlider(page.getByLabel('Noise gate'), '0.01');
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
@@ -146,9 +142,7 @@ test('Escape during pending permission cannot start a later automatic check', as
 });
 
 async function twoSecondHold(page: import('@playwright/test').Page) {
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
   await page
     .getByRole('button', { name: 'Save settings', exact: true })

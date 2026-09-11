@@ -17,7 +17,7 @@ export const dialogs = {
   newSession(this: App): void {
     const roster = this.cls().students.filter((s) => !s.archived);
     if (!roster.length) {
-      this.toast('Add students in Classes & settings first.');
+      this.toast('Add students in Classes first.');
       return;
     }
     this.showDialog(

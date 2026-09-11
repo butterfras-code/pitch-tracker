@@ -127,6 +127,7 @@ export function createBindings(app: App): UiBindings {
       },
     },
     submit: {
+      'session-defaults': () => app.saveSessionDefaults(),
       'create-session': () => app.createSession(),
       settings: () => app.saveSettings(),
       'new-students': () => app.saveNewStudents(),
