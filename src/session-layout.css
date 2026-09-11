@@ -243,11 +243,6 @@ body.session-active {
   height: 28px;
   width: 3px;
 }
-#sessionShell #checkHint {
-  font-size: var(--session-small);
-  line-height: 1.4;
-  margin-top: 4px;
-}
 #sessionShell .classroom-feedback {
   grid-column: 1 / -1;
   padding: 12px 0;

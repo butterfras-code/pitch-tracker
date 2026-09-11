@@ -111,9 +111,6 @@ export const microphone = {
     this.pitchDisplay.reset();
     if (findElement('holdProgress')) $('holdProgress').style.width = '0%';
     if (findElement('cancelButton')) $('cancelButton').classList.add('hidden');
-    if (findElement('checkHint'))
-      $('checkHint').textContent =
-        'Brief interruptions are OK. Keep the tone steady.';
   },
   async startCheck(this: App): Promise<void> {
     const s = this.ses(),

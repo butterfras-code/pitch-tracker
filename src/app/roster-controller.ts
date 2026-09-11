@@ -7,6 +7,8 @@ import type { App } from './application';
 import { validateBackup as validate } from '../domain/backup';
 import { uid } from '../domain/identity';
 import { parseNote } from '../domain/pitch';
+import { defaultPitchTargets } from '../domain/defaults';
+import { targetRow } from '../ui/pitch-settings';
 import { $ } from '../ui/helpers';
 
 export const rosterController = {
@@ -128,6 +130,16 @@ export const rosterController = {
     this.db.configs[n] = { pitch: 'C', min: -25, max: 25 };
     this.save();
     this.render();
+  },
+  resetPitchTargets(this: App): void {
+    if (!confirm('Reset every pitch target to the band defaults?')) return;
+    document.querySelector('#configTable tbody')!.innerHTML = Object.entries(
+      defaultPitchTargets(),
+    )
+      .map(([name, config]) => targetRow(name, config, this.db.settings.a4))
+      .join('');
+    $('settingsError').textContent = '';
+    this.toast('Pitch target defaults loaded. Save settings to apply them.');
   },
   saveSettings(this: App): void {
     try {

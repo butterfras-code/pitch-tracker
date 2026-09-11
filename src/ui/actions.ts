@@ -48,6 +48,7 @@ export function createBindings(app: App): UiBindings {
       'close-dialog': () => app.closeDialog(),
       'add-students': () => app.addStudent(),
       'add-instrument': () => app.addInstrument(),
+      'reset-pitch-targets': () => app.resetPitchTargets(),
       'toggle-focus': () => {
         app.focusMode = !app.focusMode;
         app.render();

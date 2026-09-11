@@ -90,6 +90,11 @@ export const adminView = {
               Moving Target keeps the range width. Min and Max are cents
               relative to Target. Use arrow keys for precise adjustments.
             </p>
+            <div class="row" style="margin-bottom:16px">
+              <button type="button" data-ui-click="reset-pitch-targets">
+                Reset pitch targets to defaults
+              </button>
+            </div>
             <div class="tablewrap target-table-wrap">
               <table id="configTable">
                 <thead>
