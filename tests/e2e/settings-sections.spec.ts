@@ -95,7 +95,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await expect(page.getByLabel('Clap navigation')).toBeChecked();
   await expect(page.getByLabel('Teacher details')).toBeChecked();
   await expect(page.getByLabel('Advance mode')).toHaveValue('one-and-done');
-  await page.locator('.current-display button.low').click();
+  await page.locator('.student.selected button.low').click();
   expect((await saved(page)).activeStudent).toBe('student-2');
   // The saved clap default drives the real listener only after microphone activation.
   await page

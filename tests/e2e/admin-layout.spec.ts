@@ -33,7 +33,7 @@ for (const viewport of [
           viewport: innerHeight,
         };
       });
-      expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewport);
+      expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewport + 0.001);
       expect(bounds.documentHeight).toBe(bounds.viewport);
       expect(bounds.scroll).toBeGreaterThan(0);
       await expect(

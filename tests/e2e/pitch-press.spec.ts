@@ -7,9 +7,7 @@ for (const width of [390, 1440]) {
   }, testInfo) => {
     await page.setViewportSize({ width, height: 1000 });
     await classroomPage(page);
-    await page
-      .getByRole('button', { name: 'Classes & settings', exact: true })
-      .click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const theme = page.getByRole('combobox', { name: 'Theme', exact: true });
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Session', exact: true }).click();
@@ -66,9 +64,7 @@ for (const width of [390, 1440]) {
     await expect(page.locator('.press-brand')).toBeHidden();
     await expect(page.locator('.standard-brand')).toBeVisible();
     await expect(page.locator('#studentIdentity h2')).toHaveText('Lucas');
-    await page
-      .getByRole('button', { name: 'Classes & settings', exact: true })
-      .click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Session', exact: true }).click();
     await page.getByRole('button', { name: 'Class view', exact: true }).click();

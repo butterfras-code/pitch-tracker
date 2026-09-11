@@ -276,9 +276,7 @@ test('user duration saves from session settings, controls timing across themes a
   const backup = JSON.parse(await readFile(path!, 'utf8'));
   expect(backup.settings.feedbackDurationMs).toBe(1500);
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Classes & settings', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(duration).toHaveValue('1.5');
   await duration.fill('5');
   await duration.press('Tab');

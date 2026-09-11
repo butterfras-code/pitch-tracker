@@ -25,9 +25,7 @@ for (const width of [390, 1440]) {
   }, testInfo) => {
     await page.setViewportSize({ width, height: 1000 });
     await classroomPage(page);
-    await page
-      .getByRole('button', { name: 'Classes & settings', exact: true })
-      .click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const themePicker = page.getByRole('combobox', {
       name: 'Theme',
       exact: true,
@@ -57,7 +55,10 @@ for (const width of [390, 1440]) {
       'color',
       'rgb(22, 43, 64)',
     );
-    const button = page.getByRole('button', { name: 'New class', exact: true });
+    const button = page.getByRole('button', {
+      name: 'Add instrument',
+      exact: true,
+    });
     await expect(button).toHaveCSS('color', 'rgb(101, 37, 59)');
     await expect(page.locator('.note-name').first()).toHaveCSS(
       'color',
@@ -192,9 +193,7 @@ for (const width of [390, 1440]) {
     await page
       .getByRole('combobox', { name: 'Theme', exact: true })
       .selectOption('cel-mech');
-    await page
-      .getByRole('button', { name: 'Classes & settings', exact: true })
-      .click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const slider = page.getByRole('slider', {
       name: 'Flute target adjustment',
       exact: true,
