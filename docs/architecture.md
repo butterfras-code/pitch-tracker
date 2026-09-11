@@ -155,3 +155,7 @@ The build discovers `big-button.theme.ts` alongside the two canonical themes. It
 ### Vintage Audio variant
 
 `vintage-audio.theme.ts` defines the studio hardware palette, typography and inset/raised shadows. The `studio` stylesheet adds a build-owned tolex texture, an ivory target surface and an amber tuner with printed linear graduations. It retains the existing meter and needle rather than introducing a decorative reading. Paint uses contract tokens; only the local material asset is a stylesheet URL, inlined by the build. The existing bundled Anton face supplies condensed equipment lettering. No layout, DOM, controller or persistence changes are included. Offline phone and fullscreen Split checks cover geometry, decoded texture, playback, navigation, selection persistence and clean theme reset in Chromium and Firefox.
+
+### Boom Pow variant
+
+`boom-pow.theme.ts` defines the comic palette and ink shadows. Its `comic` treatment uses a local generated Ben-Day print and a locally bundled Bangers font (SIL Open Font License), with readable ivory surfaces over the artwork. Hard inset outlines and offset shadows add ink weight without changing border widths or component dimensions. The existing meter, scoring and navigation are retained; yellow feedback styling only follows a real correct result. Offline Chromium/Firefox checks cover fullscreen laptop/desktop and phone geometry, artwork decoding, font loading, playback, navigation, reset and preference persistence. No layout, controller or saved-data changes are included.

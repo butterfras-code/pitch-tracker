@@ -40,3 +40,7 @@ Select **Lisa Lives!** for the neon mockup-inspired variant: rainbow leopard/zeb
 ## Vintage Audio
 
 **Vintage Audio** uses worn black amplifier tolex, recessed ivory target lettering, amber instrument illumination and deep-red switches. The studio treatment preserves shared session layout and live meter behavior. Its local generated texture and existing bundled condensed font work entirely offline.
+
+## Boom Pow
+
+**Boom Pow** turns the shared workspace into a pop-art comic: cyan Ben-Day print, yellow bursts, black ink outlines, ivory panels and red playback. Bangers provides comic lettering while body copy stays readable. Artwork and font are bundled offline; layout and live meter behavior stay shared.
