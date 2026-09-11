@@ -7,6 +7,21 @@ import { $, download } from './helpers';
 export function createBindings(app: App): UiBindings {
   return {
     click: {
+      'session-view': ({ data }) =>
+        app.workspace?.setView(data.view ?? 'split'),
+      'session-settings': () => app.workspace?.toggleSettings(),
+      'session-fullscreen': () => app.workspace?.fullscreen(),
+      'show-current': () => {
+        app.search = '';
+        app.filter = 'all';
+        app.renderCards();
+        app.workspace?.follow();
+      },
+      'previous-student': () => app.classroomNavigate(-1),
+      'pause-listening': () => app.toggleClassroomPause(),
+      'restart-round': () => app.startRound('whole'),
+      'retry-round': () => app.startRound('retry'),
+      'delete-student': ({ data }) => app.deleteStudent(data.id!),
       backup: () => app.backup(),
       'session-notes': () => app.sessionNotes(),
       'end-session': () => app.endSession(),
@@ -26,7 +41,7 @@ export function createBindings(app: App): UiBindings {
         app.cancelCheck();
         app.render();
       },
-      'next-student': () => app.pickNext(false),
+      'next-student': () => app.classroomNavigate(1),
       'random-student': () => app.pickNext(true),
       'active-student-notes': () => app.studentDetail(app.db.activeStudent),
       record: ({ data }) => {
@@ -55,6 +70,19 @@ export function createBindings(app: App): UiBindings {
       'switch-tab': ({ data }) => app.switchTab(data.tab!),
     },
     change: {
+      'teacher-details': ({ checked }) => app.workspace?.toggleTeacher(checked),
+      'microphone-input': ({ value }) => app.changeMicrophone(value),
+      'classroom-mode': ({ value }) => {
+        if (value !== 'until-correct' && value !== 'one-and-done') return;
+        app.classroomMode = value;
+        app.cancelCheck();
+        app.render();
+      },
+      'clap-navigation': ({ checked }) => {
+        app.clapNavigation = checked;
+        app.cancelCheck();
+        app.render();
+      },
       'change-class': ({ value }) => app.changeClass(value),
       advance: ({ checked }) => {
         app.db.settings.advance = checked;

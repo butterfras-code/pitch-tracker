@@ -35,6 +35,9 @@ export const microphone = {
           echoCancellation: false,
           noiseSuppression: false,
           autoGainControl: false,
+          ...(this.microphoneId
+            ? { deviceId: { exact: this.microphoneId } }
+            : {}),
         },
         video: false,
       });
@@ -48,9 +51,13 @@ export const microphone = {
       this.analyser.fftSize = 4096;
       this.source.connect(this.analyser);
       this.mic = true;
+      this.microphoneError = '';
+      void this.refreshMicrophones();
       this.stream.getAudioTracks()[0].onended = () => {
         this.stopMic();
-        this.toast('Microphone disconnected. Manual scoring is available.');
+        this.microphoneError =
+          'Microphone disconnected. Reconnect it or select another input. Manual scoring is available.';
+        this.toast(this.microphoneError);
         this.render();
       };
       this.lastFrame = performance.now();
@@ -60,11 +67,11 @@ export const microphone = {
     } catch (e) {
       if (generation !== this.micGeneration) return false;
       this.stopMic();
-      this.toast(
+      this.microphoneError =
         e instanceof Error && e.name === 'NotAllowedError'
           ? 'Microphone permission denied. Allow access in the browser, or use manual scoring.'
-          : errorMessage(e),
-      );
+          : errorMessage(e);
+      this.toast(this.microphoneError);
       return false;
     } finally {
       this.pendingMic = false;
@@ -72,7 +79,11 @@ export const microphone = {
   },
   async toggleMic(this: App): Promise<void> {
     if (this.mic || this.pendingMic) this.stopMic();
-    else await this.enableMic();
+    else {
+      this.classroomPaused = false;
+      this.cancelCheck();
+      await this.enableMic();
+    }
     if (!this.disposed) this.render();
   },
   stopMic(this: App): void {
@@ -94,24 +105,22 @@ export const microphone = {
   },
   cancelCheck(this: App): void {
     this.checkGeneration++;
+    this.classroomListenerReady = false;
+    this.classroomListener.reset();
     this.checking = null;
     this.holdSamples = [];
     this.holdStart = null;
     if (findElement('holdProgress')) $('holdProgress').style.width = '0%';
     if (findElement('cancelButton')) $('cancelButton').classList.add('hidden');
     if (findElement('checkHint'))
-      $('checkHint').textContent =
-        'Checks record one attempt after a steady hold.';
+      $('checkHint').textContent = 'Listening automatically after a quiet gap.';
   },
   async startCheck(this: App): Promise<void> {
-    if (this.checking) {
-      this.cancelCheck();
-      this.render();
-      return;
-    }
     const s = this.ses(),
       id = this.db.activeStudent;
     if (!s || !id || !this.pupil() || s.absent.includes(id)) return;
+    this.classroomPaused = false;
+    this.roundComplete = false;
     const sid = s.id,
       checkGeneration = this.checkGeneration;
     if (await this.enableMic()) {
@@ -125,10 +134,32 @@ export const microphone = {
         return;
       }
       this.cancelCheck();
-      this.checking = { id, sid };
-      this.checkDeadline = performance.now() + 20000;
+      // Automatic arming happens only after fresh quiet audio observations.
       this.render();
     }
+  },
+  async refreshMicrophones(this: App): Promise<void> {
+    const generation = this.micGeneration;
+    try {
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      if (this.disposed || generation !== this.micGeneration) return;
+      this.microphoneDevices = devices
+        .filter((d) => d.kind === 'audioinput')
+        .map((d) => ({ deviceId: d.deviceId, label: d.label }));
+      if (this.tab === 'session' && this.ses()) this.renderClassroom();
+    } catch {
+      if (!this.disposed && generation === this.micGeneration)
+        this.microphoneDevices = [];
+    }
+  },
+  async changeMicrophone(this: App, id: string): Promise<void> {
+    const listening = this.mic;
+    this.stopMic();
+    this.microphoneId = id;
+    this.microphoneError = '';
+    if (listening) await this.enableMic();
+    if (!this.disposed) this.render();
   },
   async referenceTone(this: App): Promise<void> {
     const pupil = this.pupil();

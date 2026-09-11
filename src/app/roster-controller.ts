@@ -33,17 +33,32 @@ export const rosterController = {
       added = [];
     try {
       if (!lines.length) throw Error('Enter at least one student.');
-      for (const [i, l] of lines.entries()) {
-        const cut = l.lastIndexOf(','),
-          name = l.slice(0, cut).trim(),
-          inst = l.slice(cut + 1).trim();
-        const instrument = Object.keys(this.db.configs).find(
-          (n) => n.toLowerCase() === inst.toLowerCase(),
+      const all = /^ALL:/i.test(lines[0]);
+      const shared = all
+        ? Object.keys(this.db.configs).find(
+            (n) => n.toLowerCase() === lines[0].slice(4).trim().toLowerCase(),
+          )
+        : undefined;
+      if (all && !shared)
+        throw Error(
+          'Line 1: use ALL: Instrument with a configured instrument.',
         );
-        if (cut < 1 || !name || name.length > 120 || !instrument)
+      const entries = all ? lines.slice(1) : lines;
+      if (!entries.length)
+        throw Error('Enter at least one student after ALL: Instrument.');
+      for (const [i, l] of entries.entries()) {
+        const cut = l.lastIndexOf(','),
+          name = all ? l : l.slice(0, cut).trim(),
+          inst = l.slice(cut + 1).trim();
+        const instrument =
+          shared ||
+          Object.keys(this.db.configs).find(
+            (n) => n.toLowerCase() === inst.toLowerCase(),
+          );
+        if ((!all && cut < 1) || !name || name.length > 120 || !instrument)
           throw Error(
             'Line ' +
-              (i + 1) +
+              (i + 1 + (all ? 1 : 0)) +
               ': use Name, Instrument with a configured instrument.',
           );
         added.push({ id: uid(), name, instrument, archived: false });
@@ -74,6 +89,25 @@ export const rosterController = {
     p.archived = !p.archived;
     this.save();
     this.render();
+  },
+  deleteStudent(this: App, id: string): void {
+    const c = this.cls(),
+      p = c.students.find((p) => p.id === id);
+    if (
+      !p ||
+      !confirm(
+        'Delete ' +
+          p.name +
+          ' from ' +
+          c.name +
+          '? This cannot be undone. Existing sessions and history will be kept.',
+      )
+    )
+      return;
+    c.students = c.students.filter((p) => p.id !== id);
+    this.save();
+    this.render();
+    this.toast(p.name + ' deleted from class.');
   },
   addInstrument(this: App): void {
     const name = prompt('Instrument name (save any pending settings first):');

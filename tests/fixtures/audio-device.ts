@@ -3,6 +3,8 @@ import type { Page } from '@playwright/test';
 /** Test-only browser device boundary. The production app exposes no test globals. */
 export interface SyntheticAudio {
   frequency: number;
+  noise: boolean;
+  requestedDevice: string;
   amplitude: number;
   requests: number;
   stopped: number;
@@ -22,6 +24,8 @@ export async function installAudioDevice(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const device: SyntheticAudio = (window.syntheticAudio = {
       frequency: 442,
+      noise: false,
+      requestedDevice: '',
       amplitude: 0.2,
       requests: 0,
       stopped: 0,
@@ -50,10 +54,14 @@ export async function installAudioDevice(page: Page): Promise<void> {
         return {
           fftSize: 4096,
           getFloatTimeDomainData(samples: Float32Array) {
-            for (let i = 0; i < samples.length; i++)
-              samples[i] =
-                device.amplitude *
-                Math.sin((2 * Math.PI * device.frequency * i) / 48000);
+            let seed = 7;
+            for (let i = 0; i < samples.length; i++) {
+              seed = (seed * 16807) % 2147483647;
+              samples[i] = device.noise
+                ? (seed / 2147483647 - 0.5) * 0.8
+                : device.amplitude *
+                  Math.sin((2 * Math.PI * device.frequency * i) / 48000);
+            }
           },
         };
       }
@@ -87,7 +95,18 @@ export async function installAudioDevice(page: Page): Promise<void> {
     Object.defineProperty(navigator, 'mediaDevices', {
       configurable: true,
       value: {
-        async getUserMedia() {
+        async enumerateDevices() {
+          return [
+            { kind: 'audioinput', deviceId: 'room', label: 'Room microphone' },
+          ];
+        },
+        async getUserMedia(constraints: MediaStreamConstraints) {
+          device.requestedDevice =
+            typeof constraints.audio === 'object' &&
+            typeof constraints.audio.deviceId === 'object' &&
+            !Array.isArray(constraints.audio.deviceId)
+              ? String(constraints.audio.deviceId.exact ?? '')
+              : '';
           device.requests++;
           if (device.deny)
             throw new DOMException('Permission denied', 'NotAllowedError');

@@ -120,6 +120,7 @@ export const backupController = {
       const restored = this.trackerStore.restore(incoming);
       this.stopMic();
       this.db = restored;
+      this.resetRound();
       this.storageBlocked = false;
       this.loadedRaw = JSON.stringify(this.db);
       $('storageWarning').classList.add('hidden');

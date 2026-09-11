@@ -2,7 +2,7 @@
 import { $, statusName } from '../ui/helpers';
 import type { App } from './application';
 import type { PitchMeasurement, PitchStatus } from '../domain/pitch';
-import { nextStudent } from '../domain/session';
+import { shouldAdvance } from '../domain/classroom';
 import * as changes from '../domain/session-changes';
 export const sessionController = {
   switchTab(this: App, tab: string): void {
@@ -10,9 +10,19 @@ export const sessionController = {
     this.tab = tab;
     this.render();
   },
-  selectStudent(this: App, id: string): void {
+  selectStudent(this: App, id: string, rememberSelection = true): void {
     if (!this.ses()?.roster.some((p) => p.id === id)) return;
     this.cancelCheck();
+    if (rememberSelection && id !== this.db.activeStudent) this.remember();
+    this.ensureRound();
+    if (
+      rememberSelection &&
+      this.roundQueue &&
+      !this.roundQueue.ids.includes(id) &&
+      !this.ses()!.absent.includes(id)
+    )
+      this.roundQueue.ids.push(id);
+    this.roundComplete = false;
     this.db.activeStudent = id;
     this.save();
     this.render();
@@ -20,11 +30,14 @@ export const sessionController = {
   changeClass(this: App, id: string): void {
     this.stopMic();
     if (!changes.changeClass(this, id)) return;
+    this.resetRound();
     this.save();
     this.render();
   },
   createSession(this: App): void {
     if (!changes.createSession(this, $('sessionName').value)) return;
+    this.resetRound();
+    this.classroomPaused = false;
     this.save();
     this.closeDialog();
     this.render();
@@ -44,6 +57,7 @@ export const sessionController = {
     this.render();
   },
   remember(this: App): void {
+    this.ensureRound();
     changes.remember(this);
   },
   undo(this: App): void {
@@ -55,12 +69,23 @@ export const sessionController = {
   },
   attendance(this: App, id: string, absent: boolean): void {
     this.cancelCheck();
+    this.ensureRound();
     if (!changes.setAttendance(this, id, absent)) return;
     this.save();
     this.render();
   },
   pickNext(this: App, random: boolean): void {
-    const id = nextStudent(this.db, random ? Math.random : undefined);
+    this.ensureRound();
+    const pool = this.present().filter((p) =>
+      this.roundQueue?.ids.includes(p.id),
+    );
+    const min = Math.min(...pool.map((p) => this.attempts(p.id).length));
+    let candidates = pool.filter((p) => this.attempts(p.id).length === min);
+    if (candidates.length > 1)
+      candidates = candidates.filter((p) => p.id !== this.db.activeStudent);
+    const id =
+      candidates[random ? Math.floor(Math.random() * candidates.length) : 0]
+        ?.id;
     if (!id) {
       this.toast('No students marked present.');
       return;
@@ -77,10 +102,22 @@ export const sessionController = {
     if (!id || !s?.roster.some((p) => p.id === id) || s.absent.includes(id))
       return;
     this.cancelCheck();
+    this.ensureRound();
     const attempt = changes.recordAttempt(this, status, id, measurement);
     if (!attempt) return;
     this.save();
-    if (this.db.settings.advance) this.pickNext(false);
+    if (this.roundQueue && !this.roundQueue.ids.includes(id))
+      this.roundQueue.ids.push(id);
+    this.lastClassroomResult =
+      attempt.name +
+      ': ' +
+      (status === 'low'
+        ? 'Try a little higher'
+        : status === 'high'
+          ? 'Try a little lower'
+          : 'In range');
+    if (shouldAdvance(this.db.settings.advance, this.classroomMode, status))
+      this.classroomNavigate(1, false);
     else this.render();
     this.toast(attempt.name + ' · ' + statusName(status));
   },

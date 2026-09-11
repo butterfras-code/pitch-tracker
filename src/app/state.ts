@@ -1,8 +1,23 @@
+import { ClassroomListener, type AdvanceMode } from '../domain/classroom';
+import type { Round } from '../domain/round';
+import type { SessionView } from '../ui/classroom-view';
 /** Owns application-instance state; session rules use its browser-independent subset. */
 import type { SessionState } from '../domain/session-changes';
 import type { TrackerData } from '../domain/tracker';
 import type { createTrackerStore } from '../persistence/tracker-store';
 export interface AppState extends SessionState {
+  workspace: SessionView | null;
+  roundQueue: Round | null;
+  roundComplete: boolean;
+  lastClassroomResult: string;
+  classroomListener: ClassroomListener;
+  classroomListenerReady: boolean;
+  classroomPaused: boolean;
+  classroomMode: AdvanceMode;
+  clapNavigation: boolean;
+  microphoneDevices: { deviceId: string; label: string }[];
+  microphoneId: string;
+  microphoneError: string;
   db: TrackerData;
   trackerStore: ReturnType<typeof createTrackerStore>;
   storageBlocked: boolean;
@@ -38,6 +53,18 @@ export function createState(
   trackerStore: AppState['trackerStore'],
 ): AppState {
   return {
+    workspace: null,
+    roundQueue: null,
+    roundComplete: false,
+    lastClassroomResult: '',
+    classroomListener: new ClassroomListener(),
+    classroomListenerReady: false,
+    classroomPaused: false,
+    classroomMode: 'until-correct',
+    clapNavigation: false,
+    microphoneDevices: [],
+    microphoneId: '',
+    microphoneError: '',
     db,
     trackerStore,
     storageBlocked: false,

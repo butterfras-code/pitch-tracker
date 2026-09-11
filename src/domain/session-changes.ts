@@ -1,3 +1,4 @@
+import type { Round } from './round';
 /** In-memory transitions. Callers own persistence, confirmation, audio, and rendering. */
 import { clone, uid } from './identity';
 import type { PitchMeasurement, PitchStatus } from './pitch';
@@ -5,7 +6,17 @@ import { activeSession, presentStudents } from './session';
 import type { Attempt, Session, TrackerData } from './tracker';
 export interface SessionState {
   db: TrackerData;
-  undoStack: { id: string; data: Session; active: string | null }[];
+  roundQueue?: Round | null;
+  roundComplete?: boolean;
+  lastClassroomResult?: string;
+  undoStack: {
+    id: string;
+    data: Session;
+    active: string | null;
+    roundQueue?: Round | null;
+    roundComplete?: boolean;
+    lastClassroomResult?: string;
+  }[];
 }
 export function remember(state: SessionState): void {
   const s = activeSession(state.db);
@@ -14,6 +25,13 @@ export function remember(state: SessionState): void {
     id: s.id,
     data: clone(s),
     active: state.db.activeStudent,
+    ...(state.roundQueue !== undefined
+      ? {
+          roundQueue: clone(state.roundQueue),
+          roundComplete: state.roundComplete,
+          lastClassroomResult: state.lastClassroomResult,
+        }
+      : {}),
   });
   if (state.undoStack.length > 50) state.undoStack.shift();
 }
@@ -22,6 +40,11 @@ export function undo(state: SessionState): boolean {
   if (!u || u.id !== state.db.activeSession) return false;
   state.db.sessions[state.db.sessions.findIndex((s) => s.id === u.id)] = u.data;
   state.db.activeStudent = u.active;
+  if (u.roundQueue !== undefined) {
+    state.roundQueue = u.roundQueue;
+    state.roundComplete = u.roundComplete;
+    state.lastClassroomResult = u.lastClassroomResult;
+  }
   return true;
 }
 export function changeClass(state: SessionState, id: string): boolean {

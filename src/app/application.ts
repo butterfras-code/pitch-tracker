@@ -1,3 +1,4 @@
+import { classroomController } from './classroom-controller';
 /** Composes typed application methods around one live state object. */
 import type { PitchMeasurement, PitchStatus } from '../domain/pitch';
 import type {
@@ -22,6 +23,16 @@ import { sessionView } from '../ui/session-view';
 import type { AppState } from './state';
 import { createState } from './state';
 export interface App extends AppState {
+  ensureRound(): void;
+  resetRound(): void;
+  renderClassroom(): void;
+  classroomNavigate(direction: 1 | -1, manual?: boolean): void;
+  startRound(kind: 'whole' | 'retry'): void;
+  classroomStatus(): string;
+  toggleClassroomPause(): void;
+  refreshMicrophones(): Promise<void>;
+  changeMicrophone(id: string): Promise<void>;
+  deleteStudent(id: string): void;
   save(): boolean;
   backup(): void;
   exportCSV(sid?: string): void;
@@ -43,7 +54,7 @@ export interface App extends AppState {
   attempts(id?: string, s?: Session): Attempt[];
   classOptions(): string;
   switchTab(t: string): void;
-  selectStudent(id: string): void;
+  selectStudent(id: string, rememberSelection?: boolean): void;
   changeClass(id: string): void;
   createSession(): void;
   endSession(): void;
@@ -88,6 +99,7 @@ export function createApplication(store: AppState['trackerStore']): App {
   return Object.assign(
     createState(fresh(), store),
     sessionController,
+    classroomController,
     historyController,
     rosterController,
     backupController,

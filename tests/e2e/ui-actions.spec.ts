@@ -13,6 +13,10 @@ async function startSession(page: Page) {
     .getByRole('dialog')
     .getByRole('button', { name: 'Start session' })
     .click();
+  await page
+    .getByRole('button', { name: 'Session behavior settings', exact: true })
+    .click();
+  await page.getByLabel('Teacher details', { exact: true }).check();
 }
 
 test('class, student and settings forms retain their behavior', async ({
@@ -81,9 +85,9 @@ test('dynamic session controls, notes and history editing work after rerenders',
 }) => {
   await startSession(page);
   const focus = page.locator('.focus');
-  await page.getByRole('button', { name: 'Focus view' }).click();
+  await page.getByRole('button', { name: 'Student view' }).click();
   await expect(page.locator('.roster-area')).toBeHidden();
-  await page.getByRole('button', { name: 'Show roster' }).click();
+  await page.getByRole('button', { name: 'Split view' }).click();
   await page.getByLabel('Search students').fill('Lucas');
   await expect(page.locator('.student')).toHaveCount(1);
   await page
@@ -115,11 +119,12 @@ test('dynamic session controls, notes and history editing work after rerenders',
     .getByRole('dialog')
     .getByRole('button', { name: 'Save notes' })
     .click();
-  await page.getByLabel('Advance after recording').check();
+  await page.getByLabel('Auto Advance', { exact: true }).check();
+  await page.getByLabel('Advance mode').selectOption('one-and-done');
   await focus.getByRole('button', { name: 'Next student' }).click();
   const selected = await focus.getByRole('heading', { level: 2 }).textContent();
-  // Clicking the nested shortcut label must dispatch exactly one score.
-  await focus.locator('button.high small').click();
+  // Scoring from the current student display must dispatch exactly one score.
+  await focus.locator('.current-display button.high').click();
   await expect(focus.getByRole('heading', { level: 2 })).not.toHaveText(
     selected!,
   );
@@ -178,7 +183,7 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
   await expect(page.locator('.student').first()).toContainText('1 tries');
   await page.keyboard.press('Control+z');
   await expect(page.locator('.student').first()).toContainText('0 tries');
-  await page.locator('.focus button.correct small').click();
+  await page.locator('.current-display button.correct').click();
   await expect(page.locator('.student').first()).toContainText('1 tries');
 });
 

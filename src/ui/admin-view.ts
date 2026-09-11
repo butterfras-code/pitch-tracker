@@ -59,7 +59,13 @@ export const adminView = {
                           data-ui-click="archive-student"
                           data-id="${p.id}"
                         >
-                          ${p.archived ? 'Restore' : 'Archive'}
+                          ${p.archived ? 'Restore' : 'Archive'}</button
+                        ><button
+                          class="danger"
+                          data-ui-click="delete-student"
+                          data-id="${p.id}"
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>`,
@@ -187,7 +193,7 @@ export const adminView = {
         In Classes & settings, create your class and add students. Verify your
         mouthpiece targets, then start a session. Mark absent students and
         select a name, or use Next / Random. Record a manual judgment or enable
-        the microphone and run a steady-hold check.
+        the microphone to log steady tones automatically.
       </p>
       <h3>Choose your theme</h3>
       <p>
@@ -247,12 +253,62 @@ export const adminView = {
         cents are inclusive; zero is valid. Hear target pauses detection briefly
         so it cannot score itself.
       </p>
+      <h3>Session views</h3>
+      <p>
+        Split shows the current student beside or above the class dashboard.
+        Student uses the space for one player; Class keeps a compact
+        current-student strip above the roster. Full screen fills the display
+        with the selected view; Exit full screen or the browser escape control
+        returns to the window. On phones, Student is the initial view.
+      </p>
+      <p>
+        The roster scrolls independently and follows each newly activated
+        student without moving keyboard focus. You can browse freely between
+        turns. If search or a filter hides the current student, their name stays
+        above the results; Show current student clears the filter and reveals
+        their card.
+      </p>
+      <p>
+        Session behavior settings contains advance mode, clap navigation,
+        microphone input and Teacher details. Teacher details reveals
+        per-student scoring and note access; it is off when you reopen the file
+        and is not a password or access restriction. Pause, Previous, Next and
+        Undo stay available in every view.
+      </p>
+      <p>
+        At round completion, retry only students whose latest result needs
+        practice, start another whole-class round, or finish. Previous and Undo
+        preserve earlier results unless you explicitly undo a score. Skipped and
+        untested students are counted separately from correct results. Round
+        queues and skip markers restart when reopening or resuming; attempts
+        remain saved. Expanded settings, enlarged text and very short screens
+        may scroll to keep controls reachable.
+      </p>
+      <h3>Hands-free classroom turns</h3>
+      <p>
+        Enable the microphone once. Each turn waits for half a second of quiet,
+        then logs a steady tone automatically. With Auto Advance on, Until
+        correct stays for retries; One and done moves on after any completed
+        result. Each attempt is saved. The round stops after the last present
+        student. Previous student revisits a student without deleting their
+        results. Undo reverses the last score or navigation.
+      </p>
+      <p>
+        Clap navigation is off by default. Enable it for two claps to move
+        forward or three to go back. Use distinct claps about a third of a
+        second apart; the app waits half a second after the last clap before
+        deciding. Commands work between tones. Pause listening disables scoring
+        and clap commands. Classroom noise can trigger or obscure claps; disable
+        the control when needed. Advance mode and clap settings are temporary
+        and reset on reopening; they are not included in backups.
+      </p>
       <h3>During class</h3>
       <p>
-        1 / 2 / 3 = low / in range / high. N = next, R = random, Space = check.
-        Escape cancels a check. Ctrl/Cmd+Z undoes the latest session change.
-        Shortcuts are disabled while typing or using a dialog. Next and Random
-        prioritize the fewest attempts and exclude absences.
+        1 / 2 / 3 = low / in range / high. N = next, R = random, Space = start
+        listening. Escape pauses listening. Ctrl/Cmd+Z undoes the latest session
+        change. Shortcuts are disabled while typing or using a dialog. Next
+        follows roster order; Random prioritizes the fewest attempts within the
+        current round. Both exclude absent students.
       </p>
       <h3>Local administration</h3>
       <p>

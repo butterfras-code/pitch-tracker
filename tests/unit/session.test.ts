@@ -122,3 +122,29 @@ describe('session transitions', () => {
     expect(s.db.activeSession).toBeNull();
   });
 });
+
+it('undo restores temporary round membership and completion without changing v1 data', () => {
+  const s = state();
+  s.roundQueue = {
+    sessionId: s.db.activeSession!,
+    kind: 'retry',
+    ids: ['student-1'],
+    baseline: s.db.sessions[0].attempts.map((a) => a.id),
+    skipped: [],
+  };
+  s.roundComplete = false;
+  s.lastClassroomResult = 'Previous result';
+  const original = structuredClone(s.db);
+  remember(s);
+  s.roundQueue.ids.push('extra');
+  s.roundQueue.skipped.push('student-1');
+  s.roundComplete = true;
+  s.lastClassroomResult = 'Changed';
+  expect(undo(s)).toBe(true);
+  expect(s.roundQueue.ids).toEqual(['student-1']);
+  expect(s.roundQueue.skipped).toEqual([]);
+  expect(s.roundComplete).toBe(false);
+  expect(s.lastClassroomResult).toBe('Previous result');
+  expect(s.db).toEqual(original);
+  expect(parseBackup(JSON.stringify(s.db))).toEqual(original);
+});

@@ -10,6 +10,7 @@ export const historyController = {
       return;
     }
     this.stopMic();
+    this.resetRound();
     this.save();
     this.tab = 'session';
     this.render();

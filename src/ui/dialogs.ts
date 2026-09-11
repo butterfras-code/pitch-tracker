@@ -138,8 +138,9 @@ ${esc(s.notes[id] || '')}</textarea></label
     this.showDialog(
       /* HTML */ `<h2>Add students</h2>
         <p class="muted">
-          One per line: Name, Instrument. Existing students are preserved. Names
-          may contain commas; the last comma separates the instrument.
+          One per line: Name, Instrument. Or start with ALL: Instrument, then
+          one name per line. Existing students are preserved. Names may contain
+          commas; the last comma separates the instrument.
         </p>
         <form data-ui-submit="new-students">
           <textarea

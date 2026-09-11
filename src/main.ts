@@ -18,6 +18,7 @@ if (import.meta.hot) {
     disposeThemes();
     disposeEvents();
     disposeLifecycle();
+    app.workspace?.dispose();
     void app.ctx?.close();
     app.ctx = null;
   });

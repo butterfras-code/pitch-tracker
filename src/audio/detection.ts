@@ -13,9 +13,16 @@ export const detection = {
     this.lastAnalysis = now;
     const gap = now - this.lastFrame;
     this.lastFrame = now;
-    if (now < this.muteUntil) {
-      this.holdSamples = [];
-      this.holdStart = null;
+    if (
+      now < this.muteUntil ||
+      this.tab !== 'session' ||
+      document.hidden ||
+      $('modal').open ||
+      this.classroomPaused ||
+      !pupil ||
+      this.ses()?.absent.includes(pupil.id)
+    ) {
+      this.cancelCheck();
       return;
     }
     this.analyser.getFloatTimeDomainData(this.buffer);
@@ -24,6 +31,44 @@ export const detection = {
       this.ctx.sampleRate,
       this.db.settings.gate,
     );
+    const rms = Math.sqrt(
+      this.buffer.reduce((sum, x) => sum + x * x, 0) / this.buffer.length,
+    );
+    const level = document.getElementById('inputLevel');
+    if (level instanceof HTMLMeterElement) level.value = rms;
+    const hint = findElement('inputHint');
+    if (hint)
+      hint.textContent =
+        rms < this.db.settings.gate
+          ? 'No signal'
+          : freq
+            ? 'Tone detected'
+            : 'Sound detected - no reliable pitch';
+    const listening = this.classroomListener.frame(
+      now,
+      rms,
+      freq,
+      this.db.settings.gate,
+      this.clapNavigation && this.holdStart === null,
+    );
+    this.classroomListenerReady = listening.ready;
+    if (listening.command) {
+      this.classroomNavigate(listening.command === 'next' ? 1 : -1);
+      return;
+    }
+    if (this.roundComplete) return;
+    if (
+      !this.checking &&
+      listening.ready &&
+      this.db.activeStudent &&
+      this.ses()
+    ) {
+      this.checking = { id: this.db.activeStudent, sid: this.ses()!.id };
+      this.checkDeadline = Infinity;
+    }
+    const status = findElement('classroomStatus');
+    if (status && status.textContent !== this.classroomStatus())
+      status.textContent = this.classroomStatus();
     if (this.checking && now > this.checkDeadline) {
       this.cancelCheck();
       this.toast(

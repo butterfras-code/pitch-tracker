@@ -681,3 +681,429 @@ header > .row {
     text-shadow: none !important;
   }
 }
+
+.classroom-feedback {
+  display: grid;
+  gap: 8px;
+  padding-block: 12px;
+  min-height: 110px;
+}
+.classroom-feedback strong {
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  line-height: 1.2;
+}
+.classroom-feedback > div {
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-weight: 700;
+}
+.classroom-controls > small {
+  display: block;
+}
+.classroom-stage h2 {
+  font-size: 2.5rem;
+  overflow-wrap: anywhere;
+}
+.focus-mode .layout {
+  max-width: 1200px;
+}
+@media (min-width: 1000px) {
+  .focus-mode .focus {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+    align-items: start;
+    gap: 36px;
+  }
+  .focus-mode .classroom-controls {
+    margin-top: 0;
+  }
+  .focus-mode .classroom-stage h2 {
+    font-size: clamp(3rem, 4vw, 4.5rem);
+    line-height: 1.1;
+  }
+}
+
+/* Session workspace: viewport shell with a single roster scroll region. */
+body.session-active {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.session-active > header,
+.session-active > .tabs {
+  width: 100%;
+  flex: 0 0 auto;
+}
+.session-active > header {
+  padding: 10px 20px;
+}
+.session-active > main {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 12px 20px 16px;
+}
+.session-shell.focus {
+  position: static;
+  border: 0;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.session-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.session-top > div:first-child {
+  min-width: 0;
+}
+.session-top strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.session-top small {
+  display: block;
+}
+.session-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.session-shell button {
+  min-height: 40px;
+}
+.view-picker {
+  gap: 4px;
+  flex-shrink: 0;
+}
+.view-picker [aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg);
+}
+.behavior-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.behavior-settings[hidden] {
+  display: none;
+}
+.behavior-settings .help {
+  margin: 0;
+  padding: 4px;
+  flex: 1 1 240px;
+}
+#viewMessage:empty,
+#micError:empty {
+  display: none;
+}
+.session-content {
+  min-height: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+}
+.current-display {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.current-display h2 {
+  font-size: clamp(2rem, 3.6vw, 4.5rem);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+.current-display .classroom-feedback {
+  min-height: 0;
+  gap: 4px;
+  padding: 4px 0;
+}
+.current-display .classroom-feedback strong {
+  font-size: clamp(1.3rem, 2.2vw, 2.5rem);
+}
+.current-display .classroom-feedback > div {
+  font-size: clamp(1rem, 1.5vw, 1.5rem);
+}
+.current-display .tuner {
+  padding: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 120px;
+}
+.current-display .note {
+  font-size: clamp(2rem, 4vw, 4.5rem);
+}
+.current-display .scorebar button {
+  padding: 8px;
+}
+.input-signal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.input-signal meter {
+  min-width: 40px;
+  width: 100px;
+  flex: 1;
+}
+.session-content .roster-area {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dashboard-header {
+  flex: 0 0 auto;
+}
+.dashboard-header .row {
+  gap: 6px;
+  margin-top: 6px;
+}
+.dashboard-header input {
+  flex: 1;
+  min-width: 100px;
+  width: 100px;
+}
+.session-shell .cards {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  padding: 5px;
+  gap: 12px;
+  scrollbar-gutter: stable;
+}
+.session-shell .student {
+  overflow-wrap: anywhere;
+}
+.session-shell .student .name {
+  min-height: 44px;
+}
+.session-shell .student .scorebar {
+  flex-wrap: wrap;
+}
+.session-shell .student label {
+  margin-top: 8px;
+}
+.session-shell[data-teacher='false'] .teacher-only {
+  display: none;
+}
+.session-shell[data-view='student'] .roster-area {
+  display: none;
+}
+.session-shell[data-view='student'] .session-content {
+  grid-template-columns: minmax(0, 1fr);
+}
+.session-shell[data-view='student'] .current-display {
+  max-width: 1100px;
+  width: 100%;
+  justify-self: center;
+}
+.session-shell[data-view='class'] .session-content {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.session-shell[data-view='class'] .current-display {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  gap: 16px;
+}
+.session-shell[data-view='class'] .current-display h2 {
+  font-size: 1.5rem;
+}
+.session-shell[data-view='class'] .tuner,
+.session-shell[data-view='class'] .input-signal {
+  display: none;
+}
+.session-shell[data-view='class'] .classroom-feedback {
+  flex: 1;
+}
+.session-shell[data-view='class'] .classroom-feedback strong {
+  font-size: 1.2rem;
+}
+#roundActions:empty {
+  display: none;
+}
+#roundActions {
+  font-size: 13px;
+}
+#roundActions .row {
+  margin-top: 8px;
+}
+@media (max-width: 999px) {
+  .session-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 10px;
+  }
+  .session-shell[data-view='student'] .session-content {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .session-shell[data-view='split'] .current-display {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 10px;
+    gap: 6px;
+  }
+  .session-shell[data-view='split'] .current-display h2 {
+    font-size: 1.8rem;
+  }
+  .session-shell[data-view='split'] .tuner {
+    display: none;
+  }
+  .session-shell[data-view='split'] .classroom-feedback strong {
+    font-size: 1.3rem;
+  }
+  .session-shell[data-view='split'] .input-signal {
+    font-size: 11px;
+  }
+  .session-top {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .session-bar {
+    gap: 5px;
+  }
+  .session-shell button {
+    padding: 7px 9px;
+  }
+}
+@media (max-width: 599px) {
+  .session-active > header {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .session-active > header .eyebrow,
+  .session-active > header .theme-picker,
+  .session-active > header #saveStatus {
+    display: none;
+  }
+  .session-active > header > .row {
+    width: auto;
+  }
+  .session-active h1 {
+    font-size: 18px;
+  }
+  .session-active > .tabs {
+    padding: 0 8px;
+    gap: 10px;
+  }
+  .session-active > .tabs button {
+    font-size: 12px;
+    padding: 10px 0;
+  }
+  .session-active > main {
+    padding: 8px;
+  }
+  .session-top {
+    font-size: 12px;
+  }
+  .session-shell {
+    gap: 6px;
+  }
+  .session-bar button {
+    flex: 1 1 28%;
+    font-size: 12px;
+  }
+  .view-picker {
+    width: 100%;
+  }
+  .view-picker button {
+    flex: 1;
+  }
+  .current-display {
+    padding: 12px;
+  }
+  .dashboard-header h3 {
+    font-size: 15px;
+  }
+  .dashboard-header button,
+  .dashboard-header select {
+    font-size: 12px;
+  }
+  .session-shell[data-view='class'] .current-display .scorebar {
+    width: 100%;
+  }
+  .session-shell[data-view='split'] .input-signal label {
+    display: none;
+  }
+  .session-shell[data-settings='true'] {
+    height: auto;
+    min-height: 100%;
+  }
+  .session-shell[data-settings='true'] .session-content {
+    min-height: 460px;
+  }
+}
+@media (max-height: 600px) {
+  body.session-active {
+    height: auto;
+    min-height: 100dvh;
+  }
+  .session-active > main {
+    flex: auto;
+  }
+  .session-shell.focus {
+    height: auto;
+  }
+  .session-content {
+    min-height: 460px;
+  }
+  .session-shell .cards {
+    max-height: 420px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-shell * {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
+.current-display > :not(.tuner) {
+  flex-shrink: 0;
+}
+.current-display .meter,
+.current-display .progress {
+  flex-shrink: 0;
+}
+.session-shell .student > small {
+  display: block;
+  margin: 4px 0;
+}
+@media (max-height: 900px) {
+  .session-shell[data-settings='true'] .current-display .tuner {
+    display: none;
+  }
+}
+@media (max-width: 599px) {
+  .session-shell[data-view='split'] .current-display > .scorebar {
+    grid-column: 1 / -1;
+  }
+  .session-shell[data-view='split'] .input-signal {
+    grid-column: 1 / -1;
+  }
+}

@@ -6,6 +6,14 @@ export const render = {
     document
       .querySelectorAll<HTMLElement>('[data-tab]')
       .forEach((b) => b.classList.toggle('on', b.dataset.tab === this.tab));
+    document.body.classList.toggle(
+      'session-active',
+      this.tab === 'session' && !!this.ses(),
+    );
+    if (this.tab === 'session' && this.ses()) {
+      this.renderClassroom();
+      return;
+    }
     $('main').classList.toggle(
       'focus-mode',
       this.focusMode && this.tab === 'session',

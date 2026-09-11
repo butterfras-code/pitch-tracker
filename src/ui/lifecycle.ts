@@ -32,12 +32,13 @@ export function bindLifecycle(app: App): () => void {
       if (['1', '2', '3'].includes(e.key)) {
         e.preventDefault();
         app.record((['low', 'correct', 'high'] as const)[+e.key - 1]);
-      } else if (e.key.toLowerCase() === 'n') app.pickNext(false);
+      } else if (e.key.toLowerCase() === 'n') app.classroomNavigate(1);
       else if (e.key.toLowerCase() === 'r') app.pickNext(true);
       else if (e.code === 'Space') {
         e.preventDefault();
         app.startCheck();
       } else if (e.key === 'Escape') {
+        app.classroomPaused = true;
         app.cancelCheck();
         app.render();
       }
