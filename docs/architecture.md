@@ -143,3 +143,7 @@ The staff automatically chooses treble at C4 or above and bass below. A clef cli
 A4 tuning, hold duration, allowed spread, and noise gate use native sliders with visible values, units, endpoint explanations, and keyboard support. Settings are applied only on Save, which cancels active pitch evidence. Session/history labels and CSV exports include custom offsets. Offline Chromium and Firefox tests exercise the built HTML, note/clef changes, dragging and keyboard input, reload persistence, and actual custom-tone playback and measurement through the test audio-device boundary.
 
 The treble and bass clefs use the Bravura U+E050 and U+E062 outlines (SIL Open Font License; see `docs/licenses/Bravura.txt`), converted to inline filled SVG paths with origins on the G4 and F3 staff lines respectively. Their engraved stroke contrast is preserved without shipping a font or adding runtime dependencies.
+
+### Big Button Sound Club variant
+
+The build discovers `big-button.theme.ts` alongside the two canonical themes. Its `toy` treatment is imported before shared session layout and changes only palette, typography, radii, backgrounds and shadows. Target and live-reading surfaces use cream text on recessed navy; playback is red and primary controls are cobalt. No DOM, layout rules, controller logic, dependencies, runtime assets or persistence formats change. Offline file-URL Chromium/Firefox coverage checks phone and desktop session geometry, data and element retention, palette reset, selection persistence and navigation.

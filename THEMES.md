@@ -28,3 +28,7 @@ Change `DEFAULT_THEME` to a registered ID to change the initial theme. A previou
 Preferences use `mouthpiece.pitchtracker.theme.v1` in localStorage, separately from tracker records. JSON backups do not include the theme. If storage is unavailable, switching still works for the current visit. Theme changes do not rebuild the interface or interrupt a pitch check.
 
 Before replacing or moving your existing tracker, download a data backup from the old file; browser storage may differ by file location. Restore that backup in the updated tracker if needed.
+
+## Big Button Sound Club
+
+Select **Big Button Sound Club** in the Theme picker for cream molded surfaces, recessed navy displays, red playback, cobalt actions, yellow accents and green success feedback inspired by the supplied toy mockup. `src/themes/big-button.theme.ts` supplies existing contract tokens; `src/themes/big-button.css` adds paint-only toy decoration. Layout, copy, music artwork and behavior remain shared. System font stacks preserve offline operation without new assets.

@@ -1,0 +1,61 @@
+/* Toy treatment is paint only. Shared CSS owns all geometry and content. */
+:root[data-treatment='toy'] {
+  scrollbar-color: var(--edge) var(--card);
+  caret-color: var(--accent);
+}
+:root[data-treatment='toy'] ::selection {
+  background: var(--badge-bg);
+  color: var(--ink);
+}
+:root[data-treatment='toy'] header h1 {
+  color: var(--highlight);
+  text-shadow:
+    0 1px 1px #fff2cf,
+    0 2px 2px #7b281b55;
+}
+:root[data-treatment='toy'] .session-target {
+  background: linear-gradient(150deg, #153562, var(--display-bg) 65%);
+  color: var(--display-ink);
+  border-radius: var(--display-radius);
+  box-shadow: var(--display-shadow);
+}
+:root[data-treatment='toy'] .target-frequency {
+  color: var(--display-ink);
+}
+:root[data-treatment='toy'] .target-playback {
+  background-color: #c92113;
+  color: var(--primary-ink);
+  border-color: #78180f;
+}
+:root[data-treatment='toy'] .target-playback:hover:not(:disabled) {
+  background-color: #a91b10;
+}
+:root[data-treatment='toy'] .target-playback:active:not(:disabled) {
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-treatment='toy']
+  .student-actions
+  [data-ui-click='previous-student'] {
+  background-color: var(--badge-bg);
+  color: var(--ink);
+}
+:root[data-treatment='toy'] .tuner {
+  border-color: #07172d;
+  border-radius: var(--display-radius);
+}
+:root[data-treatment='toy'] .meter {
+  box-shadow: inset 0 2px 4px #0006;
+}
+:root[data-treatment='toy'] .progress {
+  box-shadow: inset 0 2px 3px #0003;
+}
+:root[data-treatment='toy'] .classroom-feedback {
+  border-radius: var(--help-radius);
+  box-shadow:
+    inset 0 2px 4px #7b684744,
+    0 1px 1px #fffaea;
+}
+:root[data-treatment='toy'] :is(.tabs button, .student .name) {
+  box-shadow: none;
+  background-image: none;
+}
