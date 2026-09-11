@@ -1,0 +1,85 @@
+.class-overview-heading,
+.class-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.class-overview-heading {
+  margin-bottom: 24px;
+}
+.class-overview-heading button,
+.class-card-heading button {
+  flex-shrink: 0;
+}
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 370px), 1fr));
+  gap: 24px;
+}
+.class-card {
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.class-card-heading > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.class-card h3 {
+  font-size: 1.5rem;
+}
+.class-card table {
+  table-layout: fixed;
+}
+.class-card th,
+.class-card td {
+  padding: 12px 4px;
+  overflow-wrap: anywhere;
+}
+.class-card thead th {
+  font-family: var(--label-font);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: var(--label-transform);
+  font-size: 0.85rem;
+}
+.class-card tbody th {
+  color: var(--card-ink);
+  font-size: 0.85rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.class-card td:not(:first-child) {
+  font-family: var(--data-font);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.class-card td:not(:first-child),
+.class-card thead th {
+  text-align: right;
+}
+.class-last-session,
+.class-results-help {
+  font-size: 0.85rem;
+}
+.class-card-footer {
+  margin-top: auto;
+  display: grid;
+  gap: 12px;
+}
+.class-results-help {
+  margin-top: 24px;
+  max-width: 80ch;
+}
+@media (max-width: 450px) {
+  .class-overview-heading {
+    flex-wrap: wrap;
+  }
+  .class-card {
+    padding: 16px;
+  }
+}

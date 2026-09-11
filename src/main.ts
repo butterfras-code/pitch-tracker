@@ -5,6 +5,7 @@ import './themes/vintage-audio.css';
 import './themes/boom-pow.css';
 import './session-layout.css';
 import './header-layout.css';
+import './class-overview.css';
 import './feedback.css';
 import { createApplication, initializeApplication } from './app/application';
 import { browserStorage } from './persistence/browser-storage';

@@ -27,6 +27,7 @@
   padding: 0;
   gap: 16px;
   border: 0;
+  flex-wrap: nowrap;
 }
 :root .app-header .tabs button {
   flex: none;
@@ -89,7 +90,7 @@
   }
   :root .app-header .tabs {
     grid-row: 2;
-    gap: 16px;
+    gap: 8px;
   }
   :root .app-header .tabs button {
     font-size: 12px;

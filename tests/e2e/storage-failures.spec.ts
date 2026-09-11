@@ -131,10 +131,11 @@ test('failed restore keeps the current UI and data', async ({ page }) => {
     buffer: Buffer.from(JSON.stringify(incoming)),
   });
   await expect(page.locator('#toast')).toContainText('Restore failed:');
-  await expect(page.locator('#classSelect')).toHaveValue(incoming.classId);
-  await expect(page.locator('#classSelect option:checked')).toHaveText(
-    'Demo class',
+  await expect(page.locator('.class-card')).toHaveAttribute(
+    'data-class-id',
+    incoming.classId,
   );
+  await expect(page.locator('.class-card h3')).toHaveText('Demo class');
   expect(await page.evaluate((key) => localStorage.getItem(key), key)).toBe(
     before,
   );
