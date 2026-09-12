@@ -25,11 +25,18 @@ test('class, student and settings forms retain their behavior', async ({
   page,
 }) => {
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
-  await page.getByRole('button', { name: 'New class', exact: true }).click();
+  await page.getByRole('button', { name: 'Add class', exact: true }).click();
   await page.getByLabel('Class name').fill('New band');
   await page
     .getByRole('dialog')
     .getByRole('button', { name: 'Save', exact: true })
+    .click();
+  await expect(
+    page.locator('[aria-label="Manage class"] option:checked'),
+  ).toHaveCount(0);
+  await page
+    .getByRole('article', { name: 'New band', exact: true })
+    .getByRole('button', { name: 'Edit class' })
     .click();
   await expect(
     page.locator('[aria-label="Manage class"] option:checked'),
@@ -180,7 +187,8 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
     .click();
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: 'Help', exact: true }).click();
-    await page.getByRole('button', { name: 'Session', exact: true }).click();
+    await page.getByRole('button', { name: 'Classes', exact: true }).click();
+    await page.getByRole('button', { name: 'Resume session' }).click();
   }
   await page.locator('.focus h2').click();
   await page.keyboard.press('2');

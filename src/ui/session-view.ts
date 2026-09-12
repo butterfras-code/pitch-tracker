@@ -1,10 +1,10 @@
-/** Entry screen for starting a session. Active sessions render through classroom-view.ts. */
+/** Classes landing screen for browsing results and starting a session. */
 import type { App } from '../app/application';
 import { classResults } from '../domain/class-results';
 import { esc } from './helpers';
 export const sessionView = {
   sessionHTML(this: App): string {
-    return `<section class="class-overview" aria-label="Class sessions">
+    return `<section class="class-overview" aria-label="Classes">
       <div class="class-overview-heading"><div><h2>Your classes</h2><p class="muted">Review results and start your next session.</p></div><button data-ui-click="new-class">Add class</button></div>
       <div class="class-grid">${this.db.classes
         .map((cls) => {

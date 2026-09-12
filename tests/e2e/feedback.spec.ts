@@ -204,7 +204,8 @@ test('replacement cancels old timers; theme switches clear the popup without lea
   await page
     .getByRole('button', { name: 'History & progress', exact: true })
     .click();
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await expect(page.locator('#pitchFeedback')).toBeHidden();
 });
 
@@ -307,7 +308,8 @@ test('user duration saves from session settings, controls timing across themes a
     ),
   });
   expect(await saved(page)).toEqual(before);
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await settings(page);
   await duration.fill('');
   await duration.press('Tab');

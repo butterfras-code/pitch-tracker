@@ -69,7 +69,8 @@ for (const width of [390, 900, 1366, 1920]) {
       page.getByRole('button', { name: 'Help', exact: true }),
     ).toHaveClass('on');
     await expect(picker).toBeVisible();
-    await page.getByRole('button', { name: 'Session', exact: true }).click();
+    await page.getByRole('button', { name: 'Classes', exact: true }).click();
+    await page.getByRole('button', { name: 'Resume session' }).click();
     await page
       .getByRole('button', { name: 'Full screen', exact: true })
       .click();

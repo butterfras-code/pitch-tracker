@@ -41,6 +41,12 @@ test('class cards show both periods, empty states and refresh after a finished s
   page,
 }) => {
   await overview(page);
+  await expect(
+    page.getByRole('button', { name: 'Classes', exact: true }),
+  ).toHaveClass(/on/);
+  await expect(
+    page.getByRole('button', { name: 'Session', exact: true }),
+  ).toHaveCount(0);
   const band = page.getByRole('article', { name: 'Band', exact: true });
   await expect(band.getByRole('row', { name: 'Total correct' })).toHaveText(
     'Total correct10',
@@ -74,6 +80,13 @@ test('class cards show both periods, empty states and refresh after a finished s
     .getByRole('button', { name: 'Start session' })
     .click();
   await expect(page.locator('#studentIdentity')).toContainText('Alex');
+  await page.getByRole('button', { name: 'Back to classes' }).click();
+  await expect(
+    strings.getByRole('button', { name: 'Resume session' }),
+  ).toBeVisible();
+  expect((await saved(page)).activeSession).toBeTruthy();
+  await strings.getByRole('button', { name: 'Resume session' }).click();
+  await expect(page.locator('#studentIdentity')).toContainText('Alex');
   await page
     .getByRole('button', { name: 'In range', exact: true })
     .first()
@@ -84,7 +97,7 @@ test('class cards show both periods, empty states and refresh after a finished s
     .click();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
-  await page.locator('[data-tab="session"]').click();
+  await page.locator('[data-tab="classes"]').click();
   await expect(strings.getByRole('row', { name: 'Correct %' })).toHaveText(
     'Correct %100%100%',
   );
@@ -107,7 +120,7 @@ test('edit selects the card class and add class creates a usable empty card', as
     .click();
   await expect(page.getByLabel('Manage class')).toHaveValue('second');
   await expect(page.locator('#main tbody')).toContainText('Alex');
-  await page.locator('[data-tab="session"]').click();
+  await page.locator('[data-tab="classes"]').click();
   await page.getByRole('button', { name: 'Add class', exact: true }).click();
   await page.getByLabel('Class name').fill('New ensemble');
   await page
@@ -120,7 +133,7 @@ test('edit selects the card class and add class creates a usable empty card', as
   await page.getByRole('button', { name: 'Add students', exact: true }).click();
   await page.getByLabel('Students', { exact: true }).fill('Taylor, Flute');
   await page.getByRole('button', { name: 'Add to roster' }).click();
-  await page.locator('[data-tab="session"]').click();
+  await page.locator('[data-tab="classes"]').click();
   await expect(
     card.getByRole('button', { name: 'Start session' }),
   ).toBeEnabled();

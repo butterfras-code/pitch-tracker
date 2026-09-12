@@ -130,7 +130,8 @@ for (const width of [390, 1440]) {
     await expect(button).toHaveCSS('color', 'rgb(21, 21, 21)');
     await themePicker.selectOption('cel-mech');
     await applyOverrides();
-    await page.getByRole('button', { name: 'Session', exact: true }).click();
+    await page.getByRole('button', { name: 'Classes', exact: true }).click();
+    await page.getByRole('button', { name: 'Resume session' }).click();
     await expect(page.locator('.current-display')).toHaveCSS(
       'color',
       'rgb(22, 43, 64)',

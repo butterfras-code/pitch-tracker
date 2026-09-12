@@ -1,8 +1,8 @@
 # Architecture and acceptance goals
 
-## Inactive Session class overview
+## Classes overview and editing
 
-The inactive Session screen renders one card per class through `src/ui/session-view.ts`, with shared, theme-token-based layout in `src/class-overview.css`. Cards offer Edit class (selects that class in the existing roster editor), Start session (selects the class before opening the naming dialog), or Resume session when that class has unfinished work. Empty rosters explain the disabled start action; Add class uses the existing class form.
+Classes is the default top-level destination and renders one card per class through `src/ui/session-view.ts`, with shared, theme-token-based layout in `src/class-overview.css`. Cards offer Edit class (a roster-editing subview with a Back to classes action), Start session (selects the class before opening the naming dialog), or Resume session when that class has unfinished work. Active sessions also provide Back to classes without finishing the session, and a reload returns directly to the active classroom. Empty rosters explain the disabled start action; Add class uses the existing class form.
 
 `src/domain/class-results.ts` derives statistics without DOM or persistence dependencies. All Time totals include every recorded attempt for that class; Correct % is correct attempts divided by total attempts, rounded to a whole percentage. No attempts displays an em dash. Coverage counts distinct checked students against the union of current active students and historical roster snapshots, preserving former students in historical totals. Last Session is the session with the latest start timestamp, independent of array order, and uses its complete roster snapshot including absent students. Current enrollment excludes archived students. No sessions displays an explicit empty state. The saved-data format and active fullscreen split experience are unchanged.
 

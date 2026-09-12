@@ -50,6 +50,7 @@ export const sessionController = {
   },
   createSession(this: App): void {
     if (!changes.createSession(this, $('sessionName').value)) return;
+    this.tab = 'session';
     this.resetRound();
     this.classroomPaused = false;
     this.applySessionDefaults();

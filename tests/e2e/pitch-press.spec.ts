@@ -10,7 +10,8 @@ for (const width of [390, 1440]) {
     await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const theme = page.getByRole('combobox', { name: 'Theme', exact: true });
     await theme.selectOption('pitch-press');
-    await page.getByRole('button', { name: 'Session', exact: true }).click();
+    await page.getByRole('button', { name: 'Classes', exact: true }).click();
+    await page.getByRole('button', { name: 'Resume session' }).click();
     await page
       .getByRole('button', { name: 'Student view', exact: true })
       .click();
@@ -66,7 +67,8 @@ for (const width of [390, 1440]) {
     await expect(page.locator('#studentIdentity h2')).toHaveText('Lucas');
     await page.getByRole('button', { name: 'Settings', exact: true }).click();
     await theme.selectOption('pitch-press');
-    await page.getByRole('button', { name: 'Session', exact: true }).click();
+    await page.getByRole('button', { name: 'Classes', exact: true }).click();
+    await page.getByRole('button', { name: 'Resume session' }).click();
     await page.getByRole('button', { name: 'Class view', exact: true }).click();
     await expect(page.locator('.session-target')).toBeHidden();
     await expect(page.locator('#cards')).toBeVisible();

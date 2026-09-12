@@ -71,7 +71,7 @@ export function createState(
     trackerStore,
     storageBlocked: false,
     loadedRaw: null,
-    tab: 'session',
+    tab: 'classes',
     search: '',
     filter: 'all',
     focusMode: false,

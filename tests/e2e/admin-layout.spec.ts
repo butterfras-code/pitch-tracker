@@ -12,8 +12,13 @@ for (const viewport of [
     await classroomPage(page, 80);
     for (const name of ['Classes', 'Settings']) {
       await page.getByRole('button', { name, exact: true }).click();
+      if (name === 'Classes')
+        await page.getByRole('button', { name: 'Edit class' }).first().click();
       await expect(
-        page.getByRole('heading', { name, exact: true }),
+        page.getByRole('heading', {
+          name: name === 'Classes' ? 'Edit Band' : name,
+          exact: true,
+        }),
       ).toBeVisible();
       await expect(page.getByLabel('Manage class')).toHaveCount(
         name === 'Classes' ? 1 : 0,

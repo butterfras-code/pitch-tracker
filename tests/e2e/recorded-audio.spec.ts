@@ -16,7 +16,8 @@ for (const recording of recordings) {
       await page
         .getByRole('button', { name: 'Save settings', exact: true })
         .click();
-      await page.getByRole('button', { name: 'Session', exact: true }).click();
+      await page.getByRole('button', { name: 'Classes', exact: true }).click();
+      await page.getByRole('button', { name: 'Resume session' }).click();
       await page
         .getByRole('button', { name: 'Start listening', exact: true })
         .click();

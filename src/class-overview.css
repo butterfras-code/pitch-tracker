@@ -1,9 +1,16 @@
 .class-overview-heading,
-.class-card-heading {
+.class-card-heading,
+.class-editor-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+.class-editor-heading {
+  min-width: 0;
+}
+.class-editor-heading > div {
+  min-width: 0;
 }
 .class-overview-heading {
   margin-bottom: 24px;

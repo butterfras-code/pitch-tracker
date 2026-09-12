@@ -25,6 +25,7 @@ test('student deletion supports cancellation, persists, and preserves session hi
     .getByRole('button', { name: 'In range' })
     .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit class' }).first().click();
   const row = page
     .getByRole('row')
     .filter({ has: page.getByRole('cell', { name: 'Maya', exact: true }) });
@@ -49,16 +50,18 @@ test('student deletion supports cancellation, persists, and preserves session hi
   await expect(page.locator('.student').first()).toContainText('Maya');
   await expect(page.locator('.student').first()).toContainText('1 tries');
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit class' }).first().click();
   await expect(row).toHaveCount(0);
   await expect(lucas).toHaveCount(0);
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Back to classes' }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
   await page.getByText('Student summary & attempts', { exact: true }).click();
   await expect(
     page.getByRole('cell', { name: 'Maya Flute', exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page
     .getByRole('button', { name: 'Start session', exact: true })
     .first()

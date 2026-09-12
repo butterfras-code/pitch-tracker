@@ -53,7 +53,8 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await form.getByRole('button', { name: 'Save session defaults' }).click();
   expect((await saved(page)).schema).toBe(3);
   expect((await saved(page)).settings.advance).toBe(false);
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await settings(page);
   await expect(
     page.getByLabel('Auto Advance', { exact: true }),
@@ -80,7 +81,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
   expect((await saved(page)).sessionDefaults?.advance).toBe(true);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page
     .getByRole('button', { name: 'Start session', exact: true })
     .first()
@@ -148,7 +149,8 @@ test('restored defaults survive pitch saves and apply on resume', async ({
     buffer: Buffer.from(JSON.stringify(data)),
   });
   await expect(page.locator('#toast')).toHaveText('Backup restored.');
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await settings(page);
   await expect(page.getByLabel('Teacher details')).toBeChecked();
   await expect(page.locator('#sessionShell')).toHaveAttribute(

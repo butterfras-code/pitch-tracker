@@ -5,7 +5,14 @@ export const render = {
   render(this: App): void {
     document
       .querySelectorAll<HTMLElement>('[data-tab]')
-      .forEach((b) => b.classList.toggle('on', b.dataset.tab === this.tab));
+      .forEach((b) =>
+        b.classList.toggle(
+          'on',
+          b.dataset.tab === this.tab ||
+            (b.dataset.tab === 'classes' &&
+              (this.tab === 'admin' || this.tab === 'session')),
+        ),
+      );
     document.body.classList.toggle(
       'session-active',
       this.tab === 'session' && !!this.ses(),
@@ -24,7 +31,7 @@ export const render = {
       this.focusMode && this.tab === 'session',
     );
     $('main').innerHTML =
-      this.tab === 'session'
+      this.tab === 'classes'
         ? this.sessionHTML()
         : this.tab === 'history'
           ? this.historyHTML()

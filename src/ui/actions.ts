@@ -33,9 +33,14 @@ export function createBindings(app: App): UiBindings {
       'new-session': () => app.newSession(),
       'start-class-session': ({ data }) => {
         if (!app.db.classes.some((c) => c.id === data.id)) return;
-        app.changeClass(data.id!);
-        if (!app.ses()) app.newSession();
+        const alreadySelected = app.db.classId === data.id && app.ses();
+        if (!alreadySelected) app.changeClass(data.id!);
+        if (app.ses()) {
+          app.tab = 'session';
+          app.render();
+        } else app.newSession();
       },
+      'back-to-classes': () => app.switchTab('classes'),
       'edit-class': ({ data }) => {
         if (!app.db.classes.some((c) => c.id === data.id)) return;
         app.tab = 'admin';

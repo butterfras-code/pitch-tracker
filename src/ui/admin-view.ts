@@ -8,12 +8,15 @@ import { esc, stamp } from './helpers';
 export const adminView = {
   adminHTML(this: App): string {
     return /* HTML */ `<div class="row spread" style="margin-bottom:20px">
-        <div>
-          <h2>Classes</h2>
-          <p class="muted">
-            Rosters persist. Past sessions retain their original names and
-            instruments.
-          </p>
+        <div class="class-editor-heading">
+          <button data-ui-click="back-to-classes">Back to classes</button>
+          <div>
+            <h2>Edit ${esc(this.cls().name)}</h2>
+            <p class="muted">
+              Rosters persist. Past sessions retain their original names and
+              instruments.
+            </p>
+          </div>
         </div>
         <div class="row">
           <button data-ui-click="backup">Download backup</button

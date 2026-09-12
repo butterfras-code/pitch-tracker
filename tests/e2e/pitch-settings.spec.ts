@@ -102,7 +102,8 @@ test('graphical detection values and tuned playback feed actual measurement', as
     stability: 20,
     gate: 0.01,
   });
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await settings(page);
   await page
     .getByRole('button', { name: 'Hear current target', exact: true })

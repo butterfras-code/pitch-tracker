@@ -125,6 +125,7 @@ export function initializeApplication(app: App): void {
   app.storageBlocked = loaded.blocked;
   app.db = loaded.data || app.db;
   app.applySessionDefaults();
+  app.tab = app.ses() ? 'session' : 'classes';
   if (app.storageBlocked)
     app.warning(
       'Saved data could not be read. Existing storage has been left untouched. Export your current work before closing; use Help to download the unreadable data or restore a backup.',

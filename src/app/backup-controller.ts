@@ -121,6 +121,7 @@ export const backupController = {
       const restored = this.trackerStore.restore(incoming);
       this.stopMic();
       this.db = restored;
+      this.tab = this.ses() ? 'session' : 'classes';
       this.applySessionDefaults();
       this.resetRound();
       this.storageBlocked = false;

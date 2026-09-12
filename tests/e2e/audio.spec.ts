@@ -21,7 +21,8 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
@@ -32,7 +33,8 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await sound(page, 0);
   await sound(page, 442);
   const attempt = (await saved(page)).sessions[0].attempts[0];
@@ -147,7 +149,8 @@ async function twoSecondHold(page: import('@playwright/test').Page) {
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
-  await page.getByRole('button', { name: 'Session', exact: true }).click();
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
