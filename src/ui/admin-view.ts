@@ -139,6 +139,18 @@ export const adminView = {
   },
   helpHTML(this: App): string {
     return /* HTML */ `<div class="panel stack" style="max-width:850px">
+      <aside class="notice" aria-labelledby="microphone-enhancements-warning">
+        <h2 id="microphone-enhancements-warning">
+          Warning: turn off microphone enhancements
+        </h2>
+        <p>
+          Software enhancements for microphones can mistake instruments for
+          background noise and filter them out. Before using automatic pitch
+          detection, find the microphone or audio-input settings in your
+          operating system and turn off enhancements such as noise suppression,
+          voice isolation, and automatic sound processing.
+        </p>
+      </aside>
       <h2>A complete tracker, in one file.</h2>
       <p>
         Open this HTML file directly in a modern desktop browser. No

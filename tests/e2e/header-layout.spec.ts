@@ -1,6 +1,21 @@
 import { expect, test } from '@playwright/test';
 import { classroomPage } from '../fixtures/classroom-page';
 
+test('help starts with the microphone enhancements warning', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await page.getByRole('button', { name: 'Help', exact: true }).click();
+
+  const helpPanel = page.locator('main > .panel');
+  await expect(helpPanel.locator(':scope > :first-child')).toContainText(
+    'Warning: turn off microphone enhancements',
+  );
+  await expect(helpPanel.locator('.notice')).toContainText(
+    'find the microphone or audio-input settings in your operating system',
+  );
+});
+
 for (const width of [390, 900, 1366, 1920]) {
   test(`header keeps navigation and utilities accessible at ${width}px`, async ({
     page,
