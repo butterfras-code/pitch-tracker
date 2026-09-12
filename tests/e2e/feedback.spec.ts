@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
+  closeSettings,
   saved,
   settings,
   sound,
@@ -103,6 +104,7 @@ test('auto-advance keeps the recorded name; Continue and Escape restore keyboard
   await settings(page);
   await page.getByLabel('Auto Advance', { exact: true }).check();
   await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await closeSettings(page);
   await page.locator('.current-display [data-status="low"]').click();
   await expect(page.locator('#studentIdentity')).toContainText('Lucas');
   await expect(page.locator('#pitchFeedback')).toContainText('Maya');
@@ -143,6 +145,7 @@ test('microphone popup waits for a recorded hold, pauses detection and resumes a
   await page
     .getByLabel('Feedback popup duration (seconds)', { exact: true })
     .press('Tab');
+  await closeSettings(page);
   await page.locator('#themeSelect').selectOption('boom-pow');
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
@@ -256,10 +259,13 @@ test('user duration saves from session settings, controls timing across themes a
   await duration.press('Tab');
   expect((await saved(page)).settings.feedbackDurationMs).toBe(1500);
   expect((await saved(page)).schema).toBe(3);
+  await closeSettings(page);
   await page.getByRole('button', { name: 'Full screen', exact: true }).click();
+  await settings(page);
   await page.screenshot({
     path: testInfo.outputPath('feedback-settings-desktop.png'),
   });
+  await closeSettings(page);
   await page.locator('#themeSelect').selectOption('boom-pow', { force: true });
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.locator('.current-display [data-status="correct"]').click();
@@ -314,12 +320,14 @@ test('user duration saves from session settings, controls timing across themes a
   await duration.fill('');
   await duration.press('Tab');
   expect((await saved(page)).settings.feedbackDurationMs).toBeNull();
+  await closeSettings(page);
   await page.locator('.current-display [data-status="correct"]').click();
   await expect(page.locator('.feedback-hint')).toHaveText(
     'Closes automatically after 1 second',
   );
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 390, height: 844 });
+  await settings(page);
   await duration.scrollIntoViewIfNeeded();
   await page.screenshot({
     path: testInfo.outputPath('feedback-settings-phone.png'),

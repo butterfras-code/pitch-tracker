@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
+  closeSettings,
   saved,
   settings,
   claps,
@@ -79,6 +80,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await page.getByLabel('Teacher details').uncheck();
   await page.getByLabel('Advance mode').selectOption('until-correct');
   expect((await saved(page)).sessionDefaults?.advance).toBe(true);
+  await closeSettings(page);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
@@ -96,12 +98,13 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await expect(page.getByLabel('Clap navigation')).toBeChecked();
   await expect(page.getByLabel('Teacher details')).toBeChecked();
   await expect(page.getByLabel('Advance mode')).toHaveValue('one-and-done');
-  await page.locator('.student.selected button.low').click();
-  expect((await saved(page)).activeStudent).toBe('student-2');
-  // The saved clap default drives the real listener only after microphone activation.
   await page
     .getByRole('button', { name: 'Enable microphone', exact: true })
     .click();
+  await closeSettings(page);
+  await page.locator('.student.selected button.low').click();
+  expect((await saved(page)).activeStudent).toBe('student-2');
+  // The saved clap default drives the real listener only after microphone activation.
   await sound(page, 0, 1000);
   await claps(page, 2);
   expect((await saved(page)).activeStudent).toBe('student-3');
@@ -158,6 +161,7 @@ test('restored defaults survive pitch saves and apply on resume', async ({
     'student',
   );
   await page.getByLabel('Teacher details').uncheck();
+  await closeSettings(page);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
   await page.getByRole('button', { name: 'Resume', exact: true }).click();

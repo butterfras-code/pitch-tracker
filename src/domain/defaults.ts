@@ -2,17 +2,35 @@ import { uid } from './identity';
 import type { TrackerData } from './tracker';
 const instruments = [
   'Flute',
-  'Clarinet',
-  'Saxophone',
   'Oboe',
   'Bassoon',
+  'Clarinet',
+  'Alto Saxophone',
   'Trumpet',
   'French Horn',
-  'Trombone',
-  'Euphonium',
+  'Trombone/Euphonium',
   'Tuba',
 ];
-const pitches = ['A', 'F#', 'Ab', 'C', 'F', 'C', 'F', 'F', 'F', 'F'];
+const pitches = ['A5', 'C5', 'C3', 'F#5', 'Ab4', 'F4', 'F3', 'F3', 'F2'];
+const demoInstruments = [
+  ...instruments.slice(0, 7),
+  'Trombone/Euphonium',
+  'Trombone/Euphonium',
+  'Tuba',
+];
+export function defaultPitchTargets(): TrackerData['configs'] {
+  return Object.fromEntries(
+    instruments.map((n, i) => [
+      n,
+      {
+        pitch: pitches[i],
+        offset: n === 'Clarinet' ? 10 : 0,
+        min: n === 'Clarinet' ? -10 : n === 'Tuba' ? -30 : -25,
+        max: n === 'Clarinet' ? 90 : n === 'Tuba' ? 30 : 25,
+      },
+    ]),
+  );
+}
 export function fresh(): TrackerData {
   const c = {
     id: uid(),
@@ -31,23 +49,14 @@ export function fresh(): TrackerData {
     ].map((name, i) => ({
       id: uid(),
       name,
-      instrument: instruments[i],
+      instrument: demoInstruments[i],
       archived: false,
     })),
   };
   return {
-    schema: 1,
+    schema: 2,
     classes: [c],
-    configs: Object.fromEntries(
-      instruments.map((n, i) => [
-        n,
-        {
-          pitch: pitches[i],
-          min: i === 1 ? 0 : i === 9 ? -30 : -25,
-          max: i === 1 ? 100 : i === 9 ? 30 : 25,
-        },
-      ]),
-    ),
+    configs: defaultPitchTargets(),
     settings: { a4: 440, hold: 2, stability: 35, gate: 0.015, advance: false },
     sessions: [],
     classId: c.id,

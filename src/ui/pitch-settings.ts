@@ -2,29 +2,7 @@
 import { parseNote, targetFrequency, type PitchTarget } from '../domain/pitch';
 import { esc } from './helpers';
 
-const notes = [
-  'C',
-  'C#',
-  'Db',
-  'D',
-  'D#',
-  'Eb',
-  'E',
-  'Fb',
-  'E#',
-  'F',
-  'F#',
-  'Gb',
-  'G',
-  'G#',
-  'Ab',
-  'A',
-  'A#',
-  'Bb',
-  'B',
-  'Cb',
-  'B#',
-];
+const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 const chromatic = [
   'C',
   'C♯',

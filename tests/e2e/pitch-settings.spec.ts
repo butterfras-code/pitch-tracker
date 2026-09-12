@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
+  closeSettings,
   saved,
   settings,
   sound,
@@ -105,6 +106,7 @@ test('graphical detection values and tuned playback feed actual measurement', as
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
   await settings(page);
+  await closeSettings(page);
   await page
     .getByRole('button', { name: 'Hear current target', exact: true })
     .click();
@@ -246,4 +248,44 @@ test('shared track scales and all three handles work without changing saved boun
   await scale.selectOption('50');
   await expect(scale).toHaveValue('200');
   await expect(row.locator('.max-slider')).toHaveValue('150');
+});
+test('reset loads score-order band defaults with the tuned clarinet range', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await page
+    .getByRole('button', { name: 'Reset pitch targets to defaults' })
+    .click();
+  await expect(page.locator('#configTable tbody tr')).toHaveCount(9);
+  await expect(
+    page
+      .locator('#configTable tbody tr')
+      .evaluateAll((rows) =>
+        rows.map((row) => (row as HTMLElement).dataset.instrument),
+      ),
+  ).resolves.toEqual([
+    'Flute',
+    'Oboe',
+    'Bassoon',
+    'Clarinet',
+    'Alto Saxophone',
+    'Trumpet',
+    'French Horn',
+    'Trombone/Euphonium',
+    'Tuba',
+  ]);
+  const clarinet = page.locator('#configTable tr[data-instrument="Clarinet"]');
+  await expect(clarinet.locator('.pitch')).toHaveValue('F#5');
+  await expect(clarinet.locator('.min')).toHaveValue('-10');
+  await expect(clarinet.locator('.target-offset')).toHaveValue('10');
+  await expect(clarinet.locator('.max')).toHaveValue('90');
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  expect((await saved(page)).configs.Clarinet).toEqual({
+    pitch: 'F#5',
+    offset: 10,
+    min: -10,
+    max: 90,
+  });
 });

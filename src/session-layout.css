@@ -105,6 +105,46 @@ body.session-active {
   gap: 12px;
   padding: 8px;
 }
+#sessionShell [data-ui-click='session-settings'] {
+  anchor-name: --session-settings-trigger;
+}
+#sessionShell .behavior-settings[popover] {
+  position: fixed;
+  position-anchor: --session-settings-trigger;
+  position-area: right span-bottom;
+  position-try-fallbacks: flip-inline, flip-block;
+  inset: auto;
+  width: min(420px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: 0 0 0 12px;
+  overflow-y: auto;
+  background-color: var(--card);
+  box-shadow: var(--surface-shadow);
+}
+#sessionShell .behavior-settings[popover]:not(:popover-open) {
+  display: none;
+}
+#sessionShell .session-settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+#sessionShell .session-settings-heading h2 {
+  font-size: var(--session-copy);
+}
+#sessionShell .session-settings-heading button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 48px;
+  padding: 8px;
+}
+#sessionShell .session-settings-heading svg {
+  width: 24px;
+  height: 24px;
+}
 #sessionShell .behavior-settings label {
   min-width: 0;
 }
@@ -242,11 +282,6 @@ body.session-active {
   top: -2px;
   height: 28px;
   width: 3px;
-}
-#sessionShell #checkHint {
-  font-size: var(--session-small);
-  line-height: 1.4;
-  margin-top: 4px;
 }
 #sessionShell .classroom-feedback {
   grid-column: 1 / -1;

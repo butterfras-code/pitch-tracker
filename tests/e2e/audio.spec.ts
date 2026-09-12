@@ -4,13 +4,13 @@ import {
   classroomPage,
   saved,
   settings,
+  closeSettings,
   sound,
   dismissFeedback,
 } from '../fixtures/classroom-page';
 
 test.beforeEach(async ({ page }) => {
   await classroomPage(page, 1);
-  await settings(page);
 });
 test('audio loop uses current tuning and gate and records a hold exactly once', async ({
   page,
@@ -48,12 +48,14 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   expect(attempt.cents).toBeCloseTo(0, 0);
   await sound(page, 442, 1200);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await settings(page);
   await page
     .getByRole('button', { name: 'Stop microphone', exact: true })
     .click();
   expect(await page.evaluate(() => window.syntheticAudio.stopped)).toBe(1);
 });
 test('denied permission leaves manual scoring available', async ({ page }) => {
+  await settings(page);
   await page.evaluate(() => {
     window.syntheticAudio.deny = true;
   });
@@ -63,6 +65,7 @@ test('denied permission leaves manual scoring available', async ({ page }) => {
   await expect(page.locator('#toast')).toContainText(
     'Microphone permission denied',
   );
+  await closeSettings(page);
   await page
     .locator('.current-display')
     .getByRole('button', { name: 'In range', exact: true })
@@ -72,6 +75,7 @@ test('denied permission leaves manual scoring available', async ({ page }) => {
 test('leaving a session while permission is pending stops the eventual stream', async ({
   page,
 }) => {
+  await settings(page);
   await page.evaluate(() => {
     window.syntheticAudio.pending = true;
   });
@@ -81,6 +85,7 @@ test('leaving a session while permission is pending stops the eventual stream', 
   await expect
     .poll(() => page.evaluate(() => window.syntheticAudio.requests))
     .toBe(1);
+  await closeSettings(page);
   page.once('dialog', (d) => d.accept());
   await page
     .getByRole('button', { name: 'Finish session', exact: true })
@@ -90,6 +95,7 @@ test('leaving a session while permission is pending stops the eventual stream', 
     .poll(() => page.evaluate(() => window.syntheticAudio.stopped))
     .toBe(1);
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
+  await settings(page);
   await expect(
     page.getByRole('button', { name: 'Enable microphone', exact: true }),
   ).toBeVisible();
@@ -97,9 +103,11 @@ test('leaving a session while permission is pending stops the eventual stream', 
 test('reference playback cancels holds and disconnection cleans up', async ({
   page,
 }) => {
+  await settings(page);
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
+  await closeSettings(page);
   await sound(page, 0);
   await sound(page, 440, 250);
   await page
@@ -111,6 +119,7 @@ test('reference playback cancels holds and disconnection cleans up', async ({
   await sound(page, 440, 2500);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
   await page.evaluate(() => window.syntheticAudio.endTrack?.());
+  await settings(page);
   await expect(
     page.getByRole('button', { name: 'Enable microphone', exact: true }),
   ).toBeVisible();
@@ -122,18 +131,21 @@ test('reference playback cancels holds and disconnection cleans up', async ({
 test('Escape during pending permission cannot start a later automatic check', async ({
   page,
 }) => {
+  await settings(page);
   await page.evaluate(() => {
     window.syntheticAudio.pending = true;
   });
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
+  await closeSettings(page);
   await expect
     .poll(() => page.evaluate(() => window.syntheticAudio.requests))
     .toBe(1);
   await page.locator('h1').click();
   await page.keyboard.press('Escape');
   await page.evaluate(() => window.syntheticAudio.release?.());
+  await settings(page);
   await expect(
     page.getByRole('button', { name: 'Stop microphone', exact: true }),
   ).toBeVisible();

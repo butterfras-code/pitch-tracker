@@ -98,7 +98,9 @@ test('delegated actions use restored data and the current session after undo', a
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(data)),
   });
-  await expect(page.locator('.focus h2')).toHaveText('Restored <Maya>');
+  await expect(page.locator('#studentIdentity h2')).toHaveText(
+    'Restored <Maya>',
+  );
   await page.locator('.focus').getByRole('button', { name: 'Too low' }).click();
   await page.getByRole('button', { name: 'Undo last change' }).click();
   await page

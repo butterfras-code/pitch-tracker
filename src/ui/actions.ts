@@ -14,7 +14,6 @@ export function createBindings(app: App): UiBindings {
       'session-view': ({ data }) =>
         app.workspace?.setView(data.view ?? 'split'),
       'session-sidebar': () => app.workspace?.toggleSidebar(),
-      'session-settings': () => app.workspace?.toggleSettings(),
       'session-fullscreen': () => app.workspace?.fullscreen(),
       'show-current': () => {
         app.search = '';
@@ -53,6 +52,7 @@ export function createBindings(app: App): UiBindings {
       'close-dialog': () => app.closeDialog(),
       'add-students': () => app.addStudent(),
       'add-instrument': () => app.addInstrument(),
+      'reset-pitch-targets': () => app.resetPitchTargets(),
       'toggle-focus': () => {
         app.focusMode = !app.focusMode;
         app.render();

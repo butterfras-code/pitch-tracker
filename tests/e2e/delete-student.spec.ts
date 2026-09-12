@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test } from '@playwright/test';
+import { closeSettings } from '../fixtures/classroom-page';
 
 test('student deletion supports cancellation, persists, and preserves session history', async ({
   page,
@@ -19,6 +20,7 @@ test('student deletion supports cancellation, persists, and preserves session hi
     .getByRole('button', { name: 'Session behavior settings', exact: true })
     .click();
   await page.getByLabel('Teacher details', { exact: true }).check();
+  await closeSettings(page);
   await page
     .locator('.student')
     .first()

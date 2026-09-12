@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import {
   classroomPage,
+  closeSettings,
   saved,
   settings,
   sound,
@@ -58,6 +59,7 @@ test('teacher details are opt-in; retry rounds, random and undo preserve results
   ).toBeVisible();
   await page.getByLabel('Auto Advance', { exact: true }).check();
   await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await closeSettings(page);
   await page
     .locator('.current-display')
     .getByRole('button', { name: 'Too low', exact: true })
@@ -74,7 +76,9 @@ test('teacher details are opt-in; retry rounds, random and undo preserve results
       exact: true,
     })
     .click();
+  await settings(page);
   await page.getByRole('button', { name: 'Random', exact: true }).click();
+  await closeSettings(page);
   expect((await saved(page)).activeStudent).toBe('student-1');
   await expect(
     page.locator('.student').nth(1).locator('.student-result, .badge'),
@@ -244,6 +248,7 @@ test('microphone errors and input switching preserve manual scoring', async ({
     .getByRole('button', { name: 'Enable microphone', exact: true })
     .click();
   await expect(page.locator('#micError')).toContainText('permission denied');
+  await closeSettings(page);
   await page
     .locator('.current-display')
     .getByRole('button', { name: 'In range', exact: true })
@@ -252,6 +257,7 @@ test('microphone errors and input switching preserve manual scoring', async ({
   await page.evaluate(() => {
     window.syntheticAudio.deny = false;
   });
+  await settings(page);
   await page
     .getByRole('button', { name: 'Enable microphone', exact: true })
     .click();

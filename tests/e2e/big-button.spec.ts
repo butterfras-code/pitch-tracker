@@ -33,15 +33,15 @@ for (const width of [390, 1440]) {
     expect(await saved(page)).toEqual(data);
     await expect(page.locator('.tuner')).toHaveCSS(
       'background-color',
-      'rgb(10, 35, 75)',
+      'rgb(0, 84, 189)',
     );
     await expect(page.locator('.session-target')).toHaveCSS(
       'color',
-      'rgb(255, 242, 207)',
+      'rgb(255, 252, 240)',
     );
     await expect(page.locator('.target-playback')).toHaveCSS(
       'background-color',
-      'rgb(201, 33, 19)',
+      'rgb(226, 35, 26)',
     );
     await page.screenshot({
       path: testInfo.outputPath(`big-button-${width}.png`),
@@ -52,12 +52,106 @@ for (const width of [390, 1440]) {
     await picker.selectOption('pitch-press', { force: true });
     await expect(page.locator('.session-target')).not.toHaveCSS(
       'color',
-      'rgb(255, 242, 207)',
+      'rgb(255, 252, 240)',
     );
     await picker.selectOption('big-button', { force: true });
     await page
       .getByRole('button', { name: 'Next student', exact: true })
       .click();
     await expect(page.locator('#studentIdentity')).toContainText('Lucas');
+  });
+}
+
+for (const [width, height] of [
+  [1366, 768],
+  [1920, 1080],
+  [390, 844],
+]) {
+  test.describe(`toy split ${width}x${height}`, () => {
+    test.use({
+      viewport: { width, height },
+      contextOptions: { screen: { width, height } },
+    });
+    test('grille stays behind readable panels and resets on theme switch', async ({
+      page,
+    }, testInfo) => {
+      await classroomPage(page, 32);
+      await page
+        .getByRole('button', { name: 'Split view', exact: true })
+        .click();
+      if (width > 390) {
+        await page
+          .getByRole('button', { name: 'Full screen', exact: true })
+          .click();
+        await expect
+          .poll(() => page.evaluate(() => !!document.fullscreenElement))
+          .toBe(true);
+      } else {
+        await page
+          .getByRole('button', { name: 'Hide controls', exact: true })
+          .click();
+      }
+      const picker = page.locator('#themeSelect');
+      await picker.selectOption('big-button', { force: true });
+      await expect(page.locator('body')).toHaveCSS(
+        'background-size',
+        '8px 8px, 8px 8px',
+      );
+      await expect(page.locator('body')).toHaveCSS(
+        'background-image',
+        /radial-gradient/,
+      );
+      await expect(page.locator('.student.selected')).toHaveCSS(
+        'background-color',
+        'rgb(255, 224, 0)',
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`toy-split-${width}.png`),
+        fullPage: true,
+      });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      if (width > 390) {
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollHeight <= innerHeight,
+          ),
+        ).toBe(true);
+        await page.locator('#cards').evaluate((e) => {
+          e.scrollTop = e.scrollHeight;
+        });
+        expect(
+          await page.locator('#cards').evaluate((e) => e.scrollTop),
+        ).toBeGreaterThan(0);
+      }
+      const data = await saved(page);
+      await picker.selectOption('cel-mech', { force: true });
+      await expect(page.locator('body')).not.toHaveCSS(
+        'background-size',
+        '8px 8px, 8px 8px',
+      );
+      await picker.selectOption('big-button', { force: true });
+      expect(await saved(page)).toEqual(data);
+      await page.locator('.target-playback').focus();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      await expect(page.locator('.target-playback')).toHaveCSS(
+        'outline-style',
+        'solid',
+      );
+      if (width === 390) {
+        await page
+          .getByRole('button', { name: 'Show controls', exact: true })
+          .click();
+      }
+      await page
+        .getByRole('button', { name: 'Class view', exact: true })
+        .click();
+      await expect(page.locator('.session-target')).toBeHidden();
+      await expect(page.locator('#cards')).toBeVisible();
+    });
   });
 }

@@ -12,3 +12,4 @@
 - This is not released yet it is still in early development so backwards compatability is not important, we can change anything if there's a good reason
 - Themeability is an important feature, Never use hardcoded CSS or UI package defaults
 - Full Screen Split View is the First Class experience when making UI changes
+- we don't have to run the full suite every time, run targetted tests

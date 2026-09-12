@@ -49,6 +49,7 @@ export interface App extends AppState {
   saveStudent(id: string): void;
   archiveStudent(id: string): void;
   addInstrument(): void;
+  resetPitchTargets(): void;
   saveSettings(): void;
   setFeedbackDuration(value: string): void;
   cls(): TrackerClass;

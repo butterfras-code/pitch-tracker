@@ -6,6 +6,7 @@
     "test": "npm run build && vitest run",
     "dev": "vite",
     "build": "vite build",
+    "deploy:pages": "npm run build && node scripts/deploy-pages.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",

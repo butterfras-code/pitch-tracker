@@ -2,7 +2,11 @@ import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
-import { dismissFeedback } from '../fixtures/classroom-page';
+import {
+  closeSettings,
+  dismissFeedback,
+  settings,
+} from '../fixtures/classroom-page';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(pathToFileURL(resolve('dist/index.html')).href);
@@ -19,6 +23,7 @@ async function startSession(page: Page) {
     .getByRole('button', { name: 'Session behavior settings', exact: true })
     .click();
   await page.getByLabel('Teacher details', { exact: true }).check();
+  await closeSettings(page);
 }
 
 test('class, student and settings forms retain their behavior', async ({
@@ -113,12 +118,14 @@ test('dynamic session controls, notes and history editing work after rerenders',
   await page.getByLabel('Filter roster').selectOption('not tested');
   await expect(page.locator('.student')).toHaveCount(9);
   await page.getByLabel('Filter roster').selectOption('all');
+  await settings(page);
   await focus.getByRole('button', { name: 'Notes', exact: true }).click();
   await page.getByLabel('Notes for this session').fill('Keep the air steady');
   await page
     .getByRole('dialog')
     .getByRole('button', { name: 'Save notes' })
     .click();
+  await settings(page);
   await page
     .getByRole('button', { name: 'Session notes', exact: true })
     .click();
@@ -129,8 +136,10 @@ test('dynamic session controls, notes and history editing work after rerenders',
     .getByRole('dialog')
     .getByRole('button', { name: 'Save notes' })
     .click();
+  await settings(page);
   await page.getByLabel('Auto Advance', { exact: true }).check();
   await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await closeSettings(page);
   await focus.getByRole('button', { name: 'Next student' }).click();
   const selected = await focus.getByRole('heading', { level: 2 }).textContent();
   // Scoring from the current student display must dispatch exactly one score.
@@ -139,7 +148,9 @@ test('dynamic session controls, notes and history editing work after rerenders',
   await expect(focus.getByRole('heading', { level: 2 })).not.toHaveText(
     selected!,
   );
+  await settings(page);
   await focus.getByRole('button', { name: 'Random', exact: true }).click();
+  await closeSettings(page);
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
   await expect(page.getByText('Good rehearsal', { exact: true })).toBeVisible();
@@ -177,6 +188,7 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
   await page.getByLabel('Search students').fill('1');
   await page.getByLabel('Search students').fill('');
   await expect(page.locator('.student').first()).toContainText('0 tries');
+  await settings(page);
   await page
     .getByRole('button', { name: 'Session notes', exact: true })
     .click();
@@ -185,12 +197,13 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
     .getByRole('dialog')
     .getByRole('button', { name: 'Cancel' })
     .click();
+  await closeSettings(page);
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: 'Help', exact: true }).click();
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
   }
-  await page.locator('.focus h2').click();
+  await page.locator('#studentIdentity h2').click();
   await page.keyboard.press('2');
   await expect(page.locator('.student').first()).toContainText('1 tries');
   await dismissFeedback(page);

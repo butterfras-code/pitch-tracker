@@ -8,40 +8,47 @@
 .press-brand {
   display: none;
 }
-:root[data-treatment='print'] {
-  --press-red: #e63212;
-  --press-yellow: #ffe500;
+:root[data-theme='pitch-press'] {
+  --press-red: var(--low);
+  --press-yellow: var(--correct-bg);
   --press-grain: url('../assets/press-grain.png');
-  scrollbar-color: var(--ink) var(--bg);
+  scrollbar-color: var(--muted) var(--bg);
+  caret-color: var(--accent);
 }
-:root[data-treatment='print'] body {
-  background-image: var(--press-grain);
+:root[data-theme='pitch-press'] body {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--bg) 85%, transparent),
+      color-mix(in srgb, var(--bg) 85%, transparent)
+    ),
+    var(--press-grain);
 }
-:root[data-treatment='print'] ::selection {
+:root[data-theme='pitch-press'] ::selection {
   background: var(--press-yellow);
   color: var(--ink);
 }
-:root[data-treatment='print'] header h1 {
+:root[data-theme='pitch-press'] header h1 {
   font-weight: 400;
 }
-:root[data-treatment='print'] .standard-brand {
+:root[data-theme='pitch-press'] .standard-brand {
   display: none;
 }
-:root[data-treatment='print'] .press-brand {
+:root[data-theme='pitch-press'] .press-brand {
   display: inline;
   white-space: nowrap;
 }
-:root[data-treatment='print'] .press-brand > span {
+:root[data-theme='pitch-press'] .press-brand > span {
   color: var(--press-red);
 }
-:root[data-treatment='print'] :is(button, .student-result) {
-  border: 2px solid var(--ink);
-  background-image: var(--press-grain);
+:root[data-theme='pitch-press'] :is(button, .student-result) {
+  border: 1px solid var(--edge);
+  background-image: none;
 }
-:root[data-treatment='print'] button:active:not(:disabled) {
-  translate: 2px 2px;
+:root[data-theme='pitch-press'] button:active:not(:disabled) {
+  translate: 1px 1px;
+  box-shadow: var(--button-pressed-shadow);
 }
-:root[data-treatment='print'] .tabs button {
+:root[data-theme='pitch-press'] .tabs button {
   border: 0;
   box-shadow: none;
   font:
@@ -50,40 +57,41 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-:root[data-treatment='print'] .tabs button.on {
+:root[data-theme='pitch-press'] .tabs button.on {
   color: var(--ink);
   box-shadow: inset 0 -5px var(--press-red);
 }
-:root[data-treatment='print']
+:root[data-theme='pitch-press']
   :is(.panel, .student, dialog, .behavior-settings) {
   border-width: 2px;
-  background-image: var(--press-grain);
+  border-color: var(--line);
+  background-image: none;
 }
-:root[data-treatment='print'] :is(h2, h3) {
+:root[data-theme='pitch-press'] :is(h2, h3) {
   font-weight: 400;
   letter-spacing: 0.015em;
 }
-:root[data-treatment='print'] .student .name {
+:root[data-theme='pitch-press'] .student .name {
   border: 0;
   box-shadow: none;
 }
-:root[data-treatment='print'] .student.selected {
+:root[data-theme='pitch-press'] .student.selected {
   border-color: var(--ink);
-  box-shadow: 4px 4px 0 var(--ink);
+  box-shadow: inset 0 4px var(--ink);
   background-color: var(--press-yellow);
 }
-:root[data-treatment='print'] .badge {
+:root[data-theme='pitch-press'] .badge {
   border: 1px solid var(--ink);
 }
 /* Session composition, sizes and feedback content belong to session-layout.css. */
-:root[data-treatment='print'] .current-display {
-  background: transparent;
-  box-shadow: none;
+:root[data-theme='pitch-press'] .current-display {
+  background: var(--card);
+  box-shadow: var(--surface-shadow);
 }
-:root[data-treatment='print'] #studentIdentity {
+:root[data-theme='pitch-press'] #studentIdentity {
   border-bottom-color: var(--ink);
 }
-:root[data-treatment='print']
+:root[data-theme='pitch-press']
   :is(
     .target-caption,
     .target-frequency,
@@ -95,12 +103,16 @@
   font-family: 'Pitch Press', sans-serif;
   text-transform: uppercase;
 }
-:root[data-treatment='print'] .current-display .tuner {
-  background: transparent;
-  box-shadow: none;
-  border-color: var(--ink);
+:root[data-theme='pitch-press'] .current-display .tuner {
+  background: var(--display-bg);
+  color: var(--display-ink);
+  box-shadow:
+    inset 0 1px var(--line),
+    inset 0 -1px var(--line);
+  border-color: var(--line);
 }
-:root[data-treatment='print'] .meter {
+/* Graduations belong to the functional pitch ruler, not a page pattern. */
+:root[data-theme='pitch-press'] .meter {
   border-radius: 0;
   background:
     linear-gradient(var(--ink), var(--ink)) center / 3px 100% no-repeat,
@@ -119,13 +131,13 @@
       )
       right center / 34% 100% no-repeat;
 }
-:root[data-treatment='print'] .needle {
+:root[data-theme='pitch-press'] .needle {
   background: var(--ink);
 }
-:root[data-treatment='print'] .progress {
+:root[data-theme='pitch-press'] .progress {
   border-radius: 0;
 }
-:root[data-treatment='print']
+:root[data-theme='pitch-press']
   .session-shell[data-result='correct']
   .classroom-feedback {
   background-color: var(--press-yellow);
@@ -144,10 +156,94 @@
   font-weight: 400;
   font-display: swap;
 }
-:root[data-treatment='print'] .target-pitch {
+:root[data-theme='pitch-press'] .target-pitch {
   font-family: 'Press Slab', Georgia, serif;
 }
-:root[data-treatment='print'] .press-brand {
+:root[data-theme='pitch-press'] .press-brand {
   mask-image: url('../assets/press-ink.png');
   mask-repeat: repeat;
+}
+
+/* Paper, ink and ruled sections create hierarchy without changing session geometry. */
+:root[data-theme='pitch-press'] .app-header {
+  background-color: var(--card);
+  box-shadow:
+    0 3px 0 var(--ink),
+    0 5px 0 var(--card);
+}
+:root[data-theme='pitch-press'] ::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+:root[data-theme='pitch-press'] .student-heading {
+  border-bottom-color: var(--ink);
+  box-shadow:
+    0 3px 0 var(--card),
+    0 4px 0 var(--line);
+}
+/* Paired vermilion rules frame the ink block like a printed poster. */
+:root[data-theme='pitch-press'] .session-target {
+  background-color: var(--ink);
+  color: var(--card);
+  box-shadow:
+    inset 0 4px var(--press-red),
+    inset 0 -4px var(--press-red);
+}
+:root[data-theme='pitch-press'] .target-frequency {
+  color: inherit;
+}
+:root[data-theme='pitch-press'] .target-caption {
+  color: var(--press-yellow);
+}
+:root[data-theme='pitch-press'] .target-playback {
+  background-color: var(--card);
+  color: var(--ink);
+  border-color: var(--card);
+  box-shadow: var(--button-shadow);
+}
+:root[data-theme='pitch-press'] .target-playback:hover:not(:disabled) {
+  background-color: var(--press-yellow);
+  border-color: var(--press-yellow);
+}
+:root[data-theme='pitch-press'] .student {
+  background-image: linear-gradient(var(--line), var(--line));
+  background-size: calc(100% - 24px) 1px;
+  background-position: center bottom 38px;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+:root[data-theme='pitch-press'] .student .name {
+  font-family: var(--heading-font);
+  font-weight: 400;
+  background: transparent;
+}
+:root[data-theme='pitch-press'] .dashboard-header h3 {
+  color: var(--card);
+  background-color: var(--ink);
+  box-shadow:
+    4px 0 var(--ink),
+    -4px 0 var(--ink);
+}
+:root[data-theme='pitch-press'] .session-sidebar button:not(.primary) {
+  box-shadow: none;
+  border-color: var(--line);
+}
+:root[data-theme='pitch-press'] .view-picker [aria-pressed='true'] {
+  border-color: var(--ink);
+}
+:root[data-theme='pitch-press'] .upcoming-student strong {
+  font-family: var(--heading-font);
+  font-weight: 400;
+}
+:root[data-theme='pitch-press'] :is(.student-result, .scorebar button) {
+  box-shadow: inset 0 -3px currentColor;
+}
+
+:root[data-theme='pitch-press'] .target-playback:focus-visible {
+  outline-color: var(--press-yellow);
+}
+
+/* Keep the shared staff preview's content width when its button is skinned. */
+:root[data-theme='pitch-press'] .clef-toggle {
+  border-width: 2px;
 }
