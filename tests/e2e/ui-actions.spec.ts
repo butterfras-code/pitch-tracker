@@ -268,7 +268,7 @@ test('only registered actions execute, and disabled controls stay inactive', asy
   await page
     .locator('.student')
     .first()
-    .locator('button.correct')
+    .locator('[data-ui-click="record"].correct')
     .dispatchEvent('click');
   await page.evaluate(() => {
     for (const name of ['constructor', 'record("correct")']) {

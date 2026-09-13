@@ -257,7 +257,7 @@ body.session-active {
   font-size: clamp(40px, 3.2vw, 124px);
   line-height: 1.1;
 }
-#sessionShell :is(#liveHz, #liveCents) {
+#sessionShell :is(.tuner-frequency, .tuner-cents) {
   font-size: var(--session-small);
 }
 #sessionShell #liveHz:empty {
@@ -622,9 +622,9 @@ body.session-active {
 #sessionShell .student-footer:has(#roundActions:empty) {
   display: none;
 }
-#sessionShell[data-range='low'] .tuner-section .low,
-#sessionShell[data-range='correct'] .tuner-section .correct,
-#sessionShell[data-range='high'] .tuner-section .high {
+#sessionShell[data-range='low'] .tuner-section[data-live-practice] .low,
+#sessionShell[data-range='correct'] .tuner-section[data-live-practice] .correct,
+#sessionShell[data-range='high'] .tuner-section[data-live-practice] .high {
   outline: 3px solid currentColor;
   outline-offset: 2px;
   animation: var(--range-animation);
@@ -663,7 +663,10 @@ body.session-active {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  #sessionShell[data-range] .tuner-section .scorebar button {
+  #sessionShell[data-range]
+    .tuner-section[data-live-practice]
+    .scorebar
+    button {
     animation: none;
   }
 }
@@ -844,6 +847,19 @@ body.session-active {
 #sessionShell .card-practice:empty {
   display: none;
 }
+#sessionShell .inactive-practice {
+  display: none;
+  pointer-events: none;
+}
+#sessionShell[data-view='class'] .student:not(.selected) .inactive-practice {
+  display: contents;
+}
+#sessionShell .inactive-practice :is(button, meter) {
+  pointer-events: none;
+}
+#sessionShell .inactive-practice .tuner-section {
+  opacity: 0.62;
+}
 #sessionShell[data-view='class'] .session-content {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
@@ -954,7 +970,7 @@ body.session-active {
   font-size: clamp(28px, 1.6vw, 48px);
   line-height: 1.1;
 }
-#sessionShell .card-practice #liveHz {
+#sessionShell .card-practice .tuner-frequency {
   display: none;
 }
 #sessionShell .card-practice .meter {
@@ -1042,7 +1058,7 @@ body.session-active {
   grid-row: 1;
   margin-right: 8px;
 }
-#sessionShell .card-practice #liveCents {
+#sessionShell .card-practice .tuner-cents {
   grid-column: 2;
   grid-row: 1;
 }
@@ -1050,7 +1066,7 @@ body.session-active {
   grid-column: 1 / -1;
 }
 
-#sessionShell .card-practice #liveCents {
+#sessionShell .card-practice .tuner-cents {
   min-height: 0;
   line-height: 1.2;
   white-space: nowrap;
@@ -1067,20 +1083,20 @@ body.session-active {
   align-items: center;
   flex-wrap: nowrap;
 }
-#sessionShell #inputStatus {
+#sessionShell .input-status {
   display: flex;
   flex: none;
   width: 24px;
   height: 24px;
   color: var(--muted);
 }
-#sessionShell #inputStatus svg {
+#sessionShell .input-status svg {
   width: 100%;
   height: 100%;
 }
-#sessionShell #inputStatus:not([data-microphone='off']) .microphone-off-mark,
+#sessionShell .input-status:not([data-microphone='off']) .microphone-off-mark,
 #sessionShell
-  #inputStatus:not([data-microphone='paused'])
+  .input-status:not([data-microphone='paused'])
   .microphone-paused-mark {
   display: none;
 }
@@ -1256,6 +1272,75 @@ body.session-active {
     grid-column: 2;
     grid-row: 2;
   }
+}
+
+/* Student cards share a compact, overflow-safe identity shell in every view. */
+#sessionShell .student {
+  overflow: hidden;
+  padding-block-start: 6px;
+}
+#sessionShell .roster-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.25em 36px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 36px;
+}
+#sessionShell .roster-header .roster-instrument {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#sessionShell .roster-header .turn-label {
+  min-width: 0;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+}
+#sessionShell .roster-identity {
+  display: flex;
+  flex-wrap: nowrap;
+  min-height: 44px;
+}
+#sessionShell .roster-name-navigation,
+#sessionShell .roster-name-navigation .name {
+  min-width: 0;
+}
+#sessionShell .roster-name-navigation .name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#sessionShell .roster-rating {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  gap: 6px;
+  text-align: center;
+}
+#sessionShell .roster-rating > small {
+  display: block;
+}
+#sessionShell .card-result-empty {
+  color: var(--muted);
+  font-size: var(--session-small);
+  white-space: nowrap;
+}
+#sessionShell[data-view='class'] .roster-rating {
+  display: none;
+}
+#sessionShell .outside-filter-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* The compact toggle and telemetry convey status without resizing the card. */
 #sessionShell .card-practice #classroomStatus {

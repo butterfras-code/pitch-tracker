@@ -62,7 +62,9 @@ for (const width of [390, 1920]) {
       await card.getByRole('button', { name: 'Maya', exact: true }).click();
       if (width === 1920) await sessionControl(page, 'Full screen');
       for (const status of ['low', 'correct', 'high']) {
-        await page.locator(`.tuner-section button.${status}`).click();
+        await page
+          .locator(`.tuner-section[data-live-practice] button.${status}`)
+          .click();
         await dismissFeedback(page);
         await page.locator('#roundLabel').hover();
         const skin = (el: Element) => {
@@ -78,7 +80,9 @@ for (const width of [390, 1920]) {
           ];
         };
         expect(await card.locator('.student-result').evaluate(skin)).toEqual(
-          await page.locator(`.tuner-section button.${status}`).evaluate(skin),
+          await page
+            .locator(`.tuner-section[data-live-practice] button.${status}`)
+            .evaluate(skin),
         );
       }
       await card.scrollIntoViewIfNeeded();
@@ -89,8 +93,13 @@ for (const width of [390, 1920]) {
       });
       await expect(toggle).toBeVisible();
       const icon = (await toggle.boundingBox())!;
-      const name = (await card.locator('.name').boundingBox())!;
-      expect(icon.y + icon.height / 2).toBeCloseTo(name.y + name.height / 2, 0);
+      const instrument = (await card
+        .locator('.roster-instrument')
+        .boundingBox())!;
+      expect(icon.y + icon.height / 2).toBeCloseTo(
+        instrument.y + instrument.height / 2,
+        0,
+      );
       await toggle.click();
       await expect(toggle).toHaveAttribute('aria-pressed', 'true');
       expect((await saved(page)).sessions[0].absent).toContain('student-1');

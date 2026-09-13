@@ -114,6 +114,39 @@ test('class scoring preserves the live tuner across views and resolves feedback 
   );
 });
 
+test('class cards show inert tuner shells and transfer the one live tuner on selection', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await sessionControl(page, 'Class view');
+
+  const liveNote = await page.locator('#liveNote').elementHandle();
+  await expect(page.locator('[data-live-practice]')).toHaveCount(2);
+  await expect(
+    page.locator('.student:not(.selected) .inactive-practice'),
+  ).toHaveCount(2);
+  await expect(
+    page.locator('.student:not(.selected) .inactive-practice').first(),
+  ).toBeVisible();
+  await expect(page.locator('.selected .inactive-practice')).toBeHidden();
+  await expect(page.locator('.inactive-practice [data-ui-click]')).toHaveCount(
+    0,
+  );
+  expect(
+    await page
+      .locator('.inactive-practice [id]')
+      .evaluateAll((elements) => elements.map((element) => element.id)),
+  ).toEqual([]);
+
+  const previous = page.locator('[data-student-id="student-1"]');
+  const next = page.locator('[data-student-id="student-2"]');
+  await next.locator('.name').click();
+  await expect(next.locator('.inactive-practice')).toBeHidden();
+  await expect(previous.locator('.inactive-practice')).toBeVisible();
+  await expect(next.locator('[data-live-practice]')).toHaveCount(2);
+  expect(await liveNote!.evaluate((element) => element.isConnected)).toBe(true);
+});
+
 test('view menu supports keyboard dismissal and fullscreen retains toolbar', async ({
   page,
 }) => {

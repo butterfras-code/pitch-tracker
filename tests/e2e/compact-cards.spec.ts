@@ -47,7 +47,7 @@ for (const width of [1366, 1920]) {
     const geometry = () =>
       page
         .locator(
-          '.selected .session-target, .selected .input-signal, .selected .tuner, .selected .scorebar',
+          '.selected .session-target[data-live-practice], .selected .tuner-section[data-live-practice] .input-signal, .selected .tuner-section[data-live-practice] .tuner, .selected .tuner-section[data-live-practice] .scorebar',
         )
         .evaluateAll((elements) =>
           elements.map((el) => {
@@ -82,9 +82,13 @@ for (const width of [1366, 1920]) {
       'Resume listening',
     );
     expect(await geometry()).toEqual(positions);
-    await card.locator('.tuner-section button.correct').click();
+    await card
+      .locator('.tuner-section[data-live-practice] button.correct')
+      .click();
     await dismissFeedback(page);
-    await expect(card.locator('.roster-rating')).toHaveText('LastIn range');
+    await expect(card.locator('.roster-rating')).toHaveText(
+      'Last resultIn range',
+    );
     expect(await card.boundingBox()).toEqual(before);
     await page.screenshot({
       path: testInfo.outputPath(`compact-vintage-${width}.png`),
@@ -113,7 +117,7 @@ test('target surface uses paired theme colors and direct toggle preserves attend
   ]) {
     await page.locator('#themeSelect').selectOption(theme);
     const colors = await page
-      .locator('.selected .session-target')
+      .locator('.selected .session-target[data-live-practice]')
       .evaluate((el) => {
         const style = getComputedStyle(el);
         const sample = document.createElement('span');
@@ -164,8 +168,68 @@ test('long instrument names reserve rating space before the first attempt', asyn
   const card = page.locator('.selected');
   const before = await card.boundingBox();
   for (const rating of ['low', 'correct', 'high']) {
-    await card.locator(`.tuner-section button.${rating}`).click();
+    await card
+      .locator(`.tuner-section[data-live-practice] button.${rating}`)
+      .click();
     await dismissFeedback(page);
     expect(await card.boundingBox()).toEqual(before);
   }
+});
+
+test('student card identity stays single-line and view-specific', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  const data = await classroomPage(page, 8);
+  data.sessions[0].roster[0].name =
+    'Alexandria Montgomery-Worthington the Third';
+  data.sessions[0].roster[0].instrument = 'Contrabass Trombone and Euphonium';
+  data.configs['Contrabass Trombone and Euphonium'] = data.configs.Flute;
+  await page.evaluate(
+    (data) =>
+      localStorage.setItem('mouthpiece.pitchtracker.v1', JSON.stringify(data)),
+    data,
+  );
+  await page.reload();
+
+  const card = page.locator('.student').first();
+  await expect(card.locator('.roster-rating')).toBeVisible();
+  await expect(card.locator('.card-practice')).toBeHidden();
+  const splitGeometry = await card.evaluate((element) => {
+    const instrument =
+      element.querySelector<HTMLElement>('.roster-instrument')!;
+    const name = element.querySelector<HTMLElement>('.name')!;
+    const header = element.querySelector<HTMLElement>('.roster-header')!;
+    const positions = [...header.children].map((child) => {
+      const box = (child as HTMLElement).getBoundingClientRect();
+      return Math.round(box.y + box.height / 2);
+    });
+    return {
+      noCardOverflow:
+        element.scrollWidth === element.clientWidth &&
+        element.scrollHeight === element.clientHeight,
+      headerIsOneRow: new Set(positions).size === 1,
+      instrument: [
+        getComputedStyle(instrument).whiteSpace,
+        getComputedStyle(instrument).textOverflow,
+      ],
+      name: [
+        getComputedStyle(name).whiteSpace,
+        getComputedStyle(name).textOverflow,
+      ],
+    };
+  });
+  expect(splitGeometry).toEqual({
+    noCardOverflow: true,
+    headerIsOneRow: true,
+    instrument: ['nowrap', 'ellipsis'],
+    name: ['nowrap', 'ellipsis'],
+  });
+
+  await sessionControl(page, 'Class view');
+  await expect(card.locator('.roster-rating')).toBeHidden();
+  const heights = await page
+    .locator('.student')
+    .evaluateAll((cards) => cards.map((item) => item.clientHeight));
+  expect(new Set(heights).size).toBe(1);
 });

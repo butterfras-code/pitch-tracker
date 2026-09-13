@@ -136,11 +136,12 @@ for (const width of [390, 1440]) {
       'color',
       'rgb(22, 43, 64)',
     );
-    await expect(page.locator('.tuner')).toHaveCSS(
-      'background-color',
-      'rgb(23, 23, 23)',
-    );
-    await expect(page.locator('.tuner')).toHaveCSS('box-shadow', /inset/);
+    await expect(
+      page.locator('.tuner-section[data-live-practice] .tuner'),
+    ).toHaveCSS('background-color', 'rgb(23, 23, 23)');
+    await expect(
+      page.locator('.tuner-section[data-live-practice] .tuner'),
+    ).toHaveCSS('box-shadow', /inset/);
     await expect(page.locator('#liveNote')).toHaveCSS(
       'color',
       'rgb(255, 230, 0)',
@@ -154,10 +155,9 @@ for (const width of [390, 1440]) {
       'font-family',
       'monospace',
     );
-    await expect(page.locator('.needle')).toHaveCSS(
-      'background-color',
-      'rgb(255, 209, 128)',
-    );
+    await expect(
+      page.locator('.tuner-section[data-live-practice] .needle'),
+    ).toHaveCSS('background-color', 'rgb(255, 209, 128)');
     for (const [status, color] of [
       ['low', 'rgb(0, 27, 38)'],
       ['correct', 'rgb(23, 32, 0)'],

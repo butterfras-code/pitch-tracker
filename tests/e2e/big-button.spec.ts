@@ -32,15 +32,14 @@ for (const width of [390, 1440]) {
     expect(await geometry()).toEqual(before);
     await expect(student).toHaveAttribute('data-retained', 'yes');
     expect(await saved(page)).toEqual(data);
-    await expect(page.locator('.tuner')).toHaveCSS(
-      'background-color',
-      'rgb(0, 84, 189)',
-    );
-    await expect(page.locator('.session-target')).toHaveCSS(
+    await expect(
+      page.locator('.tuner-section[data-live-practice] .tuner'),
+    ).toHaveCSS('background-color', 'rgb(0, 84, 189)');
+    await expect(page.locator('.session-target[data-live-practice]')).toHaveCSS(
       'color',
       'rgb(255, 252, 240)',
     );
-    await expect(page.locator('.target-playback')).toHaveCSS(
+    await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
       'background-color',
       'rgb(226, 35, 26)',
     );
@@ -51,10 +50,9 @@ for (const width of [390, 1440]) {
     await page.reload();
     await expect(picker).toHaveValue('big-button');
     await picker.selectOption('pitch-press', { force: true });
-    await expect(page.locator('.session-target')).not.toHaveCSS(
-      'color',
-      'rgb(255, 252, 240)',
-    );
+    await expect(
+      page.locator('.session-target[data-live-practice]'),
+    ).not.toHaveCSS('color', 'rgb(255, 252, 240)');
     await picker.selectOption('big-button', { force: true });
     await page
       .getByRole('button', { name: 'Next student', exact: true })
@@ -128,10 +126,10 @@ for (const [width, height] of [
       );
       await picker.selectOption('big-button', { force: true });
       expect(await saved(page)).toEqual(data);
-      await page.locator('.target-playback').focus();
+      await page.locator('[data-ui-click="reference-tone"]').focus();
       await page.keyboard.press('Tab');
       await page.keyboard.press('Shift+Tab');
-      await expect(page.locator('.target-playback')).toHaveCSS(
+      await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'outline-style',
         'solid',
       );

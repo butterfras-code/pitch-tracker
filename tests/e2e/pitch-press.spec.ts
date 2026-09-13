@@ -18,10 +18,16 @@ for (const width of [390, 1440]) {
     await expect(
       page.getByRole('heading', { name: 'Pitch Tracker', exact: true }),
     ).toBeVisible();
-    await expect(page.locator('.target-pitch')).toHaveText('A4');
-    await expect(page.locator('.target-frequency')).toHaveText('440.0 Hz');
-    await expect(page.locator('.session-target')).toBeVisible();
-    await page.locator('.target-playback').click();
+    await expect(
+      page.locator('.session-target[data-live-practice] .target-pitch'),
+    ).toHaveText('A4');
+    await expect(
+      page.locator('.session-target[data-live-practice] .target-frequency'),
+    ).toHaveText('440.0 Hz');
+    await expect(
+      page.locator('.session-target[data-live-practice]'),
+    ).toBeVisible();
+    await page.locator('[data-ui-click="reference-tone"]').click();
     await expect
       .poll(() =>
         page.evaluate(() => window.syntheticAudio.oscillatorFrequency),
@@ -60,7 +66,9 @@ for (const width of [390, 1440]) {
       '',
     );
     await theme.selectOption('cel-mech');
-    await expect(page.locator('.session-target')).toBeVisible();
+    await expect(
+      page.locator('.session-target[data-live-practice]'),
+    ).toBeVisible();
     await expect(page.locator('.press-brand')).toBeHidden();
     await expect(page.locator('.standard-brand')).toBeVisible();
     await expect(page.locator('#studentIdentity h2')).toHaveText('Lucas');
@@ -118,18 +126,15 @@ for (const [width, height] of [
       await picker.selectOption('pitch-press', { force: true });
       await page.evaluate(() => document.fonts.ready);
       const data = await saved(page);
-      await expect(page.locator('.session-target')).toHaveCSS(
-        'background-color',
-        'rgb(21, 21, 21)',
-      );
-      await expect(page.locator('.session-target')).toHaveCSS(
-        'color',
-        'rgb(255, 249, 234)',
-      );
-      await expect(page.locator('.target-frequency')).toHaveCSS(
-        'color',
-        'rgb(255, 249, 234)',
-      );
+      await expect(
+        page.locator('.session-target[data-live-practice]'),
+      ).toHaveCSS('background-color', 'rgb(21, 21, 21)');
+      await expect(
+        page.locator('.session-target[data-live-practice]'),
+      ).toHaveCSS('color', 'rgb(255, 249, 234)');
+      await expect(
+        page.locator('.session-target[data-live-practice] .target-frequency'),
+      ).toHaveCSS('color', 'rgb(255, 249, 234)');
       await expect(page.locator('.current-display')).toHaveCSS(
         'background-color',
         'rgb(255, 249, 234)',
@@ -160,19 +165,18 @@ for (const [width, height] of [
         expect(await cards.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
       }
       await picker.selectOption('cel-mech', { force: true });
-      await expect(page.locator('.session-target')).not.toHaveCSS(
-        'background-color',
-        'rgb(21, 21, 21)',
-      );
+      await expect(
+        page.locator('.session-target[data-live-practice]'),
+      ).not.toHaveCSS('background-color', 'rgb(21, 21, 21)');
       await picker.selectOption('pitch-press', { force: true });
       expect(await saved(page)).toEqual(data);
       await page.keyboard.press('Tab');
-      await page.locator('.target-playback').focus();
-      await expect(page.locator('.target-playback')).toHaveCSS(
+      await page.locator('[data-ui-click="reference-tone"]').focus();
+      await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'outline-style',
         'solid',
       );
-      await expect(page.locator('.target-playback')).toHaveCSS(
+      await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'outline-color',
         'rgb(255, 230, 0)',
       );

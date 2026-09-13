@@ -354,7 +354,9 @@ test('live range effects follow pitch and clear on silence, pause and navigation
     await sound(page, 0);
     await sound(page, frequency, 250);
     await expect(shell).toHaveAttribute('data-range', range);
-    const button = page.locator(`.tuner-section button.${range}`);
+    const button = page.locator(
+      `.tuner-section[data-live-practice] button.${range}`,
+    );
     expect(
       await button.evaluate((el) => getComputedStyle(el).animationName),
     ).not.toBe('none');
@@ -376,7 +378,7 @@ test('live range effects follow pitch and clear on silence, pause and navigation
   await page.emulateMedia({ reducedMotion: 'reduce' });
   expect(
     await page
-      .locator('.tuner-section .correct')
+      .locator('.tuner-section[data-live-practice] .correct')
       .evaluate((el) => getComputedStyle(el).animationName),
   ).toBe('none');
 });
@@ -388,11 +390,11 @@ test('session groups listening input, student identities and tuner scoring', asy
   await classroomPage(page);
   await expect(page.locator('#studentIdentity')).not.toContainText('Target');
   const rect = (selector: string) => page.locator(selector).boundingBox();
-  const mic = (await rect('.input-signal'))!;
-  const tuner = (await rect('.tuner'))!;
-  const scores = (await rect('.tuner-section .scorebar'))!;
+  const mic = (await rect('.tuner-section[data-live-practice] .input-signal'))!;
+  const tuner = (await rect('.tuner-section[data-live-practice] .tuner'))!;
+  const scores = (await rect('.tuner-section[data-live-practice] .scorebar'))!;
   const listening = (await rect('#pauseListening'))!;
-  const playback = (await rect('.target-playback'))!;
+  const playback = (await rect('[data-ui-click="reference-tone"]'))!;
   expect(mic.y + mic.height).toBeLessThanOrEqual(tuner.y);
   expect(Math.abs(listening.y - playback.y)).toBeLessThan(2);
   await expect(page.locator('.target-actions #pauseListening')).toBeVisible();

@@ -51,7 +51,7 @@ for (const [width, height] of [
       );
       expect(await saved(page)).toEqual(data);
       // Large inline artwork must decode, not just appear in the CSS source.
-      for (const selector of ['body', '.session-target']) {
+      for (const selector of ['body', '.session-target[data-live-practice]']) {
         expect(
           await page.locator(selector).evaluate(async (element) => {
             const background = getComputedStyle(element).backgroundImage;
@@ -64,15 +64,14 @@ for (const [width, height] of [
           }),
         ).toBe(true);
       }
-      await expect(page.locator('.tuner')).toHaveCSS(
-        'background-color',
-        'rgb(9, 19, 34)',
-      );
-      await expect(page.locator('.target-playback')).toHaveCSS(
+      await expect(
+        page.locator('.tuner-section[data-live-practice] .tuner'),
+      ).toHaveCSS('background-color', 'rgb(9, 19, 34)');
+      await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'background-color',
         'rgb(191, 0, 123)',
       );
-      await page.locator('.target-playback').click();
+      await page.locator('[data-ui-click="reference-tone"]').click();
       await expect
         .poll(() =>
           page.evaluate(() => window.syntheticAudio.oscillatorFrequency),
@@ -87,10 +86,9 @@ for (const [width, height] of [
         .click();
       await expect(page.locator('#studentIdentity')).toContainText('Lucas');
       await picker.selectOption('big-button', { force: true });
-      await expect(page.locator('.tuner')).toHaveCSS(
-        'background-color',
-        'rgb(0, 84, 189)',
-      );
+      await expect(
+        page.locator('.tuner-section[data-live-practice] .tuner'),
+      ).toHaveCSS('background-color', 'rgb(0, 84, 189)');
       await picker.selectOption('lisa-lives', { force: true });
       await page.reload();
       await expect(picker).toHaveValue('lisa-lives');

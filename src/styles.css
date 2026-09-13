@@ -248,8 +248,8 @@ main {
 .tuner small {
   color: inherit;
 }
-#liveHz,
-#liveCents,
+.tuner-frequency,
+.tuner-cents,
 .range-readouts b,
 .detection-control output {
   font-family: var(--data-font);

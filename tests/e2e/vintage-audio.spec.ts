@@ -65,11 +65,10 @@ for (const [width, height] of [
           }),
         ).toBe(true);
       }
-      await expect(page.locator('.tuner')).toHaveCSS(
-        'background-color',
-        'rgb(246, 205, 130)',
-      );
-      await expect(page.locator('.target-playback')).toHaveCSS(
+      await expect(
+        page.locator('.tuner-section[data-live-practice] .tuner'),
+      ).toHaveCSS('background-color', 'rgb(246, 205, 130)');
+      await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'background-color',
         'rgb(166, 44, 33)',
       );
@@ -77,7 +76,7 @@ for (const [width, height] of [
         path: testInfo.outputPath(`vintage-audio-${width}.png`),
         fullPage: true,
       });
-      await page.locator('.target-playback').click();
+      await page.locator('[data-ui-click="reference-tone"]').click();
       await expect
         .poll(() =>
           page.evaluate(() => window.syntheticAudio.oscillatorFrequency),
@@ -88,10 +87,9 @@ for (const [width, height] of [
         .click();
       await expect(page.locator('#studentIdentity')).toContainText('Lucas');
       await picker.selectOption('big-button', { force: true });
-      await expect(page.locator('.tuner')).toHaveCSS(
-        'background-color',
-        'rgb(0, 84, 189)',
-      );
+      await expect(
+        page.locator('.tuner-section[data-live-practice] .tuner'),
+      ).toHaveCSS('background-color', 'rgb(0, 84, 189)');
       await picker.selectOption('vintage-audio', { force: true });
       await page.reload();
       await expect(picker).toHaveValue('vintage-audio');

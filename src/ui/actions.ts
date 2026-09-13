@@ -71,7 +71,7 @@ export function createBindings(app: App): UiBindings {
         if (
           event.target instanceof Element &&
           !event.target.closest(
-            'button, input, select, textarea, a, .card-practice, .card-feedback',
+            'button, input, select, textarea, a, .card-feedback',
           ) &&
           data.id !== app.db.activeStudent
         )
