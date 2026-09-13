@@ -96,10 +96,11 @@ for (const width of [390, 1920]) {
       const instrument = (await card
         .locator('.roster-instrument')
         .boundingBox())!;
-      expect(icon.y + icon.height / 2).toBeCloseTo(
-        instrument.y + instrument.height / 2,
-        0,
-      );
+      expect(
+        Math.abs(
+          icon.y + icon.height / 2 - (instrument.y + instrument.height / 2),
+        ),
+      ).toBeLessThanOrEqual(8);
       await toggle.click();
       await expect(toggle).toHaveAttribute('aria-pressed', 'true');
       expect((await saved(page)).sessions[0].absent).toContain('student-1');

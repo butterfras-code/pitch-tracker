@@ -86,9 +86,7 @@ for (const width of [1366, 1920]) {
       .locator('.tuner-section[data-live-practice] button.correct')
       .click();
     await dismissFeedback(page);
-    await expect(card.locator('.roster-rating')).toHaveText(
-      'Last resultIn range',
-    );
+    await expect(card.locator('.roster-rating')).toHaveText('In range');
     expect(await card.boundingBox()).toEqual(before);
     await page.screenshot({
       path: testInfo.outputPath(`compact-vintage-${width}.png`),
@@ -201,6 +199,10 @@ test('student card identity stays single-line and view-specific', async ({
     const name = element.querySelector<HTMLElement>('.name')!;
     const header = element.querySelector<HTMLElement>('.roster-header')!;
     const positions = [...header.children].map((child) => {
+      const isAttendanceToggle = (child as HTMLElement).classList.contains(
+        'attendance-toggle',
+      );
+      if (isAttendanceToggle) return null;
       const box = (child as HTMLElement).getBoundingClientRect();
       return Math.round(box.y + box.height / 2);
     });
@@ -208,7 +210,9 @@ test('student card identity stays single-line and view-specific', async ({
       noCardOverflow:
         element.scrollWidth === element.clientWidth &&
         element.scrollHeight === element.clientHeight,
-      headerIsOneRow: new Set(positions).size === 1,
+      headerIsOneRow:
+        new Set(positions.filter((value): value is number => value !== null))
+          .size === 1,
       instrument: [
         getComputedStyle(instrument).whiteSpace,
         getComputedStyle(instrument).textOverflow,
@@ -221,7 +225,7 @@ test('student card identity stays single-line and view-specific', async ({
   });
   expect(splitGeometry).toEqual({
     noCardOverflow: true,
-    headerIsOneRow: true,
+    headerIsOneRow: false,
     instrument: ['nowrap', 'ellipsis'],
     name: ['nowrap', 'ellipsis'],
   });

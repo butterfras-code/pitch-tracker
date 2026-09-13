@@ -395,7 +395,7 @@ body.session-active {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   padding: 10px 12px;
   min-height: clamp(160px, 10vw, 380px);
   min-width: 0;
@@ -1148,7 +1148,13 @@ body.session-active {
   font-size: var(--session-small);
   white-space: nowrap;
 }
+#sessionShell[data-view='split'] .student .roster-header .turn-label {
+  display: none;
+}
 #sessionShell .attendance-toggle {
+  position: absolute;
+  top: 6px;
+  right: 0;
   display: grid;
   place-items: center;
   flex: none;
@@ -1159,11 +1165,12 @@ body.session-active {
   border: 0;
   box-shadow: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--ink);
+  opacity: 0.25;
 }
 #sessionShell .attendance-toggle:hover {
   background: var(--soft);
-  color: var(--ink);
+  opacity: 0.5;
 }
 #sessionShell .card-practice .target-pitch small {
   font-size: 0.7em;
@@ -1179,7 +1186,8 @@ body.session-active {
 }
 #sessionShell .attendance-toggle[aria-pressed='true'] {
   background: var(--accent);
-  color: var(--primary-ink);
+  color: var(--ink);
+  opacity: 1;
 }
 
 /* Narrow split-view cards retain readable names beside the attendance toggle. */
@@ -1284,11 +1292,13 @@ body.session-active {
 }
 #sessionShell .roster-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 5.25em 36px;
+  grid-template-columns: minmax(0, 1fr) 5.25em;
   align-items: center;
   gap: 6px;
   min-width: 0;
   min-height: 36px;
+  position: relative;
+  padding-inline-end: 44px;
 }
 #sessionShell .roster-header .roster-instrument {
   display: block;
@@ -1296,6 +1306,9 @@ body.session-active {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.82em;
+  line-height: 1.1;
+  opacity: 0.85;
 }
 #sessionShell .roster-header .turn-label {
   min-width: 0;
@@ -1317,6 +1330,9 @@ body.session-active {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-height: 34px;
+  padding: 0 0 2px 0;
+  line-height: 1.15;
 }
 #sessionShell .roster-rating {
   display: flex;
@@ -1333,8 +1349,17 @@ body.session-active {
   display: block;
 }
 #sessionShell .card-result-empty {
-  color: var(--muted);
+  display: inline-block;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 999px);
+  background: var(--control);
+  color: var(--control-ink);
   font-size: var(--session-small);
+  line-height: 1.2;
+  box-shadow: var(--button-shadow);
+  opacity: 0.9;
+  user-select: none;
   white-space: nowrap;
 }
 #sessionShell[data-view='class'] .roster-rating {
