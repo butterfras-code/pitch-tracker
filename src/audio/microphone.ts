@@ -1,5 +1,6 @@
 /** Owns microphone permission, cancellation, reference tones, and audio cleanup. */
 import { findElement } from '../ui/helpers';
+import { updateMicrophoneIndicator } from '../ui/microphone-indicator';
 import { errorMessage } from '../ui/helpers';
 import type { App } from '../app/application';
 import { targetFrequency } from '../domain/pitch';
@@ -106,9 +107,15 @@ export const microphone = {
     this.checkGeneration++;
     this.classroomListenerReady = false;
     this.classroomListener.reset();
+    this.pitchFeedback.observePause(false);
     this.checking = null;
     this.pitchHold.reset();
     this.pitchDisplay.reset();
+    updateMicrophoneIndicator(
+      this.mic,
+      this.classroomPaused,
+      this.classroomStatus(),
+    );
     if (findElement('holdProgress')) $('holdProgress').style.width = '0%';
     if (findElement('cancelButton')) $('cancelButton').classList.add('hidden');
   },

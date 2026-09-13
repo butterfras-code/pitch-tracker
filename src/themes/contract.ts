@@ -5,6 +5,7 @@ export const DEFAULT_TOKENS = {
   card: '#fff',
   ink: '#24332f',
   muted: '#69766f',
+  'mic-waiting': '#b88700',
   line: '#dce3dc',
   accent: '#246b55',
   soft: '#e6f1ea',

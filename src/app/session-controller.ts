@@ -141,6 +141,7 @@ export const sessionController = {
       status,
       this.db.settings.feedbackDurationMs,
       this.workspace?.feedbackHost(id),
+      this.mic && !this.classroomPaused && !this.roundComplete,
     );
   },
 };

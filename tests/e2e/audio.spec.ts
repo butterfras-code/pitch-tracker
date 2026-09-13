@@ -12,6 +12,35 @@ import {
 test.beforeEach(async ({ page }) => {
   await classroomPage(page, 1);
 });
+test('an established hold survives brief octave jumps and a dropout without scoring ambiguous audio', async ({
+  page,
+}) => {
+  await twoSecondHold(page);
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await sound(page, 0);
+  await sound(page, 440, 1100);
+  const before = await page
+    .locator('#holdProgress')
+    .evaluate((el) => (el as HTMLElement).style.width);
+  await sound(page, 880, 80);
+  expect(
+    await page
+      .locator('#holdProgress')
+      .evaluate((el) => (el as HTMLElement).style.width),
+  ).toBe(before);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await sound(page, 440, 400);
+  await sound(page, 220, 80);
+  await sound(page, 440, 300);
+  await sound(page, 0, 80);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await sound(page, 440, 900);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  expect((await saved(page)).sessions[0].attempts[0]).toMatchObject({
+    status: 'correct',
+    source: 'microphone',
+  });
+});
 test('audio loop uses current tuning and gate and records a hold exactly once', async ({
   page,
 }) => {
@@ -188,7 +217,8 @@ test('saves a correct A over background noise and a brief impact; retries withou
     window.syntheticAudio.noise = true;
   });
   await page.clock.runFor(160);
-  await sound(page, 440, 1080);
+  // The impact pauses credited time, so finish the hold after that pause.
+  await sound(page, 440, 1320);
   let attempts = (await saved(page)).sessions[0].attempts;
   expect(attempts).toHaveLength(1);
   expect(attempts[0]).toMatchObject({

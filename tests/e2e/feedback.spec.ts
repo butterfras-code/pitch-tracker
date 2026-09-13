@@ -10,6 +10,94 @@ import {
 import catalog from '../../src/themes/feedback.json' with { type: 'json' };
 import { readFile } from 'node:fs/promises';
 
+for (const mode of ['Split view', 'Class view']) {
+  test(`${mode}: feedback waits for audible pause and manual dismissal preserves waiting state`, async ({
+    page,
+  }, testInfo) => {
+    await classroomPage(page);
+    await page.clock.pauseAt(new Date(Date.now() + 1000));
+    await sessionControl(page, mode);
+    await sessionControl(page, 'Full screen');
+    await settings(page);
+    await page.getByLabel('Auto Advance', { exact: true }).check();
+    await closeSettings(page);
+    await page
+      .getByRole('button', { name: 'Start listening', exact: true })
+      .click();
+    await expect(page.locator('#inputStatus')).toHaveAccessibleName(
+      'Microphone waiting for a pause',
+    );
+    await sound(page, 0);
+    await sound(page, 440, 900);
+    const feedback = page.locator('#pitchFeedback[open], .card-feedback');
+    await expect(feedback).toBeVisible();
+    await expect(page.locator('#studentIdentity')).toContainText('Lucas');
+    await sound(page, 440, 3000);
+    await expect(feedback).toBeVisible();
+    await expect(page.locator('#inputStatus')).toHaveAttribute(
+      'data-microphone',
+      'waiting',
+    );
+    expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+    await page.screenshot({
+      path: testInfo.outputPath('waiting-for-pause.png'),
+    });
+    // No second quiet period should be needed after feedback closes.
+    await sound(page, 0, 700);
+    await expect(feedback).toHaveCount(0);
+    await expect(page.locator('#inputStatus')).toHaveAccessibleName(
+      'Microphone on',
+    );
+    await sound(page, 440, 900);
+    expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
+    await feedback.getByRole('button', { name: 'Continue' }).click();
+    await expect(feedback).toHaveCount(0);
+    await sound(page, 440, 2000);
+    await expect(page.locator('#inputStatus')).toHaveAccessibleName(
+      'Microphone waiting for a pause',
+    );
+    expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
+    await sound(page, 0, 700);
+    await sound(page, 440, 900);
+    expect((await saved(page)).sessions[0].attempts).toHaveLength(3);
+    // Round completion needs no handoff and must not trap the final feedback.
+    await sound(page, 440, 1500);
+    await expect(feedback).toHaveCount(0);
+  });
+}
+
+test('quiet during feedback satisfies handoff but does not shorten its minimum duration', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await settings(page);
+  const duration = page.getByLabel('Feedback popup duration (seconds)', {
+    exact: true,
+  });
+  await duration.fill('3');
+  await duration.press('Tab');
+  await closeSettings(page);
+  await page
+    .getByRole('button', { name: 'Start listening', exact: true })
+    .click();
+  await sound(page, 0);
+  await sound(page, 440, 700);
+  const feedback = page.locator('#pitchFeedback');
+  await sound(page, 0, 700);
+  await expect(page.locator('#inputStatus')).toHaveAccessibleName(
+    'Microphone on',
+  );
+  await expect(feedback).toBeVisible();
+  await sound(page, 440, 1000);
+  await expect(feedback).toBeVisible();
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await sound(page, 0, 1600);
+  await expect(feedback).toBeHidden();
+  await sound(page, 440, 700);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
+});
+
 for (const [width, height] of [
   [1366, 768],
   [1920, 1080],
@@ -128,7 +216,7 @@ test('auto-advance keeps the recorded name; Continue and Escape restore keyboard
   await expect(page.locator('#toast')).toHaveText('Last change undone.');
 });
 
-test('microphone popup waits for a recorded hold, pauses detection and resumes after dismissal', async ({
+test('microphone popup waits for a recorded hold, blocks scoring and resumes after dismissal', async ({
   page,
 }) => {
   await classroomPage(page);

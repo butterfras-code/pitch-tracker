@@ -1,5 +1,6 @@
 /** Coordinates raw pitch evidence, display smoothing, and current-session recording. */
 import { findElement } from '../ui/helpers';
+import { updateMicrophoneIndicator } from '../ui/microphone-indicator';
 import type { App } from '../app/application';
 import { detectPitch, evaluate } from '../domain/pitch';
 import { $, noteNames } from '../ui/helpers';
@@ -16,7 +17,6 @@ export const detection = {
       this.tab !== 'session' ||
       document.hidden ||
       $('modal').open ||
-      this.pitchFeedback.visible ||
       this.classroomPaused ||
       !pupil ||
       this.ses()?.absent.includes(pupil.id)
@@ -40,11 +40,23 @@ export const detection = {
       rms,
       freq,
       this.db.settings.gate,
-      this.clapNavigation && !this.pitchHold.active,
+      this.clapNavigation &&
+        !this.pitchHold.active &&
+        !this.pitchFeedback.visible,
     );
     this.classroomListenerReady = listening.ready;
     if (listening.command) {
       this.classroomNavigate(listening.command === 'next' ? 1 : -1);
+      return;
+    }
+    const status = this.classroomStatus();
+    const statusElement = findElement('classroomStatus');
+    if (statusElement && statusElement.textContent !== status)
+      statusElement.textContent = status;
+    updateMicrophoneIndicator(this.mic, this.classroomPaused, status);
+    if (this.pitchFeedback.visible) {
+      this.pitchFeedback.observePause(listening.ready);
+      // Even the frame that dismisses feedback supplies no scoring evidence.
       return;
     }
     if (this.roundComplete) return;
@@ -57,9 +69,6 @@ export const detection = {
       this.checking = { id: this.db.activeStudent, sid: this.ses()!.id };
       this.checkDeadline = Infinity;
     }
-    const status = findElement('classroomStatus');
-    if (status && status.textContent !== this.classroomStatus())
-      status.textContent = this.classroomStatus();
     if (this.checking && now > this.checkDeadline) {
       this.cancelCheck();
       this.toast(

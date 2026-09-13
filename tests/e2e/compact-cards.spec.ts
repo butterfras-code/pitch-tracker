@@ -38,7 +38,7 @@ for (const width of [1366, 1920]) {
       .getByRole('button', { name: 'Start listening', exact: true })
       .click();
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
-      'Microphone on',
+      'Microphone waiting for a pause',
     );
     await expect(card.locator('#pauseListening')).toHaveAttribute(
       'aria-pressed',

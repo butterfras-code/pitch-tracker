@@ -21,6 +21,9 @@ for (const [width, height] of [
     }, testInfo) => {
       await page.setViewportSize({ width, height });
       await classroomPage(page, 30);
+      // Layout inspection must not lengthen the synthetic 200 ms tone into
+      // a scored hold whose feedback correctly waits for an audible pause.
+      await page.clock.pauseAt(new Date(Date.now() + 1000));
       await sessionControl(page, 'Full screen');
       await expect
         .poll(() => page.evaluate(() => !!document.fullscreenElement))

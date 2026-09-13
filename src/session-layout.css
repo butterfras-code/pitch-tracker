@@ -1078,7 +1078,7 @@ body.session-active {
   display: none;
 }
 
-/* Stable microphone telemetry: only the meter value changes during listening. */
+/* Fixed geometry for microphone telemetry and its pause-waiting state. */
 #sessionShell .input-signal {
   align-items: center;
   flex-wrap: nowrap;
@@ -1089,6 +1089,9 @@ body.session-active {
   width: 24px;
   height: 24px;
   color: var(--muted);
+}
+#sessionShell .input-status[data-microphone='waiting'] {
+  color: var(--mic-waiting);
 }
 #sessionShell .input-status svg {
   width: 100%;

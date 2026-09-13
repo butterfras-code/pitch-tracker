@@ -10,6 +10,15 @@ export class PitchFeedback {
   private timer: ReturnType<typeof setTimeout> | undefined;
   private element: HTMLDialogElement | null = null;
   private events: AbortController | null = null;
+  private minimumElapsed = false;
+  private pauseReady = true;
+  private waitForPause = false;
+
+  observePause(ready: boolean): void {
+    if (!this.waitForPause) return;
+    this.pauseReady = ready;
+    if (this.minimumElapsed && ready) this.clear();
+  }
 
   get visible(): boolean {
     return !!this.inlineElement || (this.element?.open ?? false);
@@ -20,8 +29,11 @@ export class PitchFeedback {
     rating: PitchStatus,
     durationOverride?: number | null,
     host?: HTMLElement,
+    waitForPause = false,
   ): void {
     this.clear();
+    this.waitForPause = waitForPause;
+    this.pauseReady = !waitForPause;
     const element = host
       ? document.createElement('div')
       : findElement('pitchFeedback');
@@ -60,7 +72,7 @@ export class PitchFeedback {
     dismiss.autofocus = !host;
     const hint = document.createElement('p');
     hint.className = 'feedback-hint';
-    hint.textContent = `Closes automatically after ${duration / 1000} ${duration === 1000 ? 'second' : 'seconds'}`;
+    hint.textContent = `Closes automatically after ${duration / 1000} ${duration === 1000 ? 'second' : 'seconds'}${waitForPause ? ' once a pause is heard' : ''}`;
     element.replaceChildren(icon, caption, message, dismiss, hint);
     element.dataset.rating = rating;
     if (host) {
@@ -81,10 +93,16 @@ export class PitchFeedback {
       options,
     );
     if (element instanceof HTMLDialogElement) element.showModal();
-    this.timer = setTimeout(() => this.clear(), duration);
+    this.timer = setTimeout(() => {
+      this.minimumElapsed = true;
+      if (this.pauseReady) this.clear();
+    }, duration);
   }
 
   clear(): void {
+    this.minimumElapsed = false;
+    this.pauseReady = true;
+    this.waitForPause = false;
     this.inlineElement?.remove();
     this.inlineElement = null;
     clearTimeout(this.timer);

@@ -11,18 +11,68 @@ const frame = (
 ) => hold.frame(now, f, target, 440, seconds, 35);
 
 describe('bounded pitch evidence', () => {
+  it.each([220, 880, 880 * 2 ** (12 / 1200), null, 660])(
+    'preserves progress through an isolated interruption (%s) without scoring it',
+    (interruption) => {
+      const hold = new PitchHold();
+      let progress = 0;
+      for (let t = 0; t <= 1900; t += 50) progress = frame(hold, t).progress;
+      const paused = frame(hold, 1950, interruption);
+      expect(paused.result).toBeNull();
+      expect(paused.progress).toBeCloseTo(progress);
+      expect(frame(hold, 2000).result).toBeNull();
+      let result = null;
+      for (let t = 2050; t <= 2300; t += 50) result ??= frame(hold, t).result;
+      expect(result).toMatchObject({ status: 'correct', frequency: 440 });
+    },
+  );
+  it.each([220, 880])(
+    'assesses an initial wrong octave as played (%s)',
+    (f) => {
+      const hold = new PitchHold();
+      for (let t = 0; t < 2000; t += 50)
+        expect(frame(hold, t, f).result).toBeNull();
+      expect(frame(hold, 2000, f).result).toMatchObject({
+        status: f < 440 ? 'low' : 'high',
+        frequency: f,
+      });
+    },
+  );
+  it.each([220, 880])(
+    'requires a fresh hold for a sustained octave change (%s)',
+    (f) => {
+      const hold = new PitchHold();
+      for (let t = 0; t <= 1800; t += 50) frame(hold, t);
+      for (let t = 1850; t < 4100; t += 50)
+        expect(frame(hold, t, f).result).toBeNull();
+      expect(frame(hold, 4100, f).result).toMatchObject({
+        status: f < 440 ? 'low' : 'high',
+        frequency: f,
+      });
+    },
+  );
+  it('cannot complete on an octave glitch at the end of the hold', () => {
+    const hold = new PitchHold();
+    for (let t = 0; t < 2000; t += 50) frame(hold, t);
+    expect(frame(hold, 2000, 880).result).toBeNull();
+    expect(frame(hold, 2050, 880).result).toBeNull();
+    expect(frame(hold, 2100).result).toBeNull();
+    expect(frame(hold, 2150).result?.status).toBe('correct');
+  });
   it('requires a full observation window even when the first 1.7 seconds are correct', () => {
     const hold = new PitchHold();
     for (let t = 0; t < 2000; t += 50) expect(frame(hold, t).result).toBeNull();
     expect(frame(hold, 2000).result?.status).toBe('correct');
   });
   it.each([null, 660])(
-    'accepts 1.7 seconds of correct evidence around a brief interruption (%s)',
+    'pauses and resumes correct evidence around a brief interruption (%s)',
     (interruption) => {
       const hold = new PitchHold();
       for (let t = 0; t < 2000; t += 50)
         frame(hold, t, t >= 900 && t <= 1100 ? interruption : 440);
-      expect(frame(hold, 2000).result?.status).toBe('correct');
+      let result = null;
+      for (let t = 2000; t <= 2350; t += 50) result ??= frame(hold, t).result;
+      expect(result?.status).toBe('correct');
     },
   );
   it('does not average alternating flat and sharp readings into a correct note', () => {

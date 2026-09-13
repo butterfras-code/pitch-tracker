@@ -1,3 +1,4 @@
+import { updateMicrophoneIndicator } from './microphone-indicator';
 import { targetFrequency, targetLabel } from '../domain/pitch';
 import { feedbackDurationControl } from './feedback-settings';
 import type { SessionDefaults } from '../domain/session-defaults';
@@ -340,10 +341,7 @@ export class SessionView {
     );
     ($('sessionUndo') as HTMLButtonElement).disabled = !m.undo;
     text('micButton', m.mic ? 'Stop microphone' : 'Enable microphone');
-    const inputState = !m.mic ? 'off' : m.paused ? 'paused' : 'on';
-    $('inputStatus').dataset.microphone = inputState;
-    $('inputStatus').setAttribute('aria-label', `Microphone ${inputState}`);
-    $('inputStatus').title = `Microphone ${inputState}`;
+    updateMicrophoneIndicator(m.mic, m.paused, m.status);
     const setCheck = (name: string, value: boolean) => {
       this.root!.querySelector<HTMLInputElement>(
         `[data-ui-change="${name}"]`,
