@@ -5,7 +5,7 @@ import {
   sound,
   dismissFeedback,
 } from '../fixtures/classroom-page';
-import { openView, sessionControl } from '../fixtures/session-controls';
+import { sessionControl } from '../fixtures/session-controls';
 
 for (const [width, height] of [
   [1920, 1080],
@@ -52,7 +52,9 @@ for (const [width, height] of [
           page.locator('.current-display .target-actions #pauseListening'),
         ).toBeVisible();
       }
-      await expect(page.locator('#viewTrigger')).toBeFocused();
+      await expect(
+        page.getByRole('button', { name: view + ' view', exact: true }),
+      ).toBeFocused();
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
@@ -147,23 +149,25 @@ test('class cards show inert tuner shells and transfer the one live tuner on sel
   expect(await liveNote!.evaluate((element) => element.isConnected)).toBe(true);
 });
 
-test('view menu supports keyboard dismissal and fullscreen retains toolbar', async ({
+test('view controls stay visible and fullscreen retains toolbar', async ({
   page,
 }) => {
   await classroomPage(page);
-  await openView(page);
-  await expect(page.locator('#viewTrigger')).toHaveAttribute(
-    'aria-expanded',
-    'true',
-  );
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#viewMenu')).toBeHidden();
-  await expect(page.locator('#viewTrigger')).toBeFocused();
+  await expect(page.getByRole('group', { name: 'Content view' })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Split view', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(
+    page.getByRole('button', { name: 'Full screen', exact: true }),
+  ).toBeVisible();
   await sessionControl(page, 'Full screen');
   if (await page.evaluate(() => !!document.fullscreenElement)) {
     await expect(page.locator('body > header')).toBeHidden();
     await expect(page.locator('.session-toolbar')).toBeInViewport();
     await sessionControl(page, 'Class view');
+    await expect(
+      page.getByRole('button', { name: 'Class view', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'true');
     await sessionControl(page, 'Exit full screen');
     await expect(page.locator('body > header')).toBeVisible();
   }

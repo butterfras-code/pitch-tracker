@@ -1,4 +1,3 @@
-import { teacherDetails } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
@@ -50,7 +49,6 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await form.getByLabel('Auto Advance', { exact: true }).check();
   await form.getByLabel('Advance mode').selectOption('one-and-done');
   await form.getByLabel('Clap navigation').check();
-  await form.getByLabel('Teacher details').check();
   await form.getByLabel('Starting view').selectOption('class');
   await form.getByRole('button', { name: 'Save session defaults' }).click();
   expect((await saved(page)).schema).toBe(3);
@@ -62,7 +60,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
     page.getByLabel('Auto Advance', { exact: true }),
   ).not.toBeChecked();
   await expect(page.getByLabel('Clap navigation')).not.toBeChecked();
-  await expect(page.getByLabel('Teacher details')).not.toBeChecked();
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   await page.reload();
   await settings(page);
   await expect(page.locator('#sessionShell')).toHaveAttribute(
@@ -72,13 +70,12 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await expect(page.getByLabel('Auto Advance', { exact: true })).toBeChecked();
   await expect(page.getByLabel('Advance mode')).toHaveValue('one-and-done');
   await expect(page.getByLabel('Clap navigation')).toBeChecked();
-  await expect(page.getByLabel('Teacher details')).toBeChecked();
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'Enable microphone', exact: true }),
   ).toBeVisible();
   await page.getByLabel('Auto Advance', { exact: true }).uncheck();
   await page.getByLabel('Clap navigation').uncheck();
-  await teacherDetails(page, false);
   await page.getByLabel('Advance mode').selectOption('until-correct');
   expect((await saved(page)).sessionDefaults?.advance).toBe(true);
   await closeSettings(page);
@@ -97,7 +94,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await settings(page);
   await expect(page.getByLabel('Auto Advance', { exact: true })).toBeChecked();
   await expect(page.getByLabel('Clap navigation')).toBeChecked();
-  await expect(page.getByLabel('Teacher details')).toBeChecked();
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   await expect(page.getByLabel('Advance mode')).toHaveValue('one-and-done');
   await page
     .getByRole('button', { name: 'Enable microphone', exact: true })
@@ -135,7 +132,6 @@ test('restored defaults survive pitch saves and apply on resume', async ({
 }) => {
   await classroomPage(page);
   const form = await openDefaults(page);
-  await form.getByLabel('Teacher details').check();
   await form.getByLabel('Starting view').selectOption('student');
   await form.getByRole('button', { name: 'Save session defaults' }).click();
   await page
@@ -143,9 +139,7 @@ test('restored defaults survive pitch saves and apply on resume', async ({
     .click();
   const data = await saved(page);
   expect(data.schema).toBe(3);
-  expect(data.sessionDefaults?.teacher).toBe(true);
-  await form.getByLabel('Teacher details').uncheck();
-  await form.getByRole('button', { name: 'Save session defaults' }).click();
+  expect(data.sessionDefaults?.teacher).toBe(false);
   page.once('dialog', (d) => d.accept());
   await page.locator('#importFile').setInputFiles({
     name: 'defaults.json',
@@ -156,18 +150,17 @@ test('restored defaults survive pitch saves and apply on resume', async ({
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
   await settings(page);
-  await expect(page.getByLabel('Teacher details')).toBeChecked();
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   await expect(page.locator('#sessionShell')).toHaveAttribute(
     'data-view',
     'student',
   );
-  await teacherDetails(page, false);
   await closeSettings(page);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
   await settings(page);
-  await expect(page.getByLabel('Teacher details')).toBeChecked();
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   const invalid = {
     ...data,
     sessionDefaults: { ...data.sessionDefaults, mode: 'invalid' },

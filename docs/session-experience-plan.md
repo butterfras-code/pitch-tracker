@@ -8,7 +8,7 @@ Teachers can run a class while walking around the room. Students can clearly see
 
 Preserve the existing visual identity and offline, single-file release. Build on automatic listening, Until correct / One and done, quiet-gap protection, clap navigation, pause, and undo. Follow a test-first workflow for each feature: demonstrate a failing meaningful test, implement, then verify.
 
-Assume the dashboard may be projected. Default to a student-friendly presentation; a deliberate Teacher details toggle reveals detailed attempts and note access. This is a display preference, not access control. Show names, turn order, and supportive progress by default; omit rankings, percentages, and teacher notes. Detailed teacher information must not open automatically during navigation.
+Assume the dashboard may be projected. Show names, turn order, and supportive progress by default; omit rankings, percentages, and teacher notes. Student history remains one deliberate icon action away and must not open automatically during navigation.
 
 ## 1. Characterize and separate the session UI
 
@@ -66,7 +66,7 @@ Acceptance: test mixed results, all correct, all absent, one student, skipping t
 
 ## 6. Preserve data and document boundaries
 
-- Keep layout, expanded controls, Teacher details, and fullscreen as UI state. Default to student-friendly details when reopening. Preserve the existing v1 saved-data format during UI extraction and layout work.
+- Keep layout, expanded controls, and fullscreen as UI state. Preserve the existing v1 saved-data format during UI extraction and layout work.
 - Initially keep round queue and skip markers in memory, consistent with current round-completion state. Historical attempts remain saved; after reopening, explain that a custom retry round must be restarted rather than pretending it resumed exactly.
 - If resumable round queues or permanent skip history are required, make that a separate versioned saved-data change with migration, export/import round-trip, and invalid-import preservation tests before implementation. Do not add fields incidentally.
 - Update Help and `docs/architecture.md` with view behavior, display privacy, round semantics, device limitations, and persistence boundaries. Add no runtime network dependencies.

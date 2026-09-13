@@ -1,4 +1,3 @@
-import { teacherDetails } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -20,9 +19,21 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
     .click();
   const focus = page.locator('.focus');
   await focus.getByRole('button', { name: 'In range' }).click();
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  expect(
+    await page.evaluate(
+      (key) =>
+        JSON.parse(localStorage.getItem(key)!).sessions[0].attempts.length,
+      key,
+    ),
+  ).toBe(1);
   await page.getByRole('button', { name: 'Undo last change' }).click();
-  await expect(page.locator('.student').first()).toContainText('0 tries');
+  expect(
+    await page.evaluate(
+      (key) =>
+        JSON.parse(localStorage.getItem(key)!).sessions[0].attempts.length,
+      key,
+    ),
+  ).toBe(0);
   await focus.getByRole('button', { name: 'Too low' }).click();
   await page.locator('.student').nth(1).getByLabel('Absent').click();
   await page.reload();
@@ -34,18 +45,17 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
     await page
       .getByRole('button', { name: 'Session options', exact: true })
       .click();
-    await teacherDetails(page, true);
   }
   await expect(
     page.getByText('Baseline rehearsal', { exact: true }),
   ).toBeVisible();
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('Too low');
   await expect(
     page.locator('.student').nth(1).getByLabel('Absent'),
   ).toHaveAttribute('aria-pressed', 'true');
-  await expect(
-    page.locator('.student').nth(1).getByRole('button', { name: 'In range' }),
-  ).toBeDisabled();
+  await expect(page.locator('.student [data-ui-click="record"]')).toHaveCount(
+    0,
+  );
 });
 
 test('theme switches persist after reload', async ({ page }) => {
@@ -118,5 +128,5 @@ test('delegated actions use restored data and the current session after undo', a
     status: 'correct',
   });
   await page.reload();
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('In range');
 });

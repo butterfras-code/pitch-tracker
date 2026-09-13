@@ -47,7 +47,7 @@ test('denied storage access does not prevent manual tracking', async ({
     .locator('.focus')
     .getByRole('button', { name: 'In range' })
     .click();
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('In range');
 });
 
 test('quota failures pause saves and retain the saved data', async ({
@@ -78,7 +78,7 @@ test('quota failures pause saves and retain the saved data', async ({
     .locator('.focus')
     .getByRole('button', { name: 'In range' })
     .click();
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('In range');
 });
 
 test('a newer stored revision is not overwritten by a stale window', async ({

@@ -5,16 +5,19 @@ test('Alt+Enter toggles fullscreen from a focused session control without changi
   page,
 }) => {
   await classroomPage(page);
-  await page.locator('#viewTrigger').focus();
+  await page.getByRole('button', { name: 'Full screen', exact: true }).focus();
   await page.keyboard.down('Alt');
   await page.keyboard.down('Enter');
   await expect
     .poll(() => page.evaluate(() => !!document.fullscreenElement))
     .toBe(true);
   await page.keyboard.down('Enter'); // Holding the shortcut must not toggle again.
-  await expect(page.locator('[data-ui-click="session-fullscreen"]')).toHaveText(
-    'Exit full screen',
-  );
+  await expect(
+    page.locator('[data-ui-click="session-fullscreen"]'),
+  ).toHaveAttribute('aria-label', 'Exit full screen');
+  await expect(
+    page.locator('[data-ui-click="session-fullscreen"]'),
+  ).toHaveAttribute('aria-pressed', 'true');
   await page.keyboard.up('Enter');
   await page.keyboard.up('Alt');
   await page.keyboard.press('Alt+Enter');

@@ -49,7 +49,7 @@ export const sessionController = {
     this.render();
   },
   createSession(this: App): void {
-    if (!changes.createSession(this, $('sessionName').value)) return;
+    if (!changes.createSession(this)) return;
     this.tab = 'session';
     this.resetRound();
     this.classroomPaused = false;
@@ -59,13 +59,7 @@ export const sessionController = {
     this.render();
   },
   endSession(this: App): void {
-    if (
-      !this.ses() ||
-      !confirm(
-        'Finish this session and save it to history? You can resume it later.',
-      )
-    )
-      return;
+    if (!this.ses()) return;
     this.stopMic();
     changes.finishSession(this);
     this.save();

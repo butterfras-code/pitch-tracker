@@ -356,7 +356,9 @@ test('user duration saves from session settings, controls timing across themes a
   await expect(page.locator('#pitchFeedback')).toBeVisible();
   await page.clock.runFor(100);
   await expect(page.locator('#pitchFeedback')).toBeHidden();
-  await page.evaluate(() => document.exitFullscreen());
+  await page.evaluate(() => {
+    if (document.fullscreenElement) return document.exitFullscreen();
+  });
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Back up data', exact: true }).click();
   const path = await (await downloading).path();

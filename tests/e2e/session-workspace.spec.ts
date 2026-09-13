@@ -117,6 +117,7 @@ for (const [width, height] of [
               tunerTop: document
                 .querySelector('.tuner-section')!
                 .getBoundingClientRect().top,
+              currentWidth: panel.width,
               columns:
                 getComputedStyle(current).gridTemplateColumns.split(' ').length,
             };
@@ -134,9 +135,10 @@ for (const [width, height] of [
           );
           if (layout.stacked) {
             expect(layout.rosterColumns).toBeGreaterThanOrEqual(3);
-            expect(layout.targetBottom).toBeLessThanOrEqual(layout.tunerTop);
           }
-          expect(layout.columns).toBe(layout.stacked ? 1 : 2);
+          expect(layout.targetBottom).toBeLessThanOrEqual(layout.tunerTop);
+          expect(layout.currentWidth).toBeLessThanOrEqual(800);
+          expect(layout.columns).toBe(1);
           const textSizes = await page
             .locator(
               '.current-display button, .target-caption, .target-frequency, #liveCents, #checkHint, #upNext, .student .badge, .student .name, #roundLabel',
@@ -216,7 +218,7 @@ for (const [width, height] of [
   });
 }
 
-test('large split stacks target and grows roster; shorter window restores side-by-side', async ({
+test('split keeps target and tuner stacked while a tall window grows the roster', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1920, height: 1200 });
@@ -231,6 +233,9 @@ test('large split stacks target and grows roster; shorter window restores side-b
         .getBoundingClientRect();
       return {
         stacked: target.bottom <= tuner.top,
+        currentWidth: document
+          .querySelector('.current-display')!
+          .getBoundingClientRect().width,
         columns: getComputedStyle(
           document.querySelector('#cards')!,
         ).gridTemplateColumns.split(' ').length,
@@ -238,12 +243,13 @@ test('large split stacks target and grows roster; shorter window restores side-b
       };
     });
   expect((await layout()).stacked).toBe(true);
+  expect((await layout()).currentWidth).toBeLessThanOrEqual(800);
   expect((await layout()).columns).toBeGreaterThanOrEqual(3);
   await page.screenshot({ path: testInfo.outputPath('large-stacked.png') });
   await page.locator('.student[data-student-id="student-30"] .name').click();
   await expect(page.locator('#studentIdentity h2')).toHaveText('Student 30');
   await page.setViewportSize({ width: 1920, height: 768 });
-  expect((await layout()).stacked).toBe(false);
+  expect((await layout()).stacked).toBe(true);
   await expect(page.locator('#studentIdentity h2')).toHaveText('Student 30');
   await page.setViewportSize({ width: 1920, height: 1200 });
   expect((await layout()).stacked).toBe(true);

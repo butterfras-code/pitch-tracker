@@ -1,4 +1,4 @@
-import { sessionControl, teacherDetails } from '../fixtures/session-controls';
+import { sessionControl } from '../fixtures/session-controls';
 import { test, expect } from '@playwright/test';
 import {
   classroomPage,
@@ -50,18 +50,47 @@ test('views preserve holds; dashboard follows without moving page or keyboard fo
     .click();
   await expect(page.getByLabel('Search students')).toHaveValue('');
 });
-test('teacher details are opt-in; retry rounds, random and undo preserve results', async ({
+test('card history and tuner scoring stay available; retry rounds, random and undo preserve results', async ({
   page,
 }) => {
   await classroomPage(page);
   await expect(
     page.getByRole('button', { name: 'History for Maya' }),
-  ).toBeHidden();
-  await settings(page);
-  await teacherDetails(page, true);
-  await expect(
-    page.getByRole('button', { name: 'History for Maya' }),
   ).toBeVisible();
+  await expect(page.locator('.student [data-ui-click="record"]')).toHaveCount(
+    0,
+  );
+  expect(
+    (await page.locator('.student').allTextContents()).join(' '),
+  ).not.toMatch(/\btries\b/);
+  const headerHeight = await page
+    .locator('.student')
+    .first()
+    .locator('.roster-header')
+    .evaluate((el) => el.getBoundingClientRect().height);
+  for (const control of ['.history-toggle', '.attendance-toggle'])
+    expect(
+      await page
+        .locator('.student')
+        .first()
+        .locator(control)
+        .evaluate((el) => el.getBoundingClientRect().height),
+    ).toBeLessThanOrEqual(headerHeight);
+  await page.getByRole('button', { name: 'History for Maya' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Recent attempts');
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await sessionControl(page, 'Class view');
+  await expect(
+    page.locator(
+      '.student.selected .tuner-section[data-live-practice] [data-ui-click="record"]',
+    ),
+  ).toHaveCount(3);
+  await expect(page.locator('.student [data-ui-click="record"]')).toHaveCount(
+    3,
+  );
+  await sessionControl(page, 'Split view');
+  await settings(page);
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   await page.getByLabel('Auto Advance', { exact: true }).check();
   await page.getByLabel('Advance mode').selectOption('one-and-done');
   await closeSettings(page);
@@ -99,9 +128,6 @@ test('teacher details are opt-in; retry rounds, random and undo preserve results
   expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
   await page.reload();
   await settings(page);
-  await expect(
-    page.getByLabel('Teacher details', { exact: true }),
-  ).not.toBeChecked();
   await expect(
     page.getByText('Round queues restart after reopening.', { exact: false }),
   ).toBeVisible();
@@ -209,8 +235,8 @@ test('card updates retain focused controls and manual roster scrolling', async (
     .locator('.roster-scroll')
     .evaluate((el) => el.scrollTop);
   await settings(page);
-  await teacherDetails(page, true);
-  await teacherDetails(page, false);
+  await page.getByLabel('Clap navigation').check();
+  await page.getByLabel('Clap navigation').uncheck();
   // Firefox may clamp the restored bottom edge to a fractional CSS pixel.
   expect(
     Math.abs(
@@ -395,7 +421,13 @@ test('session groups listening input, student identities and tuner scoring', asy
   const scores = (await rect('.tuner-section[data-live-practice] .scorebar'))!;
   const listening = (await rect('#pauseListening'))!;
   const playback = (await rect('[data-ui-click="reference-tone"]'))!;
-  expect(mic.y + mic.height).toBeLessThanOrEqual(tuner.y);
+  await expect(
+    page.locator('.tuner-section[data-live-practice] .tuner > .input-signal'),
+  ).toHaveCount(1);
+  expect(mic.x).toBeGreaterThanOrEqual(tuner.x);
+  expect(mic.x + mic.width).toBeLessThanOrEqual(tuner.x + tuner.width);
+  expect(mic.y).toBeGreaterThanOrEqual(tuner.y);
+  expect(mic.y + mic.height).toBeLessThanOrEqual(tuner.y + tuner.height);
   expect(Math.abs(listening.y - playback.y)).toBeLessThan(2);
   await expect(page.locator('.target-actions #pauseListening')).toBeVisible();
   await expect(page.locator('#classroomStatus')).toBeEmpty();

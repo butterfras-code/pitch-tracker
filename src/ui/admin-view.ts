@@ -257,16 +257,17 @@ export const adminView = {
       <p>
         The instrument appears above each student’s name. Last labels the active
         student’s previous rating. Use the card’s options button to mark a
-        student absent or present. The microphone icon shows whether input is
+        student absent or present. The history icon beside it opens that
+        student’s notes and attempts. The microphone icon shows whether input is
         on, paused, or off; the adjacent meter shows its level.
       </p>
       <p>
         The shared session toolbar stays available in every view, including
-        fullscreen. View contains Split, Student, Class, Full screen, and
-        Teacher details. Session options contains advancement rules, feedback
-        duration, clap navigation, and microphone selection. Back returns to
-        classes; Undo reverses the last change. Previous, listening, and Next
-        remain directly accessible below the toolbar.
+        fullscreen. Split, Student, Class, and Full screen remain directly
+        available in the toolbar. Session options contains advancement rules,
+        feedback duration, clap navigation, and microphone selection. Back
+        returns to classes; Undo reverses the last change. Previous, listening,
+        and Next remain directly accessible below the toolbar.
       </p>
       <p>
         Split shows the current student beside or above the class dashboard.
@@ -284,11 +285,10 @@ export const adminView = {
         reveals their card.
       </p>
       <p>
-        Session behavior settings contains advance mode, clap navigation,
-        microphone input and Teacher details. Teacher details reveals
-        per-student scoring and note access; its initial value comes from
-        Session defaults and is not a password or access restriction. Pause,
-        Previous, Next and Undo stay available in every view.
+        Session behavior settings contains advance mode, clap navigation, and
+        microphone input. Score the current student with the controls in the
+        tuner in Split or Class view. Pause, Previous, Next and Undo stay
+        available in every view.
       </p>
       <p>
         At round completion, retry only students whose latest result needs

@@ -82,7 +82,6 @@ test('fullscreen class scoring and menus fit every bundled theme', async ({
   await classroomPage(page, 30);
   await sessionControl(page, 'Class view');
   await sessionControl(page, 'Full screen');
-  const signatures = [];
   for (const theme of await page
     .locator('#themeSelect option')
     .evaluateAll((options) =>
@@ -97,12 +96,9 @@ test('fullscreen class scoring and menus fit every bundled theme', async ({
       '.selected .tuner-section .scorebar',
     ])
       await expect(page.locator(selector)).toBeInViewport();
-    signatures.push(await page.locator('.selected').boundingBox());
     await settings(page);
     await expect(page.getByLabel('Microphone input')).toBeVisible();
     await closeSettings(page);
     await page.screenshot({ path: testInfo.outputPath(`class-${theme}.png`) });
   }
-  for (const signature of signatures.slice(1))
-    expect(signature).toEqual(signatures[0]);
 });

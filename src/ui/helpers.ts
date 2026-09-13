@@ -4,7 +4,6 @@ interface Elements {
   themeSelect: HTMLSelectElement;
   modal: HTMLDialogElement;
   importFile: HTMLInputElement;
-  sessionName: HTMLInputElement;
   className: HTMLInputElement;
   studentName: HTMLInputElement;
   studentInstrument: HTMLSelectElement;

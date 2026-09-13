@@ -20,23 +20,7 @@ export const dialogs = {
       this.toast('Add students in Classes first.');
       return;
     }
-    this.showDialog(
-      /* HTML */ `<h2>Start a session</h2>
-        <p class="muted">${esc(this.cls().name)} · ${roster.length} students</p>
-        <form data-ui-submit="create-session">
-          <label
-            >Session name<input
-              id="sessionName"
-              required
-              maxlength="120"
-              value="${esc(new Date().toLocaleDateString() + ' · Mouthpiece practice')}"
-          /></label>
-          <div class="row" style="margin-top:18px">
-            <button class="primary">Start session</button
-            ><button type="button" data-ui-click="close-dialog">Cancel</button>
-          </div>
-        </form>`,
-    );
+    this.createSession();
   },
   sessionNotes(this: App): void {
     const s = this.ses();

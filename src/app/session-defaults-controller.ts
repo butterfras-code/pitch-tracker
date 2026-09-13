@@ -28,7 +28,8 @@ export const sessionDefaultsController = {
           advance: values.has('advance'),
           mode: values.get('mode'),
           claps: values.has('claps'),
-          teacher: values.has('teacher'),
+          // Retained in schema 3 so removing the UI does not rewrite backups.
+          teacher: next.sessionDefaults!.teacher,
           view: values.get('view'),
         },
       });

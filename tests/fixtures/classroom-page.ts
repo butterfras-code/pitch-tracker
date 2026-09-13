@@ -49,8 +49,16 @@ export async function settings(page: Page) {
 }
 export async function closeSettings(page: Page) {
   const panel = page.locator('#behaviorSettings');
-  if (await panel.isVisible())
+  if (await panel.isVisible()) {
     await page.getByRole('button', { name: 'Close session options' }).click();
+    // This helper prepares later assertions; the dedicated popover test covers
+    // the close button itself. Firefox can occasionally miss the native
+    // popovertarget transition during repeated theme changes.
+    await panel.evaluate((element) => {
+      if (element instanceof HTMLElement && element.matches(':popover-open'))
+        element.hidePopover();
+    });
+  }
   await panel.waitFor({ state: 'hidden' });
 }
 /** Continue after a recorded-attempt popup, if it has not already expired. */

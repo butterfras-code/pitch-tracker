@@ -41,6 +41,7 @@ const studentChevron = (direction: 'previous' | 'next', extra = '') =>
   );
 const microphoneStatusIcon = `<svg class="microphone-status-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v3M9 21h6"/><path class="microphone-off-mark" d="m4 4 16 16"/></svg>`;
 const speakerIcon = `<svg aria-hidden="true" viewBox="0 0 48 40"><path d="M4 14h9L25 4v32L13 26H4z" fill="currentColor"/><path d="M32 11q12 9 0 18m6-25q20 16 0 32" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
+const historyIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>`;
 const scoreButtons = (active: boolean) =>
   (['low', 'correct', 'high'] as const)
     .map((status, index) => {
@@ -67,7 +68,7 @@ const inactivePractice = (
   a4: number,
 ) => `<div class="inactive-practice" aria-hidden="true">
   <div class="session-target session-target--inactive"><div class="target-readout">${targetReadout(target, a4)}</div><div class="target-controls"><div class="target-actions"><button type="button" class="primary target-listening" disabled tabindex="-1">${microphoneStatusIcon}</button><button type="button" class="primary target-playback" disabled tabindex="-1">${speakerIcon}</button></div></div></div>
-  <div class="tuner-section tuner-section--inactive"><div class="input-signal"><span class="input-status" data-microphone="off">${microphoneStatusIcon}</span><meter aria-hidden="true" min="0" max="0.25" value="0"></meter></div><div class="tuner"><div class="note">—</div><div class="tuner-frequency"></div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle"></i></div><div class="tuner-cents">—</div><div class="progress"><i></i></div></div><div class="scorebar">${scoreButtons(false)}</div></div>
+  <div class="tuner-section tuner-section--inactive"><div class="tuner"><div class="note">—</div><div class="tuner-frequency"></div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle"></i></div><div class="input-signal"><span class="input-status" data-microphone="off">${microphoneStatusIcon}</span><meter aria-hidden="true" min="0" max="0.25" value="0"></meter></div><div class="tuner-cents">—</div><div class="progress"><i></i></div></div><div class="scorebar">${scoreButtons(false)}</div></div>
 </div>`;
 const attendanceToggle = (id: string, name: string, absent: boolean) =>
   action(
@@ -86,7 +87,6 @@ interface StudentCardLayout {
   result: string;
   resultStatus: string;
   hasAttempt: boolean;
-  attempts: number;
   inactivePractice: string;
 }
 /** Shared, value-stable shell for student cards in split and class views. */
@@ -95,7 +95,7 @@ const studentCardLayout = (student: StudentCardLayout) => {
   const result = student.result
     ? `<span class="${student.hasAttempt ? `student-result ${student.resultStatus}` : 'badge'}">${esc(student.result)}</span>`
     : '<span class="card-result-empty">No result yet</span>';
-  return `${student.outsideFilter ? '<small class="outside-filter-label">Current student · outside this filter</small>' : ''}<div class="roster-header"><small class="roster-instrument" title="${esc(student.instrument)}">${esc(student.instrument)}</small><span class="turn-label">${turn}</span>${attendanceToggle(student.id, student.name, student.absent)}</div><div class="roster-identity"><div class="roster-name-navigation">${student.active ? studentChevron('previous', 'class-chevron') : ''}<button class="name" data-ui-click="select-student" data-id="${esc(student.id)}" title="${esc(student.name)}">${esc(student.name)}</button>${student.active ? studentChevron('next', 'class-chevron') : ''}</div></div><div class="roster-rating">${result}</div><div class="card-practice">${student.inactivePractice}</div><div class="teacher-only"><small>${student.attempts} tries</small><div class="scorebar">${['low', 'correct', 'high'].map((status, index) => action('record', ['Too low', 'In range', 'Too high'][index], `class="${status}" data-id="${esc(student.id)}" data-status="${status}" ${student.absent ? 'disabled' : ''}`)).join('')}</div>${action('student-notes', 'History', `data-id="${esc(student.id)}" aria-label="History for ${esc(student.name)}"`)}</div>`;
+  return `${student.outsideFilter ? '<small class="outside-filter-label">Current student · outside this filter</small>' : ''}<div class="roster-header"><small class="roster-instrument" title="${esc(student.instrument)}">${esc(student.instrument)}</small><span class="turn-label">${turn}</span><div class="roster-card-actions">${action('student-notes', historyIcon, `class="history-toggle" data-id="${esc(student.id)}" aria-label="History for ${esc(student.name)}" title="History for ${esc(student.name)}"`)}${attendanceToggle(student.id, student.name, student.absent)}</div></div><div class="roster-identity"><div class="roster-name-navigation">${student.active ? studentChevron('previous', 'class-chevron') : ''}<button class="name" data-ui-click="select-student" data-id="${esc(student.id)}" title="${esc(student.name)}">${esc(student.name)}</button>${student.active ? studentChevron('next', 'class-chevron') : ''}</div></div><div class="roster-rating">${result}</div><div class="card-practice">${student.inactivePractice}</div>`;
 };
 // Cards have a stable structure: patch nodes in place to preserve focus and inputs.
 function patchChildren(target: Node, source: Node): void {
@@ -136,7 +136,6 @@ export class SessionView {
   private root: HTMLElement | null = null;
   private model: SessionModel | null = null;
   private current: string | null = null;
-  private teacher = false;
   private settings = false;
   private view: 'split' | 'student' | 'class' =
     window.innerWidth < 600 ? 'student' : 'split';
@@ -148,7 +147,6 @@ export class SessionView {
   }
   constructor(defaults?: SessionDefaults) {
     if (defaults) {
-      this.teacher = defaults.teacher;
       if (defaults.view !== 'auto') this.view = defaults.view;
     }
     window.addEventListener('resize', () => this.follow(), {
@@ -164,24 +162,9 @@ export class SessionView {
     if (view === 'split' || view === 'student' || view === 'class')
       this.view = view;
     this.applyView();
-    this.root?.querySelector<HTMLElement>('#viewMenu')?.hidePopover();
-    this.root
-      ?.querySelector<HTMLElement>('#viewTrigger')
-      ?.focus({ preventScroll: true });
     this.follow();
   }
-  toggleTeacher(value: boolean) {
-    this.teacher = value;
-    if (this.model) this.render(this.root!.parentElement!, this.model);
-  }
   async fullscreen() {
-    const menu = this.root?.querySelector<HTMLElement>('#viewMenu');
-    if (menu?.matches(':popover-open')) {
-      menu.hidePopover();
-      this.root
-        ?.querySelector<HTMLElement>('#viewTrigger')
-        ?.focus({ preventScroll: true });
-    }
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (document.documentElement.requestFullscreen)
@@ -199,16 +182,22 @@ export class SessionView {
     this.fullscreenLabel();
   }
   private fullscreenLabel() {
-    const b = this.root?.querySelector('[data-ui-click="session-fullscreen"]');
-    if (b)
-      b.textContent = document.fullscreenElement
+    const b = this.root?.querySelector<HTMLElement>(
+      '[data-ui-click="session-fullscreen"]',
+    );
+    if (b) {
+      const label = document.fullscreenElement
         ? 'Exit full screen'
         : 'Full screen';
+      const text = b.querySelector('.fullscreen-label');
+      if (text) text.textContent = label;
+      b.setAttribute('aria-label', label);
+      b.setAttribute('aria-pressed', String(!!document.fullscreenElement));
+    }
   }
   private applyView() {
     if (!this.root) return;
     this.root.dataset.view = this.view;
-    this.root.dataset.teacher = String(this.teacher);
     const settings = this.root.querySelector<HTMLElement>('#behaviorSettings')!;
     this.settings = settings.matches(':popover-open');
     this.root.dataset.settings = String(this.settings);
@@ -220,10 +209,6 @@ export class SessionView {
     this.root
       .querySelector('[data-ui-click="session-settings"]')!
       .setAttribute('aria-expanded', String(this.settings));
-    const viewMenu = this.root.querySelector<HTMLElement>('#viewMenu')!;
-    this.root
-      .querySelector('#viewTrigger')!
-      .setAttribute('aria-expanded', String(viewMenu.matches(':popover-open')));
     this.placePractice();
     this.fullscreenLabel();
   }
@@ -272,28 +257,20 @@ export class SessionView {
 
  <div class="session-toolbar" aria-label="Session controls">
  ${action('back-to-classes', '←', 'aria-label="Back to classes" title="Back to classes"')}
- <button id="viewTrigger" popovertarget="viewMenu" aria-expanded="false" aria-controls="viewMenu">View ▾</button>
+ <div class="view-picker" role="group" aria-label="Content view">${['split', 'student', 'class'].map((v) => action('session-view', v[0].toUpperCase() + v.slice(1), `data-view="${v}" aria-label="${v[0].toUpperCase() + v.slice(1)} view"`)).join('')}</div>
+ ${action('session-fullscreen', '<span class="fullscreen-icon" aria-hidden="true">⛶</span><span class="fullscreen-label">Full screen</span>', 'aria-label="Full screen" aria-pressed="false"')}
  ${action('session-settings', 'Session options ▾', 'aria-label="Session options" aria-expanded="false" aria-controls="behaviorSettings" popovertarget="behaviorSettings"')}
  ${action('undo', '↶ Undo', 'id="sessionUndo" aria-label="Undo last change"')}
  <div class="session-meta"><strong id="sessionTitle"></strong><small id="roundLabel"></small></div>
  ${action('end-session', 'Finish session')}
  </div>
- <div id="viewMenu" class="behavior-settings view-menu" popover="auto" aria-label="View">
- <div class="session-settings-heading"><h2>View</h2><button popovertarget="viewMenu" popovertargetaction="hide" aria-label="Close view menu">×</button></div>
- <div class="view-picker" role="group" aria-label="Content view">${['split', 'student', 'class'].map((v) => action('session-view', v[0].toUpperCase() + v.slice(1), `data-view="${v}" aria-label="${v[0].toUpperCase() + v.slice(1)} view"`)).join('')}</div>
- ${action('session-fullscreen', 'Full screen')}
- <label><input type="checkbox" data-ui-change="teacher-details"> Teacher details</label>
- </div>
- <div id="behaviorSettings" class="behavior-settings" popover="auto"><div class="session-settings-heading"><h2>Session options</h2>${action('session-settings-close', '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>', 'type="button" aria-label="Close session options" popovertarget="behaviorSettings" popovertargetaction="hide"')}</div>${feedbackDurationControl(m.db.settings.feedbackDurationMs)}<label>Class<select id="sessionClass" data-ui-change="change-class"></select></label><label><input type="checkbox" data-ui-change="advance" aria-label="Auto Advance"> Auto Advance</label><label>Advance mode<select data-ui-change="classroom-mode"><option value="until-correct">Until correct</option><option value="one-and-done">One and done</option></select></label><label><input type="checkbox" data-ui-change="clap-navigation"> Clap navigation</label><div class="row">${action('toggle-mic', 'Enable microphone', 'id="micButton"')}${action('random-student', 'Random')}${action('active-student-notes', 'Notes', 'class="teacher-only"')}${action('session-notes', 'Session notes', 'class="teacher-only"')}</div><label>Microphone input<select id="microphoneInput" data-ui-change="microphone-input"><option value="">Browser default</option></select></label><p class="help">Two claps: next. Three claps: back. Clap navigation is optional. Round queues restart after reopening. Attempts stay saved.</p></div>
+ <div id="behaviorSettings" class="behavior-settings" popover="auto"><div class="session-settings-heading"><h2>Session options</h2>${action('session-settings-close', '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>', 'type="button" aria-label="Close session options" popovertarget="behaviorSettings" popovertargetaction="hide"')}</div>${feedbackDurationControl(m.db.settings.feedbackDurationMs)}<label>Class<select id="sessionClass" data-ui-change="change-class"></select></label><label><input type="checkbox" data-ui-change="advance" aria-label="Auto Advance"> Auto Advance</label><label>Advance mode<select data-ui-change="classroom-mode"><option value="until-correct">Until correct</option><option value="one-and-done">One and done</option></select></label><label><input type="checkbox" data-ui-change="clap-navigation"> Clap navigation</label><div class="row">${action('toggle-mic', 'Enable microphone', 'id="micButton"')}${action('random-student', 'Random')}${action('active-student-notes', 'Notes')}${action('session-notes', 'Session notes')}</div><label>Microphone input<select id="microphoneInput" data-ui-change="microphone-input"><option value="">Browser default</option></select></label><p class="help">Two claps: next. Three claps: back. Clap navigation is optional. Round queues restart after reopening. Attempts stay saved.</p></div>
  <div class="session-workspace"><div class="session-stage"><p id="viewMessage" role="status"></p><p id="micError" role="status"></p>
- <div class="session-content"><section class="current-display" aria-label="Current student"><div class="student-heading student-actions" role="group" aria-label="Current and next students"><div class="student-navigation">${studentChevron('previous')}<div id="studentIdentity"></div>${studentChevron('next')}</div><div id="upNext" class="upcoming-student"></div></div><div class="session-target" data-live-practice><div class="target-readout" id="pressTarget"></div><div class="target-controls"><div class="target-actions">${action('pause-listening', `${microphoneStatusIcon}<span id="listeningLabel">Pause listening</span>`, 'id="pauseListening" class="primary target-listening" aria-label="Pause listening" data-microphone="on"')}${action('reference-tone', `${speakerIcon}<span>Hear target</span>`, 'class="primary target-playback" aria-label="Hear current target"')}</div><small id="classroomStatus" role="status"></small></div></div><div class="tuner-section" data-live-practice><div class="input-signal"><span id="inputStatus" class="input-status" role="img" aria-label="Microphone off" title="Microphone off" data-microphone="off">${microphoneStatusIcon.replace('</svg>', '<path class="microphone-paused-mark" d="M18 16v6m4-6v6"/></svg>')}</span><meter id="inputLevel" aria-label="Microphone level" min="0" max="0.25" value="0"></meter></div><div class="tuner"><div class="note" id="liveNote">—</div><div id="liveHz" class="tuner-frequency">Listening for a clear tone</div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle" id="needle"></i></div><div id="liveCents" class="tuner-cents" aria-label="Cents relative to target">—</div><div class="progress"><i id="holdProgress"></i></div></div><div class="scorebar">${scoreButtons(true)}</div></div><div class="classroom-feedback"><div id="lastResult"></div></div><div class="student-footer"><div id="roundActions"></div></div></section>
+ <div class="session-content"><section class="current-display" aria-label="Current student"><div class="student-heading student-actions" role="group" aria-label="Current and next students"><div class="student-navigation">${studentChevron('previous')}<div id="studentIdentity"></div>${studentChevron('next')}</div><div id="upNext" class="upcoming-student"></div></div><div class="session-target" data-live-practice><div class="target-readout" id="pressTarget"></div><div class="target-controls"><div class="target-actions">${action('pause-listening', `${microphoneStatusIcon}<span id="listeningLabel">Pause listening</span>`, 'id="pauseListening" class="primary target-listening" aria-label="Pause listening" data-microphone="on"')}${action('reference-tone', `${speakerIcon}<span>Hear target</span>`, 'class="primary target-playback" aria-label="Hear current target"')}</div><small id="classroomStatus" role="status"></small></div></div><div class="tuner-section" data-live-practice><div class="tuner"><div class="note" id="liveNote">—</div><div id="liveHz" class="tuner-frequency">Listening for a clear tone</div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle" id="needle"></i></div><div class="input-signal"><span id="inputStatus" class="input-status" role="img" aria-label="Microphone off" title="Microphone off" data-microphone="off">${microphoneStatusIcon.replace('</svg>', '<path class="microphone-paused-mark" d="M18 16v6m4-6v6"/></svg>')}</span><meter id="inputLevel" aria-label="Microphone level" min="0" max="0.25" value="0"></meter></div><div class="tuner-cents" id="liveCents" aria-label="Cents relative to target">—</div><div class="progress"><i id="holdProgress"></i></div></div><div class="scorebar">${scoreButtons(true)}</div></div><div class="classroom-feedback"><div id="lastResult"></div></div><div class="student-footer"><div id="roundActions"></div></div></section>
  <section class="roster-area" aria-label="Students dashboard"><div class="dashboard-header"><div class="row"><input id="search" aria-label="Search students" placeholder="Find a student" data-ui-input="search"><select aria-label="Filter roster" data-ui-change="filter-roster">${['all', 'not tested', 'needs practice', 'absent'].map((v) => `<option>${v}</option>`).join('')}</select>${action('show-current', 'Show current student')}</div></div><div class="roster-scroll" tabindex="0" aria-label="Class roster"><div id="activeOutsideFilter"></div><div class="cards" id="cards"></div></div></section></div></div></div></section>`;
       this.root = host.querySelector('#sessionShell')!;
       const stage = this.root.querySelector('.session-stage')!;
       stage.append(this.root.querySelector('.student-footer')!);
-      this.root
-        .querySelector('#viewMenu')!
-        .addEventListener('toggle', () => this.applyView());
       const settings =
         this.root.querySelector<HTMLElement>('#behaviorSettings')!;
       settings.addEventListener('toggle', () => this.applyView());
@@ -349,7 +326,6 @@ export class SessionView {
     };
     setCheck('advance', m.db.settings.advance);
     setCheck('clap-navigation', m.claps);
-    setCheck('teacher-details', this.teacher);
     this.root.querySelector<HTMLSelectElement>(
       '[data-ui-change="classroom-mode"]',
     )!.value = m.mode;
@@ -465,7 +441,6 @@ export class SessionView {
         result: state,
         resultStatus: last?.status ?? '',
         hasAttempt: !!last,
-        attempts: attempts.length,
         inactivePractice: active
           ? ''
           : inactivePractice(m.db.configs[p.instrument], m.db.settings.a4),

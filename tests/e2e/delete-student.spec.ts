@@ -1,8 +1,6 @@
-import { teacherDetails } from '../fixtures/session-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test } from '@playwright/test';
-import { closeSettings } from '../fixtures/classroom-page';
 
 test('student deletion supports cancellation, persists, and preserves session history', async ({
   page,
@@ -18,13 +16,7 @@ test('student deletion supports cancellation, persists, and preserves session hi
     .getByRole('button', { name: 'Start session' })
     .click();
   await page
-    .getByRole('button', { name: 'Session options', exact: true })
-    .click();
-  await teacherDetails(page, true);
-  await closeSettings(page);
-  await page
-    .locator('.student')
-    .first()
+    .locator('.tuner-section[data-live-practice]')
     .getByRole('button', { name: 'In range' })
     .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
@@ -51,7 +43,7 @@ test('student deletion supports cancellation, persists, and preserves session hi
   await page.reload();
   await expect(page.locator('.student')).toHaveCount(10);
   await expect(page.locator('.student').first()).toContainText('Maya');
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('In range');
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Edit class' }).first().click();
   await expect(row).toHaveCount(0);

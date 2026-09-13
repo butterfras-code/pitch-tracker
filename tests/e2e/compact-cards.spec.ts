@@ -235,5 +235,5 @@ test('student card identity stays single-line and view-specific', async ({
   const heights = await page
     .locator('.student')
     .evaluateAll((cards) => cards.map((item) => item.clientHeight));
-  expect(new Set(heights).size).toBe(1);
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
 });

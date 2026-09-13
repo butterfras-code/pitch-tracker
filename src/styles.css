@@ -902,9 +902,6 @@ body.session-active {
 .session-shell .student label {
   margin-top: 8px;
 }
-.session-shell[data-teacher='false'] .teacher-only {
-  display: none;
-}
 .session-shell[data-view='student'] .roster-area {
   display: none;
 }

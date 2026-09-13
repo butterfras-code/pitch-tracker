@@ -111,7 +111,6 @@ export function createBindings(app: App): UiBindings {
       },
       'target-scale': ({ element }) => editTarget(element, 'scale'),
       'target-note': ({ element }) => editTarget(element, 'note'),
-      'teacher-details': ({ checked }) => app.workspace?.toggleTeacher(checked),
       'microphone-input': ({ value }) => app.changeMicrophone(value),
       'classroom-mode': ({ value }) => {
         if (value !== 'until-correct' && value !== 'one-and-done') return;

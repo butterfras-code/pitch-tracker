@@ -45,14 +45,6 @@ export function sessionDefaultsHTML(data: TrackerData): string {
           Clap navigation</label
         >
         <label
-          ><input
-            name="teacher"
-            type="checkbox"
-            ${defaults.teacher ? 'checked' : ''}
-          />
-          Teacher details</label
-        >
-        <label
           >Starting view<select name="view">
             ${[
               ['auto', 'Automatic'],
@@ -71,7 +63,6 @@ export function sessionDefaultsHTML(data: TrackerData): string {
       <p class="help">
         Automatic view uses Student on phones and Split otherwise. Clap
         navigation uses two claps for next and three for back while listening.
-        Teacher details shows student history and scoring controls.
       </p>
       <button class="primary">Save session defaults</button>
       <p id="sessionDefaultsError" role="alert" class="danger"></p>

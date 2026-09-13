@@ -4,6 +4,22 @@ import { clone, uid } from './identity';
 import type { PitchMeasurement, PitchStatus } from './pitch';
 import { activeSession, presentStudents } from './session';
 import type { Attempt, Session, TrackerData } from './tracker';
+const sessionNameForDate = (
+  sessions: Session[],
+  classId: string,
+  className: string,
+  now: number,
+): string => {
+  const date = new Date(now).toLocaleDateString();
+  const sameDateCount = sessions.filter(
+    (session) =>
+      session.classId === classId &&
+      new Date(session.started).toLocaleDateString() === date,
+  ).length;
+  return `${date} - ${className}${
+    sameDateCount > 0 ? ` Session ${sameDateCount + 1}` : ''
+  }`;
+};
 export interface SessionState {
   db: TrackerData;
   roundQueue?: Round | null;
@@ -59,20 +75,23 @@ export function changeClass(state: SessionState, id: string): boolean {
 }
 export function createSession(
   state: SessionState,
-  name: string,
+  name?: string,
   now = Date.now(),
   id = uid(),
 ): Session | null {
   const db = state.db,
     cls = db.classes.find((c) => c.id === db.classId);
-  if (!cls || !name.trim() || activeSession(db)) return null;
+  if (!cls || activeSession(db)) return null;
+  const sessionName =
+    name?.trim() || sessionNameForDate(db.sessions, cls.id, cls.name, now);
+  if (!sessionName) return null;
   const roster = clone(cls.students.filter((p) => !p.archived));
   if (!roster.length) return null;
   const s: Session = {
     id,
     classId: cls.id,
     className: cls.name,
-    name: name.trim(),
+    name: sessionName,
     started: now,
     ended: null,
     roster,

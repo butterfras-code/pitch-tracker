@@ -1,4 +1,4 @@
-import { sessionControl, teacherDetails } from '../fixtures/session-controls';
+import { sessionControl } from '../fixtures/session-controls';
 import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -20,11 +20,6 @@ async function startSession(page: Page) {
     .getByRole('dialog')
     .getByRole('button', { name: 'Start session' })
     .click();
-  await page
-    .getByRole('button', { name: 'Session options', exact: true })
-    .click();
-  await teacherDetails(page, true);
-  await closeSettings(page);
 }
 
 test('class, student and settings forms retain their behavior', async ({
@@ -111,10 +106,10 @@ test('dynamic session controls, notes and history editing work after rerenders',
     .getByRole('button', { name: 'Lucas', exact: true })
     .click();
   await page
-    .locator('.student')
-    .getByRole('button', { name: 'In range' })
+    .locator('.tuner-section[data-live-practice]')
+    .getByRole('button', { name: 'In range', exact: true })
     .click();
-  await expect(page.locator('.student')).toContainText('1 tries');
+  await expect(page.locator('.student')).toContainText('In range');
   await dismissFeedback(page);
   await page.getByLabel('Search students').fill('');
   await page.getByLabel('Filter roster').selectOption('not tested');
@@ -189,7 +184,7 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
   await startSession(page);
   await page.getByLabel('Search students').fill('1');
   await page.getByLabel('Search students').fill('');
-  await expect(page.locator('.student').first()).toContainText('0 tries');
+  await expect(page.locator('.student').first()).toContainText('No result yet');
   await settings(page);
   await page
     .getByRole('button', { name: 'Session notes', exact: true })
@@ -207,12 +202,12 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
   }
   await page.locator('#studentIdentity h2').click();
   await page.keyboard.press('2');
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('In range');
   await dismissFeedback(page);
   await page.keyboard.press('Control+z');
-  await expect(page.locator('.student').first()).toContainText('0 tries');
+  await expect(page.locator('.student').first()).toContainText('No result yet');
   await page.locator('.current-display button.correct').click();
-  await expect(page.locator('.student').first()).toContainText('1 tries');
+  await expect(page.locator('.student').first()).toContainText('In range');
 });
 
 test('backup buttons, file picker and unreadable-data download remain connected', async ({
@@ -265,11 +260,16 @@ test('only registered actions execute, and disabled controls stay inactive', asy
   );
   // Synthetic events can bubble from disabled controls; the dispatcher still
   // must not run the action. Unknown names must never become executable code.
-  await page
-    .locator('.student')
-    .first()
-    .locator('[data-ui-click="record"].correct')
-    .dispatchEvent('click');
+  await expect(page.locator('.student [data-ui-click="record"]')).toHaveCount(
+    0,
+  );
+  const disabledScore = page.locator(
+    '.tuner-section[data-live-practice] [data-ui-click="record"].correct',
+  );
+  await disabledScore.evaluate((button: HTMLButtonElement) => {
+    button.disabled = true;
+  });
+  await disabledScore.dispatchEvent('click');
   await page.evaluate(() => {
     for (const name of ['constructor', 'record("correct")']) {
       const button = document.createElement('button');
