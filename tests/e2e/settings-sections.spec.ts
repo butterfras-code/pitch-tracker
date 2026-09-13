@@ -1,3 +1,4 @@
+import { teacherDetails } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
@@ -77,7 +78,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
   ).toBeVisible();
   await page.getByLabel('Auto Advance', { exact: true }).uncheck();
   await page.getByLabel('Clap navigation').uncheck();
-  await page.getByLabel('Teacher details').uncheck();
+  await teacherDetails(page, false);
   await page.getByLabel('Advance mode').selectOption('until-correct');
   expect((await saved(page)).sessionDefaults?.advance).toBe(true);
   await closeSettings(page);
@@ -102,7 +103,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
     .getByRole('button', { name: 'Enable microphone', exact: true })
     .click();
   await closeSettings(page);
-  await page.locator('.student.selected button.low').click();
+  await page.locator('.student.selected .tuner-section button.low').click();
   expect((await saved(page)).activeStudent).toBe('student-2');
   // The saved clap default drives the real listener only after microphone activation.
   await sound(page, 0, 1000);
@@ -160,7 +161,7 @@ test('restored defaults survive pitch saves and apply on resume', async ({
     'data-view',
     'student',
   );
-  await page.getByLabel('Teacher details').uncheck();
+  await teacherDetails(page, false);
   await closeSettings(page);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();

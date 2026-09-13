@@ -15,7 +15,7 @@
   background-size: 700px;
 }
 :root[data-treatment='comic']
-  :is(header, .tabs, .session-sidebar, .dashboard-header) {
+  :is(header, .tabs, .session-toolbar, .dashboard-header) {
   background-color: var(--card);
   border-radius: var(--help-radius);
   box-shadow: var(--panel-shadow);
@@ -37,21 +37,24 @@
 :root[data-treatment='comic'] .target-frequency {
   color: var(--display-ink);
 }
-:root[data-treatment='comic'] :is(.target-playback, .meter-labels) {
+:root[data-treatment='comic']
+  :is(.target-listening, .target-playback, .meter-labels) {
   font-family: var(--label-font);
   font-weight: var(--label-weight);
   letter-spacing: var(--label-tracking);
   text-transform: var(--label-transform);
 }
-:root[data-treatment='comic'] .target-playback {
+:root[data-treatment='comic'] :is(.target-listening, .target-playback) {
   background-color: var(--highlight);
   color: var(--primary-ink);
   border-color: var(--ink);
 }
-:root[data-treatment='comic'] .target-playback:hover:not(:disabled) {
+:root[data-treatment='comic']
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--danger);
 }
-:root[data-treatment='comic'] .target-playback:active:not(:disabled) {
+:root[data-treatment='comic']
+  :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
 :root[data-treatment='comic'] [data-ui-click='next-student'] {

@@ -1,186 +1,184 @@
 import { expect, test } from '@playwright/test';
-import { classroomPage } from '../fixtures/classroom-page';
+import {
+  classroomPage,
+  saved,
+  sound,
+  dismissFeedback,
+} from '../fixtures/classroom-page';
+import { openView, sessionControl } from '../fixtures/session-controls';
 
 for (const [width, height] of [
-  [1440, 900],
+  [1920, 1080],
+  [1366, 768],
   [390, 844],
-  [844, 390],
 ]) {
-  test(`session panels stay inside the viewport across themes at ${width}x${height}`, async ({
+  test(`shared toolbar and active scoring remain reachable at ${width}x${height}`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height });
-    await classroomPage(page, 80);
-    for (const theme of ['cel-mech', 'pitch-press']) {
-      await page.evaluate((id) => {
-        const select =
-          document.querySelector<HTMLSelectElement>('#themeSelect')!;
-        select.value = id;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-      }, theme);
-      for (const view of ['Student', 'Split', 'Class']) {
+    await classroomPage(page, 30);
+    for (const view of ['Split', 'Student', 'Class']) {
+      await sessionControl(page, view + ' view');
+      await expect(page.locator('#sessionSidebar')).toHaveCount(0);
+      for (const name of [
+        'Back to classes',
+        'Session options',
+        'Undo last change',
+        'Finish session',
+        'Next student',
+        'Previous student',
+        'Start listening',
+      ]) {
         await page
-          .getByRole('button', { name: view + ' view', exact: true })
-          .click();
-        await page
-          .getByRole('button', { name: 'Hide controls', exact: true })
-          .click();
-        await expect(page.locator('#sessionSidebar')).toBeHidden();
-        const bounds = await page.evaluate(() => {
-          const panels = [
-            ...document.querySelectorAll<HTMLElement>(
-              '.current-display, .roster-area, #cards',
-            ),
-          ].filter((el) => el.getClientRects().length);
-          return (
-            panels.every((el) => {
-              const rect = el.getBoundingClientRect();
-              return (
-                rect.bottom <= innerHeight + 1 &&
-                rect.right <= innerWidth + 1 &&
-                rect.height > 0
-              );
-            }) &&
-            document.documentElement.scrollHeight <= innerHeight + 1 &&
-            document.documentElement.scrollWidth <= innerWidth
-          );
-        });
-        expect(bounds, `${theme} ${view}`).toBe(true);
-        if (view === 'Class') {
-          expect(
-            await page
-              .locator('#cards')
-              .evaluate((el) => el.scrollHeight > el.clientHeight),
-          ).toBe(true);
-          await page.locator('#cards').evaluate((el) => {
-            el.scrollTop = el.scrollHeight;
-          });
-          expect(await page.evaluate(() => scrollY)).toBe(0);
-        }
-        if (theme === 'pitch-press' && view === 'Student') {
-          await page.screenshot({
-            path: testInfo.outputPath(`session-${width}.png`),
-          });
-        }
-        await page
-          .getByRole('button', { name: 'Show controls', exact: true })
-          .click();
+          .getByRole('button', { name, exact: true })
+          .scrollIntoViewIfNeeded();
         await expect(
-          page.getByRole('button', { name: 'Next student', exact: true }),
+          page.getByRole('button', { name, exact: true }),
+        ).toBeInViewport();
+      }
+      if (view !== 'Class') {
+        const previous = await page
+          .locator('.student-heading [data-ui-click="previous-student"]')
+          .boundingBox();
+        const identity = await page
+          .locator('#studentIdentity h2')
+          .boundingBox();
+        const next = await page
+          .locator('.student-heading [data-ui-click="next-student"]')
+          .boundingBox();
+        expect(previous!.x + previous!.width).toBeLessThanOrEqual(identity!.x);
+        expect(identity!.x + identity!.width).toBeLessThanOrEqual(next!.x);
+        await expect(
+          page.locator('.current-display .target-actions #pauseListening'),
         ).toBeVisible();
       }
+      await expect(page.locator('#viewTrigger')).toBeFocused();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
     }
-    await page
-      .getByRole('button', { name: 'Full screen', exact: true })
-      .click();
-    if (await page.evaluate(() => !!document.fullscreenElement)) {
-      await expect(page.locator('body > header')).toBeHidden();
-      await page
-        .getByRole('button', { name: 'Hide controls', exact: true })
-        .click();
-      await expect(page.locator('#cards')).toBeInViewport();
-      await page.evaluate(() => document.exitFullscreen());
-      await expect(page.locator('body > header')).toBeVisible();
-    }
+    await expect(page.locator('.current-display')).toBeHidden();
+    await expect(
+      page.getByRole('button', { name: 'Next student', exact: true }),
+    ).toBeVisible();
+    await expect(page.locator('.selected #pauseListening')).toBeVisible();
+    await expect(page.locator('.selected #liveNote')).toBeVisible();
+    await expect(page.locator('.selected .target-playback')).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath(`class-${width}.png`) });
+    await page.locator('.student .name').filter({ hasText: 'Lucas' }).click();
+    await expect(page.locator('.selected')).toContainText('Lucas');
+    await expect(page.locator('.selected #liveNote')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Undo last change' }).click();
+    expect((await saved(page)).activeStudent).toBe('student-1');
   });
 }
 
-test('the two canonical themes share session content and retain active controls', async ({
+test('class scoring preserves the live tuner across views and resolves feedback in the scored card', async ({
   page,
-}, testInfo) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+}) => {
   await classroomPage(page);
-  expect(await page.locator('#themeSelect option').allTextContents()).toEqual(
-    expect.arrayContaining(['Cel-Shaded Mech', 'Pitch Press']),
+  await sessionControl(page, 'Class view');
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  const tuner = await page.locator('#liveNote').elementHandle();
+  await page
+    .getByRole('button', { name: 'Start listening', exact: true })
+    .click();
+  await sound(page, 0);
+  await sound(page, 440, 250);
+  await expect(page.locator('.selected #liveNote')).not.toHaveText('—');
+  await sessionControl(page, 'Split view');
+  await sessionControl(page, 'Class view');
+  expect(await tuner!.evaluate((el) => el.isConnected)).toBe(true);
+  await sound(page, 440, 400);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await expect(page.locator('.selected .card-feedback')).toContainText(
+    'Maya · In range',
   );
-  await page.getByRole('button', { name: 'Student view', exact: true }).click();
-  const student = await page.locator('.current-display').elementHandle();
-  const signatures = [];
-  for (const theme of ['cel-mech', 'pitch-press']) {
-    await page
-      .getByRole('combobox', { name: 'Theme', exact: true })
-      .selectOption(theme);
-    await expect(page.locator('.target-pitch')).toHaveText('A4');
-    await expect(page.locator('.target-frequency')).toHaveText('440.0 Hz');
-    await expect(
-      page.getByRole('button', { name: 'Hear current target', exact: true }),
-    ).toBeVisible();
-    signatures.push(
-      await page.locator('.current-display').evaluate((el) =>
-        [...el.children].map((child) => {
-          const css = getComputedStyle(child);
-          return [child.id || child.className, css.display, css.order];
-        }),
-      ),
-    );
-    expect(await student!.evaluate((el) => el.isConnected)).toBe(true);
-    await page
-      .getByRole('button', { name: 'Hide controls', exact: true })
-      .click();
-    await page.screenshot({
-      path: testInfo.outputPath(`${theme}-student.png`),
-    });
-    await page
-      .getByRole('button', { name: 'Show controls', exact: true })
-      .click();
-  }
-  expect(signatures[0]).toEqual(signatures[1]);
-  await page.getByRole('button', { name: 'Next student', exact: true }).click();
-  await expect(page.locator('#studentIdentity h2')).toHaveText('Lucas');
+  await expect(page.locator('#pitchFeedback')).not.toHaveAttribute('open');
+  await expect(page.locator('.selected .card-practice')).toBeHidden();
+  await dismissFeedback(page);
+  await expect(page.locator('.selected .card-practice')).toBeVisible();
+  await page.locator('.student .name').filter({ hasText: 'Lucas' }).click();
+  await expect(
+    page.locator('.student').first().locator('.student-result'),
+  ).toHaveText('In range');
+  await page.getByLabel('Search students').fill('Sofia');
+  await expect(
+    page.locator('#activeOutsideFilter .selected #liveNote'),
+  ).toBeVisible();
+  await page.locator('#activeOutsideFilter .tuner-section .low').click();
+  expect((await saved(page)).sessions[0].attempts.at(-1)?.studentId).toBe(
+    'student-2',
+  );
 });
 
-test('metadata sits in the panel margin; show control restores keyboard focus', async ({
+test('view menu supports keyboard dismissal and fullscreen retains toolbar', async ({
   page,
-}, testInfo) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await classroomPage(page, 30);
-  await page.getByRole('button', { name: 'Full screen', exact: true }).click();
-  await expect(page.locator('.session-top')).toHaveCount(0);
-  await expect(page.locator('.current-display .session-meta')).toContainText(
-    'Rehearsal',
-  );
-  await expect(page.locator('.current-display #roundLabel')).toContainText(
-    '30 played',
-  );
-  await expect(page.locator('#sessionSidebar #hideControls')).toBeVisible();
-  const top = await page
-    .locator('.session-workspace')
-    .evaluate((el) => el.getBoundingClientRect().top);
-  expect(
-    await page
-      .locator('.current-display')
-      .evaluate((el) => el.getBoundingClientRect().top),
-  ).toBeCloseTo(top, 0);
-  await page.screenshot({ path: testInfo.outputPath('controls-visible.png') });
-  await page.locator('#hideControls').focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#sessionSidebar')).toBeHidden();
-  await expect(page.locator('#showControls')).toBeFocused();
-  await expect(page.locator('#showControls')).toHaveAttribute(
+}) => {
+  await classroomPage(page);
+  await openView(page);
+  await expect(page.locator('#viewTrigger')).toHaveAttribute(
     'aria-expanded',
-    'false',
+    'true',
   );
-  const placement = await page.evaluate(() => {
-    const show = document
-      .querySelector('#showControls')!
-      .getBoundingClientRect();
-    const panel = document
-      .querySelector('.current-display')!
-      .getBoundingClientRect();
-    const name = document
-      .querySelector('.student-heading')!
-      .getBoundingClientRect();
-    return (
-      show.left >= panel.left &&
-      show.left - panel.left <= 24 &&
-      show.top >= panel.top &&
-      show.bottom <= name.top
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#viewMenu')).toBeHidden();
+  await expect(page.locator('#viewTrigger')).toBeFocused();
+  await sessionControl(page, 'Full screen');
+  if (await page.evaluate(() => !!document.fullscreenElement)) {
+    await expect(page.locator('body > header')).toBeHidden();
+    await expect(page.locator('.session-toolbar')).toBeInViewport();
+    await sessionControl(page, 'Class view');
+    await sessionControl(page, 'Exit full screen');
+    await expect(page.locator('body > header')).toBeVisible();
+  }
+});
+
+test('class card selection and compact chevrons select students without scoring', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await sessionControl(page, 'Class view');
+  const lucas = page.locator('[data-student-id="student-2"]');
+  await lucas.locator('.roster-instrument').click();
+  await expect(lucas).toHaveClass(/selected/);
+  await page.getByRole('button', { name: 'Next student', exact: true }).click();
+  await expect(page.locator('.selected .name')).toHaveText('Sofia');
+  await page
+    .getByRole('button', { name: 'Previous student', exact: true })
+    .click();
+  await expect(page.locator('.selected .name')).toHaveText('Lucas');
+  await page
+    .locator('[data-student-id="student-1"]')
+    .click({ position: { x: 20, y: 150 } });
+  await expect(page.locator('.selected .name')).toHaveText('Maya');
+  await page.locator('.selected .attendance-toggle').click();
+  await expect(page.locator('[data-student-id="student-1"]')).toHaveClass(
+    /absent/,
+  );
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  for (const view of ['Student', 'Split', 'Class']) {
+    await sessionControl(page, view + ' view');
+    const parent = page.locator(
+      view === 'Class'
+        ? '.selected .roster-name-navigation'
+        : '.student-navigation',
     );
-  });
-  expect(placement).toBe(true);
-  await page.screenshot({ path: testInfo.outputPath('controls-hidden.png') });
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#hideControls')).toBeFocused();
-  await expect(page.locator('#showControls')).toBeHidden();
-  await expect(page.locator('#sessionSidebar')).toBeVisible();
+    const name = parent.locator(view === 'Class' ? '.name' : 'h2');
+    const previous = await parent
+      .locator('[data-ui-click="previous-student"]')
+      .boundingBox();
+    const next = await parent
+      .locator('[data-ui-click="next-student"]')
+      .boundingBox();
+    const identity = await name.boundingBox();
+    expect(identity!.x - previous!.x - previous!.width).toBeLessThanOrEqual(3);
+    expect(next!.x - identity!.x - identity!.width).toBeLessThanOrEqual(3);
+    await expect(parent.locator('.student-chevron').first()).toHaveCSS(
+      'border-top-width',
+      '0px',
+    );
+  }
 });

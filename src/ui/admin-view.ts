@@ -255,18 +255,33 @@ export const adminView = {
       </p>
       <h3>Session views</h3>
       <p>
+        The instrument appears above each student’s name. Last labels the active
+        student’s previous rating. Use the card’s options button to mark a
+        student absent or present. The microphone icon shows whether input is
+        on, paused, or off; the adjacent meter shows its level.
+      </p>
+      <p>
+        The shared session toolbar stays available in every view, including
+        fullscreen. View contains Split, Student, Class, Full screen, and
+        Teacher details. Session options contains advancement rules, feedback
+        duration, clap navigation, and microphone selection. Back returns to
+        classes; Undo reverses the last change. Previous, listening, and Next
+        remain directly accessible below the toolbar.
+      </p>
+      <p>
         Split shows the current student beside or above the class dashboard.
-        Student uses the space for one player; Class keeps a compact
-        current-student strip above the roster. Full screen fills the display
-        with the selected view; Exit full screen or the browser escape control
-        returns to the window. On phones, Student is the initial view.
+        Student uses the space for one player; Class puts the live target,
+        tuner, and scoring controls inside the active student’s card. Full
+        screen fills the display with the selected view; Exit full screen or the
+        browser escape control returns to the window. On phones, Student is the
+        initial view.
       </p>
       <p>
         The roster scrolls independently and follows each newly activated
         student without moving keyboard focus. You can browse freely between
-        turns. If search or a filter hides the current student, their name stays
-        above the results; Show current student clears the filter and reveals
-        their card.
+        turns. If search or a filter hides the current student, their active
+        card stays above the results; Show current student clears the filter and
+        reveals their card.
       </p>
       <p>
         Session behavior settings contains advance mode, clap navigation,

@@ -133,7 +133,7 @@ export const microphone = {
       this.cancelCheck();
       // Automatic arming requires fresh quiet or settled-background observations.
       this.render();
-    }
+    } else if (!this.disposed) this.render();
   },
   async refreshMicrophones(this: App): Promise<void> {
     const generation = this.micGeneration;

@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { classroomPage, saved } from '../fixtures/classroom-page';
 
@@ -18,19 +19,11 @@ for (const [width, height] of [
       const picker = page.locator('#themeSelect');
       await picker.selectOption('big-button', { force: true });
       if (width > 390) {
-        await page
-          .getByRole('button', { name: 'Split view', exact: true })
-          .click();
-        await page
-          .getByRole('button', { name: 'Full screen', exact: true })
-          .click();
+        await sessionControl(page, 'Split view');
+        await sessionControl(page, 'Full screen');
         await expect
           .poll(() => page.evaluate(() => !!document.fullscreenElement))
           .toBe(true);
-      } else {
-        await page
-          .getByRole('button', { name: 'Hide controls', exact: true })
-          .click();
       }
       const student = page.locator('.current-display');
       const geometry = () =>

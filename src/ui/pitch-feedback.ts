@@ -3,25 +3,29 @@ import { FEEDBACK_CATALOG } from '../themes/registry';
 import { FeedbackPicker, resolveFeedback } from '../themes/feedback';
 import { findElement, statusName } from './helpers';
 
-/** Owns the temporary result modal; attempts and scoring remain in the controller. */
+/** Owns timed dialog/card feedback; attempts and scoring remain in the controller. */
 export class PitchFeedback {
+  private inlineElement: HTMLElement | null = null;
   private picker = new FeedbackPicker();
   private timer: ReturnType<typeof setTimeout> | undefined;
   private element: HTMLDialogElement | null = null;
   private events: AbortController | null = null;
 
   get visible(): boolean {
-    return this.element?.open ?? false;
+    return !!this.inlineElement || (this.element?.open ?? false);
   }
 
   show(
     name: string,
     rating: PitchStatus,
     durationOverride?: number | null,
+    host?: HTMLElement,
   ): void {
     this.clear();
-    const element = findElement('pitchFeedback');
-    if (!(element instanceof HTMLDialogElement)) return;
+    const element = host
+      ? document.createElement('div')
+      : findElement('pitchFeedback');
+    if (!element) return;
     const themeId = document.documentElement.dataset.theme ?? '';
     const phrase = this.picker.next(
       resolveFeedback(FEEDBACK_CATALOG, themeId, rating),
@@ -53,13 +57,18 @@ export class PitchFeedback {
     dismiss.type = 'button';
     dismiss.className = 'feedback-continue';
     dismiss.textContent = 'Continue';
-    dismiss.autofocus = true;
+    dismiss.autofocus = !host;
     const hint = document.createElement('p');
     hint.className = 'feedback-hint';
     hint.textContent = `Closes automatically after ${duration / 1000} ${duration === 1000 ? 'second' : 'seconds'}`;
     element.replaceChildren(icon, caption, message, dismiss, hint);
     element.dataset.rating = rating;
-    this.element = element;
+    if (host) {
+      element.className = 'card-feedback';
+      element.setAttribute('role', 'status');
+      host.append(element);
+      this.inlineElement = element;
+    } else if (element instanceof HTMLDialogElement) this.element = element;
     this.events = new AbortController();
     const options = { signal: this.events.signal };
     dismiss.addEventListener('click', () => this.clear(), options);
@@ -71,11 +80,13 @@ export class PitchFeedback {
       },
       options,
     );
-    element.showModal();
+    if (element instanceof HTMLDialogElement) element.showModal();
     this.timer = setTimeout(() => this.clear(), duration);
   }
 
   clear(): void {
+    this.inlineElement?.remove();
+    this.inlineElement = null;
     clearTimeout(this.timer);
     this.timer = undefined;
     this.events?.abort();

@@ -1,3 +1,4 @@
+import { teacherDetails } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -27,13 +28,13 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
   await page.reload();
   if (
     await page
-      .getByRole('button', { name: 'Session behavior settings', exact: true })
+      .getByRole('button', { name: 'Session options', exact: true })
       .count()
   ) {
     await page
-      .getByRole('button', { name: 'Session behavior settings', exact: true })
+      .getByRole('button', { name: 'Session options', exact: true })
       .click();
-    await page.getByLabel('Teacher details', { exact: true }).check();
+    await teacherDetails(page, true);
   }
   await expect(
     page.getByText('Baseline rehearsal', { exact: true }),

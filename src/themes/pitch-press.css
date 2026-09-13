@@ -95,6 +95,7 @@
   :is(
     .target-caption,
     .target-frequency,
+    .target-listening,
     .target-playback,
     .meter-labels,
     #classroomStatus,
@@ -144,7 +145,7 @@
 }
 @media print {
   .student-actions,
-  .target-playback {
+  :is(.target-listening, .target-playback) {
     display: none;
   }
 }
@@ -195,13 +196,14 @@
 :root[data-theme='pitch-press'] .target-caption {
   color: var(--press-yellow);
 }
-:root[data-theme='pitch-press'] .target-playback {
+:root[data-theme='pitch-press'] :is(.target-listening, .target-playback) {
   background-color: var(--card);
   color: var(--ink);
   border-color: var(--card);
   box-shadow: var(--button-shadow);
 }
-:root[data-theme='pitch-press'] .target-playback:hover:not(:disabled) {
+:root[data-theme='pitch-press']
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--press-yellow);
   border-color: var(--press-yellow);
 }
@@ -224,7 +226,7 @@
     4px 0 var(--ink),
     -4px 0 var(--ink);
 }
-:root[data-theme='pitch-press'] .session-sidebar button:not(.primary) {
+:root[data-theme='pitch-press'] .session-toolbar button:not(.primary) {
   box-shadow: none;
   border-color: var(--line);
 }
@@ -239,7 +241,8 @@
   box-shadow: inset 0 -3px currentColor;
 }
 
-:root[data-theme='pitch-press'] .target-playback:focus-visible {
+:root[data-theme='pitch-press']
+  :is(.target-listening, .target-playback):focus-visible {
   outline-color: var(--press-yellow);
 }
 

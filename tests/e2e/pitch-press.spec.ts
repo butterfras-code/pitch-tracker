@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { classroomPage, saved, sound } from '../fixtures/classroom-page';
 
@@ -12,9 +13,7 @@ for (const width of [390, 1440]) {
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await page
-      .getByRole('button', { name: 'Student view', exact: true })
-      .click();
+    await sessionControl(page, 'Student view');
     await expect(page.locator('.press-brand')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Pitch Tracker', exact: true }),
@@ -53,7 +52,7 @@ for (const width of [390, 1440]) {
       ),
     ).toBe(true);
     await page
-      .locator('.student-actions [data-ui-click="next-student"]')
+      .locator('.student-heading [data-ui-click="next-student"]')
       .click();
     await expect(page.locator('#studentIdentity h2')).toHaveText('Lucas');
     await expect(page.locator('#sessionShell')).toHaveAttribute(
@@ -69,9 +68,11 @@ for (const width of [390, 1440]) {
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await page.getByRole('button', { name: 'Class view', exact: true }).click();
-    await expect(page.locator('.session-target')).toBeHidden();
+    await sessionControl(page, 'Class view');
+    await expect(page.locator('.selected .target-readout')).toBeVisible();
+    await expect(page.locator('#pauseListening')).toBeVisible();
     await expect(page.locator('#cards')).toBeVisible();
+    await sessionControl(page, 'Student view');
     await page
       .getByRole('button', { name: 'Next student', exact: true })
       .click();
@@ -106,20 +107,12 @@ for (const [width, height] of [
       page,
     }, testInfo) => {
       await classroomPage(page, 30);
-      await page
-        .getByRole('button', { name: 'Split view', exact: true })
-        .click();
+      await sessionControl(page, 'Split view');
       if (width > 390) {
-        await page
-          .getByRole('button', { name: 'Full screen', exact: true })
-          .click();
+        await sessionControl(page, 'Full screen');
         await expect
           .poll(() => page.evaluate(() => !!document.fullscreenElement))
           .toBe(true);
-      } else {
-        await page
-          .getByRole('button', { name: 'Hide controls', exact: true })
-          .click();
       }
       const picker = page.locator('#themeSelect');
       await picker.selectOption('pitch-press', { force: true });
@@ -160,7 +153,7 @@ for (const [width, height] of [
             () => document.documentElement.scrollHeight <= innerHeight,
           ),
         ).toBe(true);
-        const cards = page.locator('#cards');
+        const cards = page.locator('.roster-scroll');
         await cards.evaluate((e) => {
           e.scrollTop = e.scrollHeight;
         });

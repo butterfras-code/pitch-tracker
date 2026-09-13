@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { classroomPage, saved } from '../fixtures/classroom-page';
 
@@ -76,20 +77,12 @@ for (const [width, height] of [
       page,
     }, testInfo) => {
       await classroomPage(page, 32);
-      await page
-        .getByRole('button', { name: 'Split view', exact: true })
-        .click();
+      await sessionControl(page, 'Split view');
       if (width > 390) {
-        await page
-          .getByRole('button', { name: 'Full screen', exact: true })
-          .click();
+        await sessionControl(page, 'Full screen');
         await expect
           .poll(() => page.evaluate(() => !!document.fullscreenElement))
           .toBe(true);
-      } else {
-        await page
-          .getByRole('button', { name: 'Hide controls', exact: true })
-          .click();
       }
       const picker = page.locator('#themeSelect');
       await picker.selectOption('big-button', { force: true });
@@ -120,11 +113,11 @@ for (const [width, height] of [
             () => document.documentElement.scrollHeight <= innerHeight,
           ),
         ).toBe(true);
-        await page.locator('#cards').evaluate((e) => {
+        await page.locator('.roster-scroll').evaluate((e) => {
           e.scrollTop = e.scrollHeight;
         });
         expect(
-          await page.locator('#cards').evaluate((e) => e.scrollTop),
+          await page.locator('.roster-scroll').evaluate((e) => e.scrollTop),
         ).toBeGreaterThan(0);
       }
       const data = await saved(page);
@@ -142,15 +135,11 @@ for (const [width, height] of [
         'outline-style',
         'solid',
       );
-      if (width === 390) {
-        await page
-          .getByRole('button', { name: 'Show controls', exact: true })
-          .click();
-      }
-      await page
-        .getByRole('button', { name: 'Class view', exact: true })
-        .click();
-      await expect(page.locator('.session-target')).toBeHidden();
+      await sessionControl(page, 'Class view');
+      await expect(page.locator('.selected .target-readout')).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Start listening', exact: true }),
+      ).toBeVisible();
       await expect(page.locator('#cards')).toBeVisible();
     });
   });

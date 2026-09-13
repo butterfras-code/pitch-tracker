@@ -1,3 +1,4 @@
+import { sessionControl, teacherDetails } from '../fixtures/session-controls';
 import { test, expect } from '@playwright/test';
 import {
   classroomPage,
@@ -12,19 +13,22 @@ test('views preserve holds; dashboard follows without moving page or keyboard fo
   page,
 }) => {
   await classroomPage(page, 80);
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
   await sound(page, 0);
   await sound(page, 440, 300);
-  await page.getByRole('button', { name: 'Student view', exact: true }).click();
-  await page.getByRole('button', { name: 'Split view', exact: true }).click();
-  await sound(page, 440, 300);
+  await sessionControl(page, 'Student view');
+  await sessionControl(page, 'Split view');
+  await sound(page, 440, 400);
   expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
-  await page.getByRole('button', { name: 'Class view', exact: true }).click();
-  // Focus remains on the navigation button while its action activates an offscreen card.
+  await dismissFeedback(page);
+  await sessionControl(page, 'Class view');
+  // Split navigation retains focus while activating an offscreen roster card.
+  await sessionControl(page, 'Split view');
   await page.locator('.student[data-student-id="student-70"] .name').click();
-  await page.locator('#cards').evaluate((el) => {
+  await page.locator('.roster-scroll').evaluate((el) => {
     el.scrollTop = 0;
   });
   await page.getByRole('button', { name: 'Next student', exact: true }).focus();
@@ -36,6 +40,7 @@ test('views preserve holds; dashboard follows without moving page or keyboard fo
     page.getByRole('button', { name: 'Next student', exact: true }),
   ).toBeFocused();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await sessionControl(page, 'Class view');
   await page.getByLabel('Search students').fill('no match');
   await expect(page.locator('#activeOutsideFilter')).toContainText(
     'Student 71',
@@ -53,7 +58,7 @@ test('teacher details are opt-in; retry rounds, random and undo preserve results
     page.getByRole('button', { name: 'History for Maya' }),
   ).toBeHidden();
   await settings(page);
-  await page.getByLabel('Teacher details', { exact: true }).check();
+  await teacherDetails(page, true);
   await expect(
     page.getByRole('button', { name: 'History for Maya' }),
   ).toBeVisible();
@@ -156,17 +161,17 @@ for (const [width, height] of [
     await page.setViewportSize({ width, height });
     await classroomPage(page);
     for (const view of ['Split', 'Student', 'Class']) {
-      await page
-        .getByRole('button', { name: view + ' view', exact: true })
-        .click();
+      await sessionControl(page, view + ' view');
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      await expect(
-        page.getByRole('button', { name: 'Next student', exact: true }),
-      ).toBeVisible();
+      const next = page.getByRole('button', {
+        name: 'Next student',
+        exact: true,
+      });
+      await expect(next).toBeVisible();
       if (height >= 768)
         expect(
           await page.evaluate(
@@ -179,15 +184,15 @@ test('card updates retain focused controls and manual roster scrolling', async (
   page,
 }) => {
   await classroomPage(page, 30);
-  await page.getByRole('button', { name: 'Class view', exact: true }).click();
+  await sessionControl(page, 'Class view');
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
-  await page.locator('.student').first().getByLabel('Absent').focus();
+  await page.locator('.student').first().locator('.attendance-toggle').focus();
   const control = await page
     .locator('.student')
     .first()
-    .getByLabel('Absent')
+    .locator('.attendance-toggle')
     .elementHandle();
   await sound(page, 0);
   await sound(page, 440);
@@ -197,23 +202,29 @@ test('card updates retain focused controls and manual roster scrolling', async (
       (el) => el.isConnected && document.activeElement === el,
     ),
   ).toBe(true);
-  await page.locator('#cards').evaluate((el) => {
+  await page.locator('.roster-scroll').evaluate((el) => {
     el.scrollTop = el.scrollHeight;
   });
-  const position = await page.locator('#cards').evaluate((el) => el.scrollTop);
+  const position = await page
+    .locator('.roster-scroll')
+    .evaluate((el) => el.scrollTop);
   await settings(page);
-  await page.getByLabel('Teacher details', { exact: true }).check();
-  await page.getByLabel('Teacher details', { exact: true }).uncheck();
-  expect(await page.locator('#cards').evaluate((el) => el.scrollTop)).toBe(
-    position,
-  );
+  await teacherDetails(page, true);
+  await teacherDetails(page, false);
+  // Firefox may clamp the restored bottom edge to a fractional CSS pixel.
+  expect(
+    Math.abs(
+      (await page.locator('.roster-scroll').evaluate((el) => el.scrollTop)) -
+        position,
+    ),
+  ).toBeLessThan(1);
 });
 test('fullscreen success, browser exit and rejection preserve content view', async ({
   page,
 }) => {
   await classroomPage(page);
-  await page.getByRole('button', { name: 'Class view', exact: true }).click();
-  await page.getByRole('button', { name: 'Full screen', exact: true }).click();
+  await sessionControl(page, 'Class view');
+  await sessionControl(page, 'Full screen');
   await expect
     .poll(
       async () =>
@@ -233,7 +244,7 @@ test('fullscreen success, browser exit and rejection preserve content view', asy
     document.documentElement.requestFullscreen = () =>
       Promise.reject(new Error('Unavailable'));
   });
-  await page.getByRole('button', { name: 'Full screen', exact: true }).click();
+  await sessionControl(page, 'Full screen');
   await expect(page.locator('#viewMessage')).toContainText('unavailable');
 });
 test('microphone errors and input switching preserve manual scoring', async ({
@@ -316,9 +327,7 @@ test('expanded settings do not overlap feedback and enlarged text remains reacha
   await page.evaluate(() => {
     document.documentElement.style.fontSize = '200%';
   });
-  await page
-    .getByRole('button', { name: 'Session behavior settings', exact: true })
-    .click();
+  await closeSettings(page);
   await page.getByRole('button', { name: 'Next student', exact: true }).click();
   await expect(page.locator('#studentIdentity h2')).toHaveText('Lucas');
   expect(
@@ -375,7 +384,7 @@ test('live range effects follow pitch and clear on silence, pause and navigation
 test('session groups listening input, student identities and tuner scoring', async ({
   page,
 }, testInfo) => {
-  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.setViewportSize({ width: 2560, height: 1440 });
   await classroomPage(page);
   await expect(page.locator('#studentIdentity')).not.toContainText('Target');
   const rect = (selector: string) => page.locator(selector).boundingBox();
@@ -383,24 +392,38 @@ test('session groups listening input, student identities and tuner scoring', asy
   const tuner = (await rect('.tuner'))!;
   const scores = (await rect('.tuner-section .scorebar'))!;
   const listening = (await rect('#pauseListening'))!;
+  const playback = (await rect('.target-playback'))!;
   expect(mic.y + mic.height).toBeLessThanOrEqual(tuner.y);
-  const status = (await rect('#classroomStatus'))!;
-  expect(status.y).toBeGreaterThanOrEqual(listening.y + listening.height);
+  expect(Math.abs(listening.y - playback.y)).toBeLessThan(2);
+  await expect(page.locator('.target-actions #pauseListening')).toBeVisible();
+  await expect(page.locator('#classroomStatus')).toBeEmpty();
+  await expect(
+    page.locator('#pauseListening .microphone-off-mark'),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Start listening', exact: true })
+    .click();
+  await expect(page.locator('#pauseListening')).toHaveAttribute(
+    'data-microphone',
+    'on',
+  );
+  await expect(
+    page.locator('#pauseListening .microphone-off-mark'),
+  ).toBeHidden();
   await expect(page.locator('#upNext')).toContainText('Lucas');
   const instrument = (await rect('#studentIdentity p'))!;
   const heading = (await rect('#studentIdentity h2'))!;
   expect(instrument.y + instrument.height).toBeLessThanOrEqual(heading.y);
   expect(scores.y).toBeGreaterThanOrEqual(tuner.y + tuner.height);
   expect(scores.y - tuner.y - tuner.height).toBeLessThanOrEqual(16);
-  const previous = (await rect('[data-ui-click="previous-student"]'))!;
-  const name = (await rect('#studentIdentity'))!;
-  const next = (await rect('[data-ui-click="next-student"]'))!;
-  expect(previous.x + previous.width).toBeLessThanOrEqual(name.x);
-  expect(next.x).toBeGreaterThanOrEqual(name.x + name.width);
+  const previous = (await rect(
+    '.student-heading [data-ui-click="previous-student"]',
+  ))!;
+
+  const next = (await rect('.student-heading [data-ui-click="next-student"]'))!;
+  expect(previous.x + previous.width).toBeLessThanOrEqual(heading.x);
+  expect(next.x).toBeGreaterThanOrEqual(heading.x + heading.width);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('button', { name: 'Student view', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Hide controls', exact: true })
-    .click();
+  await sessionControl(page, 'Student view');
   await page.screenshot({ path: testInfo.outputPath('mobile-session.png') });
 });

@@ -27,7 +27,7 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
   await sound(page, 442);
-  await expect(page.locator('#liveCents')).toHaveText('No reliable pitch');
+  await expect(page.locator('#liveCents')).toHaveText('—');
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await setSlider(page.getByLabel('Noise gate'), '0.01');
   await page
@@ -104,10 +104,10 @@ test('reference playback cancels holds and disconnection cleans up', async ({
   page,
 }) => {
   await settings(page);
+  await closeSettings(page);
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
-  await closeSettings(page);
   await sound(page, 0);
   await sound(page, 440, 250);
   await page
@@ -135,10 +135,10 @@ test('Escape during pending permission cannot start a later automatic check', as
   await page.evaluate(() => {
     window.syntheticAudio.pending = true;
   });
+  await closeSettings(page);
   await page
     .getByRole('button', { name: 'Start listening', exact: true })
     .click();
-  await closeSettings(page);
   await expect
     .poll(() => page.evaluate(() => window.syntheticAudio.requests))
     .toBe(1);

@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
@@ -10,7 +11,7 @@ test('fullscreen split cards show latest session results across rounds and reloa
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await classroomPage(page);
-  await page.getByRole('button', { name: 'Full screen', exact: true }).click();
+  await sessionControl(page, 'Full screen');
   const card = page.locator('.student').first();
   await expect(card.locator('.student-result, .badge')).toHaveCount(0);
   for (const result of ['Too low', 'Too high', 'In range']) {
@@ -39,7 +40,7 @@ test('fullscreen split cards show latest session results across rounds and reloa
 });
 
 for (const width of [390, 1920]) {
-  test(`result skins and corner attendance toggle at ${width}px`, async ({
+  test(`result skins and direct attendance toggle at ${width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1080 });
@@ -57,14 +58,9 @@ for (const width of [390, 1920]) {
         theme,
       );
       await page.reload();
-      await page
-        .getByRole('button', { name: 'Split view', exact: true })
-        .click();
+      await sessionControl(page, 'Split view');
       await card.getByRole('button', { name: 'Maya', exact: true }).click();
-      if (width === 1920)
-        await page
-          .getByRole('button', { name: 'Full screen', exact: true })
-          .click();
+      if (width === 1920) await sessionControl(page, 'Full screen');
       for (const status of ['low', 'correct', 'high']) {
         await page.locator(`.tuner-section button.${status}`).click();
         await dismissFeedback(page);
@@ -86,15 +82,15 @@ for (const width of [390, 1920]) {
         );
       }
       await card.scrollIntoViewIfNeeded();
-      const toggle = card.getByRole('button', { name: 'Absent', exact: true });
-      const bounds = (await card.boundingBox())!;
+      const toggle = card.getByRole('button', {
+        name: 'Absent',
+        exact: true,
+        includeHidden: true,
+      });
+      await expect(toggle).toBeVisible();
       const icon = (await toggle.boundingBox())!;
-      expect(
-        Math.abs(bounds.x + bounds.width - icon.x - icon.width),
-      ).toBeLessThanOrEqual(2);
-      expect(
-        Math.abs(bounds.y + bounds.height - icon.y - icon.height),
-      ).toBeLessThanOrEqual(2);
+      const name = (await card.locator('.name').boundingBox())!;
+      expect(icon.y + icon.height / 2).toBeCloseTo(name.y + name.height / 2, 0);
       await toggle.click();
       await expect(toggle).toHaveAttribute('aria-pressed', 'true');
       expect((await saved(page)).sessions[0].absent).toContain('student-1');

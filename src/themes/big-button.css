@@ -22,15 +22,17 @@
 :root[data-theme='big-button'] .target-frequency {
   color: var(--display-ink);
 }
-:root[data-theme='big-button'] .target-playback {
+:root[data-theme='big-button'] :is(.target-listening, .target-playback) {
   background-color: var(--highlight);
   color: var(--primary-ink);
   border-color: var(--danger);
 }
-:root[data-theme='big-button'] .target-playback:hover:not(:disabled) {
+:root[data-theme='big-button']
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--danger);
 }
-:root[data-theme='big-button'] .target-playback:active:not(:disabled) {
+:root[data-theme='big-button']
+  :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
 :root[data-theme='big-button']

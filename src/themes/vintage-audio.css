@@ -31,21 +31,24 @@
   letter-spacing: var(--label-tracking);
   text-transform: var(--label-transform);
 }
-:root[data-treatment='studio'] :is(.target-playback, .meter-labels) {
+:root[data-treatment='studio']
+  :is(.target-listening, .target-playback, .meter-labels) {
   font-family: var(--label-font);
   font-weight: var(--label-weight);
   letter-spacing: var(--label-tracking);
   text-transform: var(--label-transform);
 }
-:root[data-treatment='studio'] .target-playback {
+:root[data-treatment='studio'] :is(.target-listening, .target-playback) {
   background-color: var(--accent);
   color: var(--primary-ink);
   border-color: var(--edge);
 }
-:root[data-treatment='studio'] .target-playback:hover:not(:disabled) {
+:root[data-treatment='studio']
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
-:root[data-treatment='studio'] .target-playback:active:not(:disabled) {
+:root[data-treatment='studio']
+  :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
 :root[data-treatment='studio'] .tuner {

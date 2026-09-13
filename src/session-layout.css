@@ -52,51 +52,10 @@ body.session-active {
   min-width: 0;
   gap: var(--session-gap);
 }
-#sessionShell .session-sidebar {
-  flex: 0 0 clamp(200px, 14vw, 540px);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 20px;
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  padding: 4px 12px 12px 0;
-  border-right: 1px solid var(--line);
-  overscroll-behavior: contain;
-}
-#sessionShell .session-sidebar[hidden],
-#sessionShell .behavior-settings[hidden] {
-  display: none;
-}
-#sessionShell :is(.view-picker, .session-bar) {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
-  gap: 8px;
-  flex: none;
-}
-#sessionShell .view-picker {
-  gap: 4px;
-}
-#sessionShell .view-picker [data-ui-click='session-fullscreen'] {
-  margin-top: 8px;
-}
 #sessionShell button {
   min-height: 48px;
   padding: 8px 12px;
   font-size: var(--session-small);
-}
-#sessionShell .session-sidebar button {
-  flex: none;
-  width: 100%;
-  text-align: left;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-#sessionShell [data-ui-click='end-session'] {
-  margin-top: 12px;
 }
 #sessionShell .behavior-settings {
   flex: none;
@@ -111,13 +70,13 @@ body.session-active {
 #sessionShell .behavior-settings[popover] {
   position: fixed;
   position-anchor: --session-settings-trigger;
-  position-area: right span-bottom;
+  position-area: bottom span-right;
   position-try-fallbacks: flip-inline, flip-block;
   inset: auto;
   width: min(420px, calc(100vw - 32px));
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 32px);
-  margin: 0 0 0 12px;
+  margin: 8px 0 0;
   overflow-y: auto;
   background-color: var(--card);
   box-shadow: var(--surface-shadow);
@@ -209,6 +168,12 @@ body.session-active {
   gap: 8px;
   min-width: 0;
 }
+#sessionShell .target-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
 #sessionShell .target-caption {
   font-family: var(--label-font);
   font-size: var(--session-small);
@@ -230,21 +195,52 @@ body.session-active {
   font-size: var(--session-small);
   margin: 0;
 }
-#sessionShell .target-playback {
+#sessionShell .target-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+#sessionShell .target-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+#sessionShell :is(.target-listening, .target-playback) {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
+  flex: 1 1 150px;
   width: auto;
   max-width: 100%;
-  margin-top: 4px;
   border-width: 2px;
   box-shadow: var(--button-shadow);
 }
-#sessionShell .target-playback svg {
+#sessionShell :is(.target-listening, .target-playback) svg {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+}
+#sessionShell .microphone-status-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#sessionShell .target-listening[data-microphone='on'] .microphone-off-mark {
+  display: none;
+}
+#sessionShell #classroomStatus {
+  color: var(--muted);
+  font-size: var(--session-small);
+}
+#sessionShell #classroomStatus:empty {
+  display: none;
 }
 #sessionShell .current-display .tuner {
   display: flex;
@@ -400,7 +396,7 @@ body.session-active {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 12px 44px;
+  padding: 10px 12px;
   min-height: clamp(160px, 10vw, 380px);
   min-width: 0;
   border-width: 1px;
@@ -442,39 +438,6 @@ body.session-active {
   font-size: var(--session-small);
   padding: 8px;
 }
-#sessionShell .attendance-toggle {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  min-height: 36px;
-  padding: 6px;
-  margin: 0;
-  border: 0;
-  border-radius: var(--control-radius) 0 var(--radius) 0;
-  box-shadow: none;
-  color: var(--muted);
-  background: transparent;
-}
-#sessionShell .attendance-toggle:hover {
-  background: var(--soft);
-  color: var(--ink);
-}
-#sessionShell .attendance-toggle[aria-pressed='true'] {
-  background: var(--accent);
-  color: var(--primary-ink);
-}
-#sessionShell .attendance-toggle svg {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 #sessionShell .student > .teacher-only {
   margin-top: 8px;
 }
@@ -495,36 +458,6 @@ body.session-active {
 }
 #sessionShell[data-view='student'] .roster-area {
   display: none;
-}
-#sessionShell[data-view='class'] .session-content {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, min(220px, 42%)) minmax(0, 1fr);
-}
-#sessionShell[data-view='class'] .current-display {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  padding: 12px;
-}
-#sessionShell[data-view='class'] .student-heading {
-  grid-column: 1;
-  border: 0;
-  padding: 0;
-}
-#sessionShell[data-view='class'] #studentIdentity h2 {
-  font-size: 1.5rem;
-}
-#sessionShell[data-view='class'] .classroom-feedback {
-  grid-column: 2;
-  padding: 0;
-}
-#sessionShell[data-view='class'] :is(.session-target, .tuner-section) {
-  display: none;
-}
-#sessionShell[data-view='class'] .cards {
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(min(clamp(220px, 14vw, 540px), 100%), 1fr)
-  );
 }
 :root:fullscreen .session-active > header,
 :root:fullscreen .session-active > .tabs {
@@ -559,10 +492,10 @@ body.session-active {
   #sessionShell .current-display > * {
     flex: none;
   }
-  #sessionShell .target-playback {
+  #sessionShell .target-actions {
     flex: none;
   }
-  #sessionShell .target-playback span {
+  #sessionShell .target-actions span {
     min-width: 0;
     overflow-wrap: anywhere;
   }
@@ -578,13 +511,6 @@ body.session-active {
   #sessionShell .student-actions button {
     flex: 1;
   }
-  #sessionShell[data-view='class'] .current-display {
-    grid-template-columns: minmax(0, 1fr);
-    max-height: 220px;
-  }
-  #sessionShell[data-view='class'] :is(#studentIdentity, .classroom-feedback) {
-    grid-column: 1;
-  }
 }
 @media (max-width: 599px) {
   #sessionShell {
@@ -599,10 +525,6 @@ body.session-active {
   #sessionShell #roundLabel {
     font-size: var(--session-small);
   }
-  #sessionShell .session-sidebar {
-    gap: 12px;
-    padding-bottom: 8px;
-  }
 
   #sessionShell .session-content {
     gap: 12px;
@@ -616,11 +538,9 @@ body.session-active {
     max-height: 72px;
     overflow: auto;
   }
-  #sessionShell .session-sidebar {
-  }
 }
 @media print {
-  #sessionShell :is(.student-actions, .target-playback) {
+  #sessionShell :is(.student-actions, .target-actions) {
     display: none;
   }
 }
@@ -629,7 +549,8 @@ body.session-active {
 #sessionShell :is(button, input, select) {
   font-size: var(--session-copy);
 }
-#sessionShell :is(small, label, #studentIdentity p, #lastResult, #upNext) {
+#sessionShell :is(small, label),
+#sessionShell :is(#studentIdentity p, #lastResult, #upNext) {
   font-size: var(--session-small);
 }
 #sessionShell .student .name {
@@ -747,15 +668,6 @@ body.session-active {
   }
 }
 
-#sessionShell .listening-control {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-#sessionShell .listening-control #classroomStatus {
-  color: var(--muted);
-  font-size: var(--session-small);
-}
 #sessionShell #studentIdentity p {
   margin: 0 0 4px;
 }
@@ -832,10 +744,617 @@ body.session-active {
 #sessionShell .session-meta #roundLabel {
   margin: 0;
 }
-#sessionShell #showControls[hidden] {
+
+/* A shared shell keeps navigation and recovery available in every content view. */
+#sessionShell .session-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: none;
+  min-width: 0;
+}
+#sessionShell .session-toolbar {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+#sessionShell .session-toolbar .session-meta {
+  flex: 1 1 240px;
+  gap: 4px 12px;
+}
+#sessionShell .session-toolbar button {
+  flex: none;
+}
+#sessionShell .session-toolbar [data-ui-click='end-session'] {
+  margin: 0 0 0 auto;
+}
+#sessionShell #viewTrigger {
+  anchor-name: --session-view-trigger;
+}
+#sessionShell #viewMenu {
+  position-anchor: --session-view-trigger;
+}
+#sessionShell .view-picker {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+#sessionShell .view-picker button {
+  flex: 1;
+  min-width: 0;
+}
+#sessionShell .behavior-settings[popover] {
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+@supports not (position-area: bottom span-right) {
+  #sessionShell .behavior-settings[popover] {
+    inset: 80px auto auto 16px;
+    max-height: calc(100dvh - 96px);
+  }
+}
+#sessionShell .current-display {
+  grid-template-rows: auto minmax(max-content, 1fr);
+}
+#sessionShell .student-heading {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr);
+}
+#sessionShell .upcoming-student {
+  grid-column: 2;
+  grid-row: 1;
+}
+#sessionShell .classroom-feedback {
+  flex: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+#sessionShell .classroom-feedback:has(#lastResult:empty) {
   display: none;
 }
-#sessionShell .show-controls {
+#sessionShell .student-footer {
   flex: none;
-  box-shadow: var(--button-shadow);
+  overflow: auto;
+  max-height: 35%;
+}
+#sessionShell .dashboard-header {
+  max-height: none;
+  overflow: visible;
+}
+#sessionShell .dashboard-header .row {
+  margin-top: 0;
+}
+#sessionShell .roster-scroll {
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  min-height: 0;
+  flex: 1;
+}
+#sessionShell .cards {
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+#sessionShell #activeOutsideFilter:empty {
+  display: none;
+}
+#sessionShell #activeOutsideFilter:not(:empty) {
+  padding: 4px;
+  margin-bottom: 8px;
+}
+#sessionShell .card-practice:empty {
+  display: none;
+}
+#sessionShell[data-view='class'] .session-content {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+#sessionShell[data-view='class'] .current-display {
+  display: none;
+}
+#sessionShell[data-view='class'] .cards {
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  grid-auto-rows: minmax(340px, auto);
+}
+#sessionShell[data-view='class'] .student {
+  min-height: 340px;
+}
+#sessionShell .card-practice {
+  --session-small: clamp(18px, 0.95vw, 36px);
+  --session-copy: clamp(18px, 1vw, 40px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.5fr);
+  gap: 6px 8px;
+  min-width: 0;
+  font-size: var(--session-copy);
+  line-height: 1.2;
+}
+#sessionShell .card-practice .session-target {
+  grid-column: 1;
+  grid-row: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 4px 6px;
+  gap: 4px;
+  border: 1px var(--surface-border-style) var(--line);
+  border-radius: var(--display-radius);
+  box-shadow: var(--display-shadow);
+  background: var(--control);
+  color: var(--control-ink);
+}
+#sessionShell .target-caption-compact {
+  display: none;
+}
+#sessionShell .card-practice .target-caption-full {
+  display: none;
+}
+#sessionShell .card-practice .target-caption-compact {
+  display: inline;
+}
+#sessionShell .card-practice .target-readout {
+  flex-direction: row;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  color: inherit;
+}
+#sessionShell .card-practice :is(.target-caption, .target-pitch) {
+  font-size: var(--session-small);
+  color: inherit;
+  padding: 0;
+}
+#sessionShell .card-practice .target-frequency {
+  display: none;
+}
+#sessionShell .card-practice .target-controls {
+  width: auto;
+  flex: none;
+}
+#sessionShell .card-practice .target-playback {
+  flex: none;
+  min-height: 40px;
+  width: 40px;
+  padding: 6px;
+  gap: 0;
+}
+#sessionShell .card-practice .target-playback span {
+  display: none;
+}
+#sessionShell .card-practice .tuner-section {
+  display: contents;
+}
+#sessionShell .card-practice .input-signal {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
+}
+#sessionShell .card-practice .input-signal meter {
+  flex: 1;
+  width: 60px;
+  min-width: 0;
+  max-width: 80px;
+}
+#sessionShell .card-practice .tuner {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
+  grid-template-rows: 2.2em auto auto auto;
+  align-items: center;
+  padding: 6px 8px;
+  margin: 0;
+  min-height: 0;
+  width: 100%;
+  border: 1px var(--surface-border-style) var(--line);
+  gap: 0;
+}
+#sessionShell .card-practice .note {
+  font-size: clamp(28px, 1.6vw, 48px);
+  line-height: 1.1;
+}
+#sessionShell .card-practice #liveHz {
+  display: none;
+}
+#sessionShell .card-practice .meter {
+  height: 12px;
+  margin: 4px 0;
+}
+#sessionShell .card-practice .needle {
+  height: 16px;
+}
+#sessionShell .card-practice .meter-labels {
+  margin-top: 0;
+}
+#sessionShell .card-practice .progress {
+  margin-top: 4px;
+}
+#sessionShell .card-practice .scorebar {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+}
+#sessionShell .card-practice .scorebar button {
+  font-size: var(--session-small);
+  line-height: 1.2;
+  padding: 6px;
+}
+#sessionShell[data-view='class'] .selected > .teacher-only .scorebar {
+  display: none;
+}
+@media (max-width: 599px) {
+  #sessionShell .session-toolbar .session-meta {
+    flex-basis: 100%;
+    order: 1;
+  }
+  #sessionShell .session-toolbar button {
+    padding-inline: 8px;
+  }
+}
+@container session-stage (min-width: 1200px) and (min-height: 800px) {
+  #sessionShell[data-view='split'] .current-display {
+    grid-template-rows: auto auto minmax(max-content, 1fr);
+  }
+}
+
+#sessionShell .student:has(.card-feedback) .card-practice {
+  display: none;
+}
+#sessionShell .card-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--correct-bg);
+  color: var(--correct);
+}
+#sessionShell .card-feedback[data-rating='low'] {
+  background: var(--low-bg);
+  color: var(--low);
+}
+#sessionShell .card-feedback[data-rating='high'] {
+  background: var(--high-bg);
+  color: var(--high);
+}
+#sessionShell .card-feedback svg {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 5;
+}
+#sessionShell .card-feedback :is(p, h2) {
+  margin: 0;
+  font-size: var(--session-copy);
+}
+#sessionShell .card-feedback .feedback-hint {
+  font-size: var(--session-small);
+}
+
+#sessionShell .card-practice .note {
+  grid-column: 1;
+  grid-row: 1;
+  margin-right: 8px;
+}
+#sessionShell .card-practice #liveCents {
+  grid-column: 2;
+  grid-row: 1;
+}
+#sessionShell .card-practice :is(.meter-labels, .meter, .progress) {
+  grid-column: 1 / -1;
+}
+
+#sessionShell .card-practice #liveCents {
+  min-height: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sessionShell .card-feedback :is(.feedback-caption, .feedback-hint) {
+  display: none;
+}
+
+/* Stable microphone telemetry: only the meter value changes during listening. */
+#sessionShell .input-signal {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+#sessionShell #inputStatus {
+  display: flex;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  color: var(--muted);
+}
+#sessionShell #inputStatus svg {
+  width: 100%;
+  height: 100%;
+}
+#sessionShell #inputStatus:not([data-microphone='off']) .microphone-off-mark,
+#sessionShell
+  #inputStatus:not([data-microphone='paused'])
+  .microphone-paused-mark {
+  display: none;
+}
+#sessionShell .roster-detail {
+  flex-wrap: nowrap;
+  font-size: clamp(14px, 0.9vw, 32px);
+  min-height: calc(1.2em + 10px);
+  gap: 4px 8px;
+  justify-content: space-between;
+}
+#sessionShell .roster-instrument,
+#sessionShell .roster-rating,
+#sessionShell .roster-rating :is(small, .student-result, .badge) {
+  font-size: clamp(14px, 0.9vw, 32px);
+  line-height: 1.2;
+}
+#sessionShell .roster-instrument {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#sessionShell .roster-rating {
+  display: inline-flex;
+  flex: none;
+  width: 8em;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+#sessionShell .roster-rating :is(.student-result, .badge) {
+  padding: 3px 6px;
+  min-height: 0;
+  flex: none;
+  white-space: nowrap;
+}
+#sessionShell .roster-identity {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+#sessionShell .roster-identity .name {
+  flex: 1;
+  min-height: 44px;
+  line-height: 1.2;
+}
+#sessionShell .turn-label {
+  font-size: var(--session-small);
+  white-space: nowrap;
+}
+#sessionShell .attendance-toggle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  min-height: 36px;
+  padding: 6px;
+  line-height: 1;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--muted);
+}
+#sessionShell .attendance-toggle:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+#sessionShell .card-practice .target-pitch small {
+  font-size: 0.7em;
+}
+#sessionShell .attendance-toggle svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#sessionShell .attendance-toggle[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--primary-ink);
+}
+
+/* Narrow split-view cards retain readable names beside the attendance toggle. */
+#sessionShell .student {
+  container-type: inline-size;
+}
+@container (max-width: 260px) {
+  #sessionShell .roster-identity {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  #sessionShell .roster-identity .name {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  #sessionShell .roster-identity .attendance-toggle {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  #sessionShell .roster-identity .turn-label {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+  #sessionShell .turn-label:empty {
+    display: none;
+  }
+}
+
+/* Controls stay with the student identity and the active pitch target. */
+#sessionShell .student-heading {
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 0.65fr);
+}
+#sessionShell .student-heading [data-ui-click='next-student'] {
+  grid-column: 3;
+  grid-row: 1;
+}
+#sessionShell .upcoming-student {
+  grid-column: 4;
+  grid-row: 1;
+}
+#sessionShell .session-target {
+  container: target / inline-size;
+}
+#sessionShell .card-practice {
+  grid-template-columns: minmax(0, 1fr);
+}
+#sessionShell .card-practice .session-target {
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+#sessionShell .card-practice .target-actions {
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+#sessionShell .card-practice :is(.target-listening, .target-playback) {
+  flex: none;
+  width: 44px;
+  min-height: 44px;
+  padding: 6px;
+  gap: 0;
+}
+#sessionShell .card-practice .target-listening span {
+  display: none;
+}
+#sessionShell .card-practice .input-signal {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+#sessionShell .card-practice .tuner {
+  grid-row: 3;
+}
+#sessionShell .card-practice .scorebar {
+  grid-row: 4;
+}
+@container target (max-width: 420px) {
+  #sessionShell .target-listening {
+    flex: 0 0 48px;
+    padding-inline: 8px;
+  }
+  #sessionShell .target-listening span {
+    display: none;
+  }
+  #sessionShell .target-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+}
+@container session-stage (max-width: 899px) {
+  #sessionShell .student-heading {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  #sessionShell .upcoming-student {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+/* The compact toggle and telemetry convey status without resizing the card. */
+#sessionShell .card-practice #classroomStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Quiet chevrons hug the name while retaining a usable pointer target. */
+#sessionShell .student-heading {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr);
+}
+#sessionShell .student-navigation {
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content) auto;
+  align-items: center;
+  justify-content: start;
+  gap: 0 2px;
+  min-width: 0;
+}
+#sessionShell #studentIdentity {
+  display: contents;
+}
+#sessionShell #studentIdentity p {
+  grid-column: 2;
+  grid-row: 1;
+}
+#sessionShell #studentIdentity h2 {
+  grid-column: 2;
+  grid-row: 2;
+}
+#sessionShell .student-navigation .student-chevron {
+  grid-row: 2;
+}
+#sessionShell .student-navigation [data-ui-click='previous-student'] {
+  grid-column: 1;
+}
+#sessionShell .student-navigation [data-ui-click='next-student'] {
+  grid-column: 3;
+  grid-row: 2;
+}
+#sessionShell .upcoming-student {
+  grid-column: 2;
+  grid-row: 1;
+}
+#sessionShell .roster-name-navigation {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+#sessionShell .roster-name-navigation .name {
+  flex: 0 1 auto;
+}
+#sessionShell button.student-chevron {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  min-width: 28px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: none;
+  background: transparent;
+  color: var(--muted);
+}
+#sessionShell button.student-chevron:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--soft);
+}
+#sessionShell .student-chevron svg {
+  width: 20px;
+  height: 20px;
+}
+#sessionShell:not([data-view='class']) .class-chevron {
+  display: none;
+}
+#sessionShell .student:not(.selected) {
+  cursor: pointer;
+}
+@container (max-width: 260px) {
+  #sessionShell .roster-name-navigation {
+    grid-row: 1;
+    grid-column: 1;
+  }
+}
+@container session-stage (max-width: 899px) {
+  #sessionShell .student-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  #sessionShell .upcoming-student {
+    grid-column: 1;
+    grid-row: 2;
+  }
 }

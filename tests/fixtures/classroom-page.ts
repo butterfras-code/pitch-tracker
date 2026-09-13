@@ -41,7 +41,7 @@ export async function settings(page: Page) {
   if (!(await panel.isVisible()))
     await page
       .getByRole('button', {
-        name: 'Session behavior settings',
+        name: 'Session options',
         exact: true,
       })
       .click();
@@ -50,14 +50,14 @@ export async function settings(page: Page) {
 export async function closeSettings(page: Page) {
   const panel = page.locator('#behaviorSettings');
   if (await panel.isVisible())
-    await page.getByRole('button', { name: 'Close settings' }).click();
+    await page.getByRole('button', { name: 'Close session options' }).click();
   await panel.waitFor({ state: 'hidden' });
 }
 /** Continue after a recorded-attempt popup, if it has not already expired. */
 export async function dismissFeedback(page: Page): Promise<void> {
   await page.evaluate(() => {
     const button = document.querySelector<HTMLButtonElement>(
-      '#pitchFeedback[open] .feedback-continue',
+      '#pitchFeedback[open] .feedback-continue, .card-feedback .feedback-continue',
     );
     button?.click();
   });

@@ -2,7 +2,7 @@
 import { findElement } from '../ui/helpers';
 import type { App } from '../app/application';
 import { detectPitch, evaluate } from '../domain/pitch';
-import { $, noteNames, statusName } from '../ui/helpers';
+import { $, noteNames } from '../ui/helpers';
 
 export const detection = {
   audioLoop(this: App, now: number): void {
@@ -35,14 +35,6 @@ export const detection = {
     );
     const level = document.getElementById('inputLevel');
     if (level instanceof HTMLMeterElement) level.value = rms;
-    const hint = findElement('inputHint');
-    if (hint)
-      hint.textContent =
-        rms < this.db.settings.gate
-          ? 'No signal'
-          : freq
-            ? 'Tone detected'
-            : 'Sound detected - no reliable pitch';
     const listening = this.classroomListener.frame(
       now,
       rms,
@@ -105,7 +97,7 @@ export const detection = {
       if (findElement('liveNote')) {
         $('liveNote').textContent = '—';
         $('liveHz').textContent = 'Listening for a clear tone';
-        $('liveCents').textContent = 'No reliable pitch';
+        $('liveCents').textContent = '—';
         $('needle').style.left = '50%';
       }
     } else if (findElement('liveNote')) {
@@ -123,10 +115,7 @@ export const detection = {
         );
         if (sessionShell) sessionShell.dataset.range = result.status;
         $('liveCents').textContent =
-          (result.cents >= 0 ? '+' : '') +
-          Math.round(result.cents) +
-          ' cents · ' +
-          statusName(result.status);
+          (result.cents >= 0 ? '+' : '') + Math.round(result.cents) + ' cents';
         $('needle').style.left =
           Math.max(0, Math.min(100, 50 + result.cents / 4)) + '%';
       }

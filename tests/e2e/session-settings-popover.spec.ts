@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 import { classroomPage } from '../fixtures/classroom-page';
 
-test('session settings open from the side navigation in a light-dismissible popover', async ({
+test('session options open from the shared toolbar in a light-dismissible popover', async ({
   page,
 }) => {
   await classroomPage(page);
   const trigger = page.getByRole('button', {
-    name: 'Session behavior settings',
+    name: 'Session options',
     exact: true,
   });
   const popover = page.locator('#behaviorSettings');
@@ -18,7 +18,7 @@ test('session settings open from the side navigation in a light-dismissible popo
   await expect(trigger).toHaveAttribute('aria-expanded', 'true');
   await expect(popover).toHaveCSS('position', 'fixed');
 
-  await popover.getByRole('button', { name: 'Close settings' }).click();
+  await popover.getByRole('button', { name: 'Close session options' }).click();
   await expect(popover).toBeHidden();
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 

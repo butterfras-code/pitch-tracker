@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
@@ -25,16 +26,10 @@ for (const [width, height] of [
       await classroomPage(page, 12);
       await page.clock.pauseAt(new Date(Date.now() + 1000));
       if (width > 390) {
-        await page
-          .getByRole('button', { name: 'Full screen', exact: true })
-          .click();
+        await sessionControl(page, 'Full screen');
         await expect
           .poll(() => page.evaluate(() => !!document.fullscreenElement))
           .toBe(true);
-      } else {
-        await page
-          .getByRole('button', { name: 'Hide controls', exact: true })
-          .click();
       }
       const popup = page.locator('#pitchFeedback');
       for (const theme of ['cel-mech', 'boom-pow']) {
@@ -231,9 +226,6 @@ test('long names remain literal text and the popup stays usable on a short phone
   );
   await page.reload();
   await page.setViewportSize({ width: 390, height: 650 });
-  await page
-    .getByRole('button', { name: 'Hide controls', exact: true })
-    .click();
   await page.locator('.current-display [data-status="correct"]').click();
   await expect(page.locator('.feedback-caption')).toContainText(name);
   await expect(page.locator('#pitchFeedback img')).toHaveCount(0);
@@ -260,7 +252,7 @@ test('user duration saves from session settings, controls timing across themes a
   expect((await saved(page)).settings.feedbackDurationMs).toBe(1500);
   expect((await saved(page)).schema).toBe(3);
   await closeSettings(page);
-  await page.getByRole('button', { name: 'Full screen', exact: true }).click();
+  await sessionControl(page, 'Full screen');
   await settings(page);
   await page.screenshot({
     path: testInfo.outputPath('feedback-settings-desktop.png'),
@@ -301,6 +293,7 @@ test('user duration saves from session settings, controls timing across themes a
   await duration.press('Tab');
   page.once('dialog', (dialog) => dialog.accept());
   await page.locator('#importFile').setInputFiles(path!);
+  await expect(page.locator('#toast')).toHaveText('Backup restored.');
   expect((await saved(page)).settings.feedbackDurationMs).toBe(1500);
   const before = await saved(page);
   await page.locator('#importFile').setInputFiles({
@@ -313,6 +306,7 @@ test('user duration saves from session settings, controls timing across themes a
       }),
     ),
   });
+  await expect(page.locator('#toast')).toContainText('Restore failed:');
   expect(await saved(page)).toEqual(before);
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();

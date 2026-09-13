@@ -13,7 +13,6 @@ export function createBindings(app: App): UiBindings {
       'target-reset': ({ element }) => editTarget(element, 'reset'),
       'session-view': ({ data }) =>
         app.workspace?.setView(data.view ?? 'split'),
-      'session-sidebar': () => app.workspace?.toggleSidebar(),
       'session-fullscreen': () => app.workspace?.fullscreen(),
       'show-current': () => {
         app.search = '';
@@ -68,11 +67,22 @@ export function createBindings(app: App): UiBindings {
         if (isPitchStatus(data.status)) app.record(data.status, data.id);
       },
       'select-student': ({ data }) => app.selectStudent(data.id!),
-      'toggle-attendance': ({ data, element }) =>
+      'select-card': ({ data, event }) => {
+        if (
+          event.target instanceof Element &&
+          !event.target.closest(
+            'button, input, select, textarea, a, .card-practice, .card-feedback',
+          ) &&
+          data.id !== app.db.activeStudent
+        )
+          app.selectStudent(data.id!);
+      },
+      'toggle-attendance': ({ data, element }) => {
         app.attendance(
           data.id!,
           element.getAttribute('aria-pressed') !== 'true',
-        ),
+        );
+      },
       'student-notes': ({ data }) => app.studentDetail(data.id!),
       'resume-session': ({ data }) => app.resumeSession(data.id!),
       'export-csv': ({ data }) => app.exportCSV(data.id),

@@ -1,3 +1,4 @@
+import { teacherDetails } from '../fixtures/session-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test } from '@playwright/test';
@@ -17,9 +18,9 @@ test('student deletion supports cancellation, persists, and preserves session hi
     .getByRole('button', { name: 'Start session' })
     .click();
   await page
-    .getByRole('button', { name: 'Session behavior settings', exact: true })
+    .getByRole('button', { name: 'Session options', exact: true })
     .click();
-  await page.getByLabel('Teacher details', { exact: true }).check();
+  await teacherDetails(page, true);
   await closeSettings(page);
   await page
     .locator('.student')

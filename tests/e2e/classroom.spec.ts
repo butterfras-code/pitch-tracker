@@ -1,4 +1,5 @@
-﻿import { expect, test } from '@playwright/test';
+import { sessionControl, teacherDetails } from '../fixtures/session-controls';
+import { expect, test } from '@playwright/test';
 import {
   classroomPage,
   saved,
@@ -155,7 +156,7 @@ test('noise, navigation, dialogs and reference playback cannot carry a hold', as
   await sound(page, 440, 1200);
   await sound(page, 0);
   await settings(page);
-  await page.getByLabel('Teacher details', { exact: true }).check();
+  await teacherDetails(page, true);
   await page
     .getByRole('button', { name: 'Session notes', exact: true })
     .click();
@@ -173,7 +174,7 @@ test('projected student view keeps large name and navigation together', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.getByRole('button', { name: 'Student view', exact: true }).click();
+  await sessionControl(page, 'Student view');
   expect(
     await page
       .locator('#studentIdentity h2')

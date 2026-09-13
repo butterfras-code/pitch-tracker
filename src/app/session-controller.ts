@@ -140,6 +140,7 @@ export const sessionController = {
       attempt.name,
       status,
       this.db.settings.feedbackDurationMs,
+      this.workspace?.feedbackHost(id),
     );
   },
 };

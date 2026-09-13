@@ -8,7 +8,7 @@
   background-size: 640px;
 }
 :root[data-treatment='rave']
-  :is(header, .tabs, .session-top, .session-sidebar, .dashboard-header) {
+  :is(header, .tabs, .session-toolbar, .dashboard-header) {
   background-color: var(--bg);
   border-radius: var(--help-radius);
 }
@@ -52,15 +52,17 @@
 :root[data-treatment='rave'] .target-pitch {
   text-shadow: var(--note-shadow);
 }
-:root[data-treatment='rave'] .target-playback {
+:root[data-treatment='rave'] :is(.target-listening, .target-playback) {
   background-color: var(--accent);
   color: var(--primary-ink);
   border-color: var(--highlight);
 }
-:root[data-treatment='rave'] .target-playback:hover:not(:disabled) {
+:root[data-treatment='rave']
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
-:root[data-treatment='rave'] .target-playback:active:not(:disabled) {
+:root[data-treatment='rave']
+  :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
 :root[data-treatment='rave'] .tuner {

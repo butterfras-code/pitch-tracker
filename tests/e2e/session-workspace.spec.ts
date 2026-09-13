@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import {
   classroomPage,
@@ -20,9 +21,7 @@ for (const [width, height] of [
     }, testInfo) => {
       await page.setViewportSize({ width, height });
       await classroomPage(page, 30);
-      await page
-        .getByRole('button', { name: 'Full screen', exact: true })
-        .click();
+      await sessionControl(page, 'Full screen');
       await expect
         .poll(() => page.evaluate(() => !!document.fullscreenElement))
         .toBe(true);
@@ -46,10 +45,10 @@ for (const [width, height] of [
           page.locator('[data-ui-click="reference-tone"]'),
         ).toHaveCount(1);
         await expect(
-          page.locator('[data-ui-click="next-student"]'),
+          page.getByRole('button', { name: 'Next student', exact: true }),
         ).toHaveCount(1);
         await expect(
-          page.locator('[data-ui-click="previous-student"]'),
+          page.getByRole('button', { name: 'Previous student', exact: true }),
         ).toHaveCount(1);
         for (const state of ['idle', 'result', 'listening']) {
           if (state === 'result') {
@@ -71,7 +70,7 @@ for (const [width, height] of [
               document.querySelector<HTMLElement>('.current-display')!;
             const panel = current.getBoundingClientRect();
             const selectors = [
-              '#studentIdentity',
+              '.student-navigation',
               '.session-target',
               '.tuner',
               '.tuner-section > .scorebar',
@@ -205,12 +204,8 @@ for (const [width, height] of [
       await expect(
         page.locator('.student[data-student-id="student-29"]'),
       ).toBeInViewport();
-      await page
-        .getByRole('button', { name: 'Class view', exact: true })
-        .click();
-      await page
-        .getByRole('button', { name: 'Split view', exact: true })
-        .click();
+      await sessionControl(page, 'Class view');
+      await sessionControl(page, 'Split view');
       await expect(page.locator('#studentIdentity h2')).toHaveText(
         'Student 29',
       );

@@ -1,3 +1,4 @@
+import { sessionControl, teacherDetails } from '../fixtures/session-controls';
 import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -20,9 +21,9 @@ async function startSession(page: Page) {
     .getByRole('button', { name: 'Start session' })
     .click();
   await page
-    .getByRole('button', { name: 'Session behavior settings', exact: true })
+    .getByRole('button', { name: 'Session options', exact: true })
     .click();
-  await page.getByLabel('Teacher details', { exact: true }).check();
+  await teacherDetails(page, true);
   await closeSettings(page);
 }
 
@@ -99,11 +100,12 @@ test('dynamic session controls, notes and history editing work after rerenders',
 }) => {
   await startSession(page);
   const focus = page.locator('.focus');
-  await page.getByRole('button', { name: 'Student view' }).click();
+  await sessionControl(page, 'Student view');
   await expect(page.locator('.roster-area')).toBeHidden();
-  await page.getByRole('button', { name: 'Split view' }).click();
+  await sessionControl(page, 'Split view');
   await page.getByLabel('Search students').fill('Lucas');
-  await expect(page.locator('.student')).toHaveCount(1);
+  await expect(page.locator('#cards .student')).toHaveCount(1);
+  await expect(page.locator('#activeOutsideFilter')).toContainText('Maya');
   await page
     .locator('.student')
     .getByRole('button', { name: 'Lucas', exact: true })
@@ -116,7 +118,7 @@ test('dynamic session controls, notes and history editing work after rerenders',
   await dismissFeedback(page);
   await page.getByLabel('Search students').fill('');
   await page.getByLabel('Filter roster').selectOption('not tested');
-  await expect(page.locator('.student')).toHaveCount(9);
+  await expect(page.locator('#cards .student')).toHaveCount(9);
   await page.getByLabel('Filter roster').selectOption('all');
   await settings(page);
   await focus.getByRole('button', { name: 'Notes', exact: true }).click();

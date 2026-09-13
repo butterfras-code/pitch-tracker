@@ -1,3 +1,4 @@
+import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { classroomPage } from '../fixtures/classroom-page';
 
@@ -71,9 +72,7 @@ for (const width of [390, 900, 1366, 1920]) {
     await expect(picker).toBeVisible();
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await page
-      .getByRole('button', { name: 'Full screen', exact: true })
-      .click();
+    await sessionControl(page, 'Full screen');
     if (await page.evaluate(() => !!document.fullscreenElement)) {
       await expect(header).toBeHidden();
       await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
