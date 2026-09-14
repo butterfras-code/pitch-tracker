@@ -267,3 +267,14 @@ pressed grading slugs, and a ruled meter with a red blade. Live range and histor
 attempt attributes drive decoration without controller changes. Reduced motion
 removes the strike and button transitions. The shared fullscreen Split geometry
 and saved-data format remain unchanged.
+
+### Pitch Press broadside treatment
+
+Pitch Press now uses bundled Smokum for ornamental wood-type UI lettering and
+generated rag-paper material for both stock and multiply-blended black plates.
+Appearance remains in theme tokens and scoped CSS. Slight name rotations and
+masked edge impressions do not rotate controls or alter shared layout. Crop marks
+and a decorative plate slug are pointer-transparent pseudo-elements in the outer
+margin with no session-state semantics. Color is concentrated in live tuner
+feedback; the selected roster card is reversed black and stock. No controller,
+saved-data, runtime fetch, or dependency changes are required.

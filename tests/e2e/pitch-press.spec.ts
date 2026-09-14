@@ -141,11 +141,11 @@ for (const [width, height] of [
       );
       await expect(page.locator('.student.selected')).toHaveCSS(
         'background-color',
-        'rgb(255, 230, 0)',
+        'rgb(21, 21, 21)',
       );
       await expect(page.locator('#studentIdentity h2')).toHaveCSS(
         'font-family',
-        '"Press Slab", Georgia, serif',
+        '"Press Wood", "Press Slab", Georgia, serif',
       );
       await expect(page.locator('.student.selected')).toHaveCSS(
         'border-style',
@@ -159,7 +159,51 @@ for (const [width, height] of [
         'font-family',
         '"Courier New", Courier, monospace',
       );
+      expect(
+        await page.evaluate(() => document.fonts.check('18px "Press Wood"')),
+      ).toBe(true);
+      expect(
+        await page.evaluate(async () => {
+          const material = getComputedStyle(
+            document.documentElement,
+          ).getPropertyValue('--press-grain');
+          const url = material
+            .trim()
+            .slice(4, -1)
+            .replace(/^["']|["']$/g, '');
+          const image = new Image();
+          image.src = url;
+          await image.decode();
+          return image.naturalWidth > 0 && url.startsWith('data:');
+        }),
+      ).toBe(true);
+      await expect(page.locator('.current-display')).toHaveCSS(
+        'background-image',
+        /url\("data:image/,
+      );
+      await expect(
+        page.locator('.view-picker [aria-pressed="true"]'),
+      ).toHaveCSS('color', 'rgb(255, 249, 234)');
+
+      await expect(page.locator('.session-toolbar button').first()).toHaveCSS(
+        'font-family',
+        '"Press Wood", Georgia, serif',
+      );
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.body, '::after').content,
+        ),
+      ).toContain('PLATE 04-B');
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.body, '::before').pointerEvents,
+        ),
+      ).toBe('none');
       const live = page.locator('.tuner-section[data-live-practice] .scorebar');
+      await expect(live.locator('.low')).toHaveCSS(
+        'background-color',
+        'rgb(21, 21, 21)',
+      );
       for (const [state, color] of [
         ['low', 'rgb(147, 47, 34)'],
         ['correct', 'rgb(41, 75, 50)'],
@@ -180,6 +224,12 @@ for (const [width, height] of [
           'animation-name',
           'press-strike',
         );
+      }
+      if (width === 1920) {
+        await page.screenshot({
+          path: testInfo.outputPath('press-live-high.png'),
+          fullPage: true,
+        });
       }
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await expect(live.locator('.high')).toHaveCSS('animation-name', 'none');
@@ -218,6 +268,11 @@ for (const [width, height] of [
       await expect(
         page.locator('.session-target[data-live-practice]'),
       ).not.toHaveCSS('background-color', 'rgb(21, 21, 21)');
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.body, '::after').content,
+        ),
+      ).toBe('none');
       await picker.selectOption('pitch-press', { force: true });
       expect(await saved(page)).toEqual(data);
       await page.keyboard.press('Tab');
@@ -228,7 +283,7 @@ for (const [width, height] of [
       );
       await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'outline-color',
-        'rgb(255, 230, 0)',
+        'rgb(255, 249, 234)',
       );
     });
   });
