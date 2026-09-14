@@ -3,11 +3,7 @@ import { setSlider, selectTarget } from '../fixtures/settings-controls';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
-import {
-  closeSettings,
-  dismissFeedback,
-  settings,
-} from '../fixtures/classroom-page';
+import { closeSettings, dismissFeedback } from '../fixtures/classroom-page';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(pathToFileURL(resolve('dist/index.html')).href);
@@ -15,11 +11,6 @@ test.beforeEach(async ({ page }) => {
 
 async function startSession(page: Page) {
   await page.getByRole('button', { name: 'Start session' }).first().click();
-  await page.getByLabel('Session name').fill('UI rehearsal');
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
 }
 
 test('class, student and settings forms retain their behavior', async ({
@@ -115,27 +106,18 @@ test('dynamic session controls, notes and history editing work after rerenders',
   await page.getByLabel('Filter roster').selectOption('not tested');
   await expect(page.locator('#cards .student')).toHaveCount(9);
   await page.getByLabel('Filter roster').selectOption('all');
-  await settings(page);
-  await focus.getByRole('button', { name: 'Notes', exact: true }).click();
-  await page.getByLabel('Notes for this session').fill('Keep the air steady');
+  await expect(
+    page.getByRole('button', { name: 'Notes', exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Session notes' })).toHaveCount(
+    0,
+  );
   await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Save notes' })
-    .click();
-  await settings(page);
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
   await page
-    .getByRole('button', { name: 'Session notes', exact: true })
-    .click();
-  await page
-    .getByLabel('Session notes', { exact: true })
-    .fill('Good rehearsal');
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Save notes' })
-    .click();
-  await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await page.getByLabel('Advance mode').selectOption('one-and-done');
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
   await closeSettings(page);
   await focus.getByRole('button', { name: 'Next student' }).click();
   const selected = await focus.getByRole('heading', { level: 2 }).textContent();
@@ -145,12 +127,8 @@ test('dynamic session controls, notes and history editing work after rerenders',
   await expect(focus.getByRole('heading', { level: 2 })).not.toHaveText(
     selected!,
   );
-  await settings(page);
-  await focus.getByRole('button', { name: 'Random', exact: true }).click();
-  await closeSettings(page);
-  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Shuffle student order' }).click();
   await page.getByRole('button', { name: 'Finish session' }).click();
-  await expect(page.getByText('Good rehearsal', { exact: true })).toBeVisible();
   await page.getByText('Student summary & attempts', { exact: true }).click();
   await page.getByRole('button', { name: 'Edit', exact: true }).first().click();
   await page.locator('#editResult').selectOption('correct');
@@ -167,7 +145,14 @@ test('dynamic session controls, notes and history editing work after rerenders',
   await page.getByRole('button', { name: 'Export CSV', exact: true }).click();
   expect((await csv).suggestedFilename()).toBe('pitch-tracker-results.csv');
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
-  await expect(page.getByText('UI rehearsal', { exact: true })).toBeVisible();
+  await expect(page.locator('#sessionShell')).toBeVisible();
+  expect(
+    (
+      await page.evaluate(() =>
+        JSON.parse(localStorage.getItem('mouthpiece.pitchtracker.v1')!),
+      )
+    ).sessions[0].name,
+  ).toContain('Demo class');
   await page
     .getByRole('button', { name: 'History & progress', exact: true })
     .click();
@@ -185,16 +170,12 @@ test('keyboard scoring ignores typing and dialogs, and listeners do not duplicat
   await page.getByLabel('Search students').fill('1');
   await page.getByLabel('Search students').fill('');
   await expect(page.locator('.student').first()).toContainText('No result yet');
-  await settings(page);
   await page
-    .getByRole('button', { name: 'Session notes', exact: true })
+    .getByRole('button', { name: /^History for / })
+    .first()
     .click();
-  await page.getByLabel('Session notes', { exact: true }).press('2');
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Cancel' })
-    .click();
-  await closeSettings(page);
+  await page.getByRole('dialog').press('2');
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: 'Help', exact: true }).click();
     await page.getByRole('button', { name: 'Classes', exact: true }).click();

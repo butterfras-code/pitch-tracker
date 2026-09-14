@@ -57,6 +57,137 @@ body.session-active {
   padding: 8px 12px;
   font-size: var(--session-small);
 }
+#sessionShell .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+#sessionShell .toolbar-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--session-small);
+}
+#sessionShell .toolbar-field select {
+  width: auto;
+  max-width: min(260px, 24vw);
+  min-height: 48px;
+  padding-block: 6px;
+  font-size: var(--session-small);
+}
+#sessionShell .toolbar-class select {
+  max-width: min(300px, 27vw);
+  text-overflow: ellipsis;
+}
+#sessionShell .icon-action {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  min-width: 48px;
+  padding: 8px;
+}
+#sessionShell .icon-action svg,
+#sessionShell .toolbar-listening svg {
+  width: 24px;
+  height: 24px;
+}
+#sessionShell .clap-toggle[aria-pressed='true'] {
+  background: var(--highlight);
+  color: var(--ink);
+}
+#sessionShell .clap-toggle {
+  anchor-name: --clap-toggle;
+}
+#sessionShell .clap-toggle[data-listening-required='true'] {
+  outline: 2px dashed var(--warning, var(--highlight));
+  outline-offset: 2px;
+}
+#sessionShell .microphone-split {
+  display: inline-flex;
+  flex: none;
+}
+#sessionShell .microphone-split button {
+  border-radius: 0;
+}
+#sessionShell .microphone-split .toolbar-listening {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+#sessionShell .microphone-split .microphone-options-trigger {
+  min-width: 42px;
+  padding-inline: 8px;
+  margin-left: -1px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+#sessionShell [data-ui-click='microphone-options'] {
+  anchor-name: --microphone-options-trigger;
+}
+#sessionShell .microphone-options[popover] {
+  position: fixed;
+  position-anchor: --microphone-options-trigger;
+  position-area: bottom span-right;
+  position-try-fallbacks: flip-inline, flip-block;
+  inset: auto;
+  width: min(380px, calc(100vw - 32px));
+  margin: 8px 0 0;
+  padding: 16px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--surface-shadow);
+  border-radius: var(--radius);
+}
+#sessionShell .microphone-options h2 {
+  font-size: var(--session-copy);
+  margin-bottom: 12px;
+}
+#sessionShell .microphone-options label,
+#sessionShell .microphone-options select,
+#sessionShell .microphone-options button {
+  width: 100%;
+}
+#sessionShell .microphone-options button {
+  margin-top: 12px;
+}
+#sessionShell .clap-instructions {
+  position: fixed;
+  position-anchor: --clap-toggle;
+  position-area: bottom span-right;
+  position-try-fallbacks: flip-inline, flip-block;
+  z-index: 20;
+  top: 76px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--surface-shadow);
+  pointer-events: none;
+  font-size: var(--session-small);
+}
+@supports (position-area: bottom) {
+  #sessionShell .clap-instructions {
+    inset: auto;
+    margin-top: 8px;
+    translate: none;
+  }
+}
+#sessionShell .clap-instructions[hidden] {
+  display: none;
+}
 #sessionShell .behavior-settings {
   flex: none;
   flex-direction: column;
@@ -933,13 +1064,19 @@ body.session-active {
 #sessionShell .inactive-practice .tuner-section--last-attempt {
   position: relative;
 }
-#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='low'] {
+#sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='low'] {
   --tuner-result-color: var(--low);
 }
-#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='correct'] {
+#sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='correct'] {
   --tuner-result-color: var(--correct);
 }
-#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='high'] {
+#sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='high'] {
   --tuner-result-color: var(--high);
 }
 #sessionShell .inactive-practice .tuner-section--last-attempt::before {
@@ -952,9 +1089,18 @@ body.session-active {
   opacity: 0.75;
   z-index: 1;
 }
-#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='low'] .low,
-#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='correct'] .correct,
-#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='high'] .high {
+#sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='low']
+  .low,
+#sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='correct']
+  .correct,
+#sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='high']
+  .high {
   outline: 2px solid currentColor;
   outline-offset: 2px;
   animation: var(--range-animation);

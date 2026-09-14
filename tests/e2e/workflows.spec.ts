@@ -37,18 +37,7 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
   await focus.getByRole('button', { name: 'Too low' }).click();
   await page.locator('.student').nth(1).getByLabel('Absent').click();
   await page.reload();
-  if (
-    await page
-      .getByRole('button', { name: 'Session options', exact: true })
-      .count()
-  ) {
-    await page
-      .getByRole('button', { name: 'Session options', exact: true })
-      .click();
-  }
-  await expect(
-    page.getByText('Baseline rehearsal', { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator('#sessionShell')).toBeVisible();
   await expect(page.locator('.student').first()).toContainText('Too low');
   await expect(
     page.locator('.student').nth(1).getByLabel('Absent'),

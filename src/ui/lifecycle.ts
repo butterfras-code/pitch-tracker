@@ -50,7 +50,7 @@ export function bindLifecycle(app: App): () => void {
         e.preventDefault();
         app.record((['low', 'correct', 'high'] as const)[+e.key - 1]);
       } else if (e.key.toLowerCase() === 'n') app.classroomNavigate(1);
-      else if (e.key.toLowerCase() === 'r') app.pickNext(true);
+      else if (e.key.toLowerCase() === 's') app.shuffleStudents();
       else if (e.code === 'Space') {
         e.preventDefault();
         app.startCheck();

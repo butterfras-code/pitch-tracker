@@ -46,6 +46,17 @@ export function createBindings(app: App): UiBindings {
       },
       undo: () => app.undo(),
       'toggle-mic': () => app.toggleMic(),
+      'turn-microphone-off': () => {
+        app.stopMic();
+        app.render();
+      },
+      'clap-navigation-toggle': ({ element }) => {
+        const enabled = element.getAttribute('aria-pressed') !== 'true';
+        app.clapNavigation = enabled;
+        app.cancelCheck();
+        app.render();
+        app.workspace?.showClapInstructions(enabled);
+      },
       'reference-tone': () => app.referenceTone(),
       'start-check': () => app.startCheck(),
       'close-dialog': () => app.closeDialog(),
@@ -61,7 +72,7 @@ export function createBindings(app: App): UiBindings {
         app.render();
       },
       'next-student': () => app.classroomNavigate(1),
-      'random-student': () => app.pickNext(true),
+      'shuffle-students': () => app.shuffleStudents(),
       'active-student-notes': () => app.studentDetail(app.db.activeStudent),
       record: ({ data }) => {
         if (isPitchStatus(data.status)) app.record(data.status, data.id);
@@ -112,6 +123,16 @@ export function createBindings(app: App): UiBindings {
       'target-scale': ({ element }) => editTarget(element, 'scale'),
       'target-note': ({ element }) => editTarget(element, 'note'),
       'microphone-input': ({ value }) => app.changeMicrophone(value),
+      'session-advance': ({ value }) => {
+        if (!['manual', 'when-correct', 'after-attempt'].includes(value))
+          return;
+        app.db.settings.advance = value !== 'manual';
+        app.classroomMode =
+          value === 'after-attempt' ? 'one-and-done' : 'until-correct';
+        app.cancelCheck();
+        app.save();
+        app.render();
+      },
       'classroom-mode': ({ value }) => {
         if (value !== 'until-correct' && value !== 'one-and-done') return;
         app.classroomMode = value;

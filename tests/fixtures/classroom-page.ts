@@ -37,23 +37,14 @@ export function saved(page: Page): Promise<TrackerData> {
 }
 export async function settings(page: Page) {
   await dismissFeedback(page);
-  const panel = page.locator('#behaviorSettings');
+  const panel = page.locator('#microphoneOptions');
   if (!(await panel.isVisible()))
-    await page
-      .getByRole('button', {
-        name: 'Session options',
-        exact: true,
-      })
-      .click();
+    await page.getByRole('button', { name: 'Microphone options' }).click();
   await panel.waitFor({ state: 'visible' });
 }
 export async function closeSettings(page: Page) {
-  const panel = page.locator('#behaviorSettings');
+  const panel = page.locator('#microphoneOptions');
   if (await panel.isVisible()) {
-    await page.getByRole('button', { name: 'Close session options' }).click();
-    // This helper prepares later assertions; the dedicated popover test covers
-    // the close button itself. Firefox can occasionally miss the native
-    // popovertarget transition during repeated theme changes.
     await panel.evaluate((element) => {
       if (element instanceof HTMLElement && element.matches(':popover-open'))
         element.hidePopover();

@@ -22,12 +22,11 @@ for (const [width, height] of [
       await expect(page.locator('#sessionSidebar')).toHaveCount(0);
       for (const name of [
         'Back to classes',
-        'Session options',
+        'Microphone options',
         'Undo last change',
         'Finish session',
         'Next student',
         'Previous student',
-        'Start listening',
       ]) {
         await page
           .getByRole('button', { name, exact: true })
@@ -36,6 +35,7 @@ for (const [width, height] of [
           page.getByRole('button', { name, exact: true }),
         ).toBeInViewport();
       }
+      await expect(page.locator('#toolbarListening')).toBeInViewport();
       if (view !== 'Class') {
         const previous = await page
           .locator('.student-heading [data-ui-click="previous-student"]')
@@ -53,7 +53,7 @@ for (const [width, height] of [
         ).toBeVisible();
       }
       await expect(
-        page.getByRole('button', { name: view + ' view', exact: true }),
+        page.getByRole('button', { name: view + ' View', exact: true }),
       ).toBeFocused();
       expect(
         await page.evaluate(
@@ -84,9 +84,7 @@ test('class scoring preserves the live tuner across views and resolves feedback 
   await sessionControl(page, 'Class view');
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   const tuner = await page.locator('#liveNote').elementHandle();
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 440, 250);
   await expect(page.locator('.selected #liveNote')).not.toHaveText('—');
@@ -155,7 +153,7 @@ test('view controls stay visible and fullscreen retains toolbar', async ({
   await classroomPage(page);
   await expect(page.getByRole('group', { name: 'Content view' })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Split view', exact: true }),
+    page.getByRole('button', { name: 'Split View', exact: true }),
   ).toHaveAttribute('aria-pressed', 'true');
   await expect(
     page.getByRole('button', { name: 'Full screen', exact: true }),
@@ -166,7 +164,7 @@ test('view controls stay visible and fullscreen retains toolbar', async ({
     await expect(page.locator('.session-toolbar')).toBeInViewport();
     await sessionControl(page, 'Class view');
     await expect(
-      page.getByRole('button', { name: 'Class view', exact: true }),
+      page.getByRole('button', { name: 'Class View', exact: true }),
     ).toHaveAttribute('aria-pressed', 'true');
     await sessionControl(page, 'Exit full screen');
     await expect(page.locator('body > header')).toBeVisible();

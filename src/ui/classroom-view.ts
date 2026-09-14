@@ -1,6 +1,5 @@
 import { updateMicrophoneIndicator } from './microphone-indicator';
 import { targetFrequency, targetLabel } from '../domain/pitch';
-import { feedbackDurationControl } from './feedback-settings';
 import type { SessionDefaults } from '../domain/session-defaults';
 import type { Session, TrackerData } from '../domain/tracker';
 import type { Round } from '../domain/round';
@@ -70,6 +69,8 @@ const sessionViewOptions: {
 const microphoneStatusIcon = `<svg class="microphone-status-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v3M9 21h6"/><path class="microphone-off-mark" d="m4 4 16 16"/></svg>`;
 const speakerIcon = `<svg aria-hidden="true" viewBox="0 0 48 40"><path d="M4 14h9L25 4v32L13 26H4z" fill="currentColor"/><path d="M32 11q12 9 0 18m6-25q20 16 0 32" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
 const historyIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>`;
+const diceIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="16" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>`;
+const clapIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 11-2-4a1.4 1.4 0 0 0-2.5 1.2l3.4 7.1M10.5 10 8 4.7a1.4 1.4 0 0 0-2.5 1.2M13 10l-2.2-6a1.4 1.4 0 0 0-2.7.9M13 10l-.8-4.6a1.4 1.4 0 0 1 2.8-.5l1.2 6.6.8-1.6a1.7 1.7 0 0 1 3.1 1.4l-2.6 6.1A6 6 0 0 1 6.9 15.3"/><path d="M18 3v3M21 6l-2 2M16 1l-1 3"/></svg>`;
 const scoreButtons = (active: boolean) =>
   (['low', 'correct', 'high'] as const)
     .map((status, index) => {
@@ -122,8 +123,8 @@ interface StudentCardLayout {
 const studentCardLayout = (student: StudentCardLayout) => {
   const turn = student.active ? 'Current' : student.upNext ? 'Up next' : '';
   const result = student.result
-        ? `<span class="${student.hasAttempt ? `student-result ${student.resultStatus}` : 'badge'}">${esc(student.result)}</span>`
-        : '<span class="card-result-empty">No result yet</span>';
+    ? `<span class="${student.hasAttempt ? `student-result ${student.resultStatus}` : 'badge'}">${esc(student.result)}</span>`
+    : '<span class="card-result-empty">No result yet</span>';
   return `${student.outsideFilter ? '<small class="outside-filter-label">Current student · outside this filter</small>' : ''}<div class="roster-header"><small class="roster-instrument" title="${esc(student.instrument)}">${esc(student.instrument)}</small><span class="turn-label">${turn}</span><div class="roster-card-actions">${action('student-notes', historyIcon, `class="history-toggle" data-id="${esc(student.id)}" aria-label="History for ${esc(student.name)}" title="History for ${esc(student.name)}"`)}${attendanceToggle(student.id, student.name, student.absent)}</div></div><div class="roster-identity"><div class="roster-name-navigation">${student.active ? studentChevron('previous', 'class-chevron') : ''}<button class="name" data-ui-click="select-student" data-id="${esc(student.id)}" title="${esc(student.name)}">${esc(student.name)}</button>${student.active ? studentChevron('next', 'class-chevron') : ''}</div></div><div class="roster-rating">${result}</div><div class="card-practice">${student.inactivePractice}</div>`;
 };
 // Cards have a stable structure: patch nodes in place to preserve focus and inputs.
@@ -171,8 +172,20 @@ export class SessionView {
   private stageKey = '';
   private cardKeys = new Map<string, string>();
   private lifecycle = new AbortController();
+  private clapTimer: ReturnType<typeof setTimeout> | undefined;
   dispose(): void {
+    clearTimeout(this.clapTimer);
     this.lifecycle.abort();
+  }
+  showClapInstructions(show: boolean): void {
+    clearTimeout(this.clapTimer);
+    const toast = this.root?.querySelector<HTMLElement>('#clapInstructions');
+    if (!toast) return;
+    toast.hidden = !show;
+    if (show)
+      this.clapTimer = setTimeout(() => {
+        toast.hidden = true;
+      }, 1500);
   }
   constructor(defaults?: SessionDefaults) {
     if (defaults) {
@@ -227,7 +240,8 @@ export class SessionView {
   private applyView() {
     if (!this.root) return;
     this.root.dataset.view = this.view;
-    const settings = this.root.querySelector<HTMLElement>('#behaviorSettings')!;
+    const settings =
+      this.root.querySelector<HTMLElement>('#microphoneOptions')!;
     this.settings = settings.matches(':popover-open');
     this.root.dataset.settings = String(this.settings);
     this.root
@@ -236,7 +250,7 @@ export class SessionView {
         b.setAttribute('aria-pressed', String(b.dataset.view === this.view)),
       );
     this.root
-      .querySelector('[data-ui-click="session-settings"]')!
+      .querySelector('[data-ui-click="microphone-options"]')!
       .setAttribute('aria-expanded', String(this.settings));
     this.placePractice();
     this.fullscreenLabel();
@@ -288,12 +302,17 @@ export class SessionView {
  ${action('back-to-classes', '←', 'aria-label="Back to classes" title="Back to classes"')}
  <div class="view-picker" role="group" aria-label="Content view">${sessionViewOptions.map((option) => action('session-view', option.icon, `data-view="${option.view}" aria-label="${option.label}" title="${option.tooltip}"`)).join('')}</div>
  ${action('session-fullscreen', '<span class="fullscreen-icon" aria-hidden="true">⛶</span>', 'aria-label="Full screen" title="Full screen: enter full screen mode" aria-pressed="false"')}
- ${action('session-settings', 'Session options ▾', 'aria-label="Session options" aria-expanded="false" aria-controls="behaviorSettings" popovertarget="behaviorSettings"')}
+ <label class="toolbar-field toolbar-class"><span>Class</span><select id="sessionClass" data-ui-change="change-class" aria-label="Class"></select></label>
+ <label class="toolbar-field toolbar-advance"><span>Advance</span><select id="sessionAdvance" data-ui-change="session-advance" aria-label="Advance"><option value="manual">Manual</option><option value="when-correct">When correct</option><option value="after-attempt">After each attempt</option></select></label>
+ ${action('clap-navigation-toggle', clapIcon, 'class="icon-action clap-toggle" aria-label="Clap navigation" aria-describedby="clapHelp" aria-pressed="false" title="Clap navigation — 2 claps Forward; 3 Claps Back"')}
+ <span id="clapHelp" class="visually-hidden">2 claps Forward. 3 Claps Back. Listening is required.</span>
+ <span class="microphone-split" role="group" aria-label="Microphone controls">${action('toolbar-listening', `${microphoneStatusIcon}<span id="toolbarListeningLabel">Start listening</span>`, 'id="toolbarListening" class="toolbar-listening" aria-label="Start listening"')}${action('microphone-options', '▾', 'class="microphone-options-trigger" aria-label="Microphone options" aria-expanded="false" aria-controls="microphoneOptions" popovertarget="microphoneOptions"')}</span>
+ ${action('shuffle-students', diceIcon, 'class="icon-action" aria-label="Shuffle student order" title="Shuffle student order"')}
  ${action('undo', '↶ Undo', 'id="sessionUndo" aria-label="Undo last change"')}
- <div class="session-meta"><strong id="sessionTitle"></strong><small id="roundLabel"></small></div>
  ${action('end-session', 'Finish session')}
  </div>
- <div id="behaviorSettings" class="behavior-settings" popover="auto"><div class="session-settings-heading"><h2>Session options</h2>${action('session-settings-close', '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>', 'type="button" aria-label="Close session options" popovertarget="behaviorSettings" popovertargetaction="hide"')}</div>${feedbackDurationControl(m.db.settings.feedbackDurationMs)}<label>Class<select id="sessionClass" data-ui-change="change-class"></select></label><label><input type="checkbox" data-ui-change="advance" aria-label="Auto Advance"> Auto Advance</label><label>Advance mode<select data-ui-change="classroom-mode"><option value="until-correct">Until correct</option><option value="one-and-done">One and done</option></select></label><label><input type="checkbox" data-ui-change="clap-navigation"> Clap navigation</label><div class="row">${action('toggle-mic', 'Enable microphone', 'id="micButton"')}${action('random-student', 'Random')}${action('active-student-notes', 'Notes')}${action('session-notes', 'Session notes')}</div><label>Microphone input<select id="microphoneInput" data-ui-change="microphone-input"><option value="">Browser default</option></select></label><p class="help">Two claps: next. Three claps: back. Clap navigation is optional. Round queues restart after reopening. Attempts stay saved.</p></div>
+ <div id="microphoneOptions" class="microphone-options" popover="auto"><h2>Microphone options</h2><label>Microphone input<select id="microphoneInput" data-ui-change="microphone-input"><option value="">Browser default</option></select></label>${action('turn-microphone-off', 'Turn microphone off', 'id="turnMicrophoneOff"')}</div>
+ <div id="clapInstructions" class="clap-instructions" role="status" hidden><span>2 claps Forward</span><span>3 Claps Back</span></div>
  <div class="session-workspace"><div class="session-stage"><p id="viewMessage" role="status"></p><p id="micError" role="status"></p>
  <div class="session-content"><section class="current-display" aria-label="Current student"><div class="student-heading student-actions" role="group" aria-label="Current and next students"><div class="student-navigation">${studentChevron('previous')}<div id="studentIdentity"></div>${studentChevron('next')}</div><div id="upNext" class="upcoming-student"></div></div><div class="session-target" data-live-practice><div class="target-readout" id="pressTarget"></div><div class="target-controls"><div class="target-actions">${action('pause-listening', `${microphoneStatusIcon}<span id="listeningLabel">Pause listening</span>`, 'id="pauseListening" class="primary target-listening" aria-label="Pause listening" data-microphone="on"')}${action('reference-tone', `${speakerIcon}<span>Hear target</span>`, 'class="primary target-playback" aria-label="Hear current target"')}</div><small id="classroomStatus" role="status"></small></div></div><div class="tuner-section" data-live-practice><div class="tuner"><div class="note" id="liveNote">—</div><div id="liveHz" class="tuner-frequency">Listening for a clear tone</div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle" id="needle"></i></div><div class="input-signal"><span id="inputStatus" class="input-status" role="img" aria-label="Microphone off" title="Microphone off" data-microphone="off">${microphoneStatusIcon.replace('</svg>', '<path class="microphone-paused-mark" d="M18 16v6m4-6v6"/></svg>')}</span><meter id="inputLevel" aria-label="Microphone level" min="0" max="0.25" value="0"></meter></div><div class="tuner-cents" id="liveCents" aria-label="Cents relative to target">—</div><div class="progress"><i id="holdProgress"></i></div></div><div class="scorebar">${scoreButtons(true)}</div></div><div class="classroom-feedback"><div id="lastResult"></div></div><div class="student-footer"><div id="roundActions"></div></div></section>
  <section class="roster-area" aria-label="Students dashboard"><div class="dashboard-header"><div class="row"><input id="search" aria-label="Search students" placeholder="Find a student" data-ui-input="search"><select aria-label="Filter roster" data-ui-change="filter-roster">${['all', 'not tested', 'needs practice', 'absent'].map((v) => `<option>${v}</option>`).join('')}</select>${action('show-current', 'Show current student')}</div></div><div class="roster-scroll" tabindex="0" aria-label="Class roster"><div id="activeOutsideFilter"></div><div class="cards" id="cards"></div></div></section></div></div></div></section>`;
@@ -301,7 +320,7 @@ export class SessionView {
       const stage = this.root.querySelector('.session-stage')!;
       stage.append(this.root.querySelector('.student-footer')!);
       const settings =
-        this.root.querySelector<HTMLElement>('#behaviorSettings')!;
+        this.root.querySelector<HTMLElement>('#microphoneOptions')!;
       settings.addEventListener('toggle', () => this.applyView());
       this.cardKeys.clear();
       this.stageKey = '';
@@ -312,20 +331,8 @@ export class SessionView {
     const text = (id: string, value: string) => {
       if ($(id).textContent !== value) $(id).textContent = value;
     };
-    text('sessionTitle', m.s.name);
-    text(
-      'roundLabel',
-      `${m.s.className} · ${m.round.kind === 'retry' ? 'Practice retry' : 'Whole class'} · ${roundSummary(m.s, m.round).attempted} / ${m.round.ids.filter((id) => !m.s.absent.includes(id)).length} played`,
-    );
     text('classroomStatus', m.status === 'Microphone off' ? '' : m.status);
     text('lastResult', m.result);
-    const feedbackDuration =
-      this.root.querySelector<HTMLInputElement>('#feedbackDuration');
-    if (feedbackDuration && document.activeElement !== feedbackDuration)
-      feedbackDuration.value =
-        m.db.settings.feedbackDurationMs == null
-          ? ''
-          : String(m.db.settings.feedbackDurationMs / 1000);
     text('micError', m.micError);
     const listeningLabel = !m.mic
       ? 'Start listening'
@@ -333,6 +340,7 @@ export class SessionView {
         ? 'Resume listening'
         : 'Pause listening';
     text('listeningLabel', listeningLabel);
+    text('toolbarListeningLabel', listeningLabel);
     $('pauseListening').setAttribute('aria-label', listeningLabel);
     $('pauseListening').dataset.microphone = m.mic && !m.paused ? 'on' : 'off';
     $('pauseListening').setAttribute(
@@ -345,19 +353,29 @@ export class SessionView {
       'data-ui-click',
       m.mic ? 'pause-listening' : 'start-check',
     );
+    $('toolbarListening').setAttribute('aria-label', listeningLabel);
+    $('toolbarListening').setAttribute(
+      'data-ui-click',
+      m.mic ? 'pause-listening' : 'start-check',
+    );
+    $('toolbarListening').dataset.microphone =
+      m.mic && !m.paused ? 'on' : 'off';
+    $('toolbarListening').setAttribute(
+      'aria-pressed',
+      String(m.mic && !m.paused),
+    );
+    $('toolbarListening').title = listeningLabel;
     ($('sessionUndo') as HTMLButtonElement).disabled = !m.undo;
-    text('micButton', m.mic ? 'Stop microphone' : 'Enable microphone');
+    ($('turnMicrophoneOff') as HTMLButtonElement).hidden = !m.mic;
     updateMicrophoneIndicator(m.mic, m.paused, m.status);
-    const setCheck = (name: string, value: boolean) => {
-      this.root!.querySelector<HTMLInputElement>(
-        `[data-ui-change="${name}"]`,
-      )!.checked = value;
-    };
-    setCheck('advance', m.db.settings.advance);
-    setCheck('clap-navigation', m.claps);
-    this.root.querySelector<HTMLSelectElement>(
-      '[data-ui-change="classroom-mode"]',
-    )!.value = m.mode;
+    const clap = this.root.querySelector<HTMLElement>('.clap-toggle')!;
+    clap.setAttribute('aria-pressed', String(m.claps));
+    clap.dataset.listeningRequired = String(m.claps && (!m.mic || m.paused));
+    ($('sessionAdvance') as HTMLSelectElement).value = !m.db.settings.advance
+      ? 'manual'
+      : m.mode === 'one-and-done'
+        ? 'after-attempt'
+        : 'when-correct';
     $('search').setAttribute('value', m.search);
     ($('search') as HTMLInputElement).value = m.search;
     this.root.querySelector<HTMLSelectElement>(
@@ -425,18 +443,31 @@ export class SessionView {
       : '';
     if ($('roundActions').innerHTML !== roundHtml)
       $('roundActions').innerHTML = roundHtml;
-    const shown = m.s.roster.filter((p) => {
-      const last = m.s.attempts.filter((a) => a.studentId === p.id).at(-1);
-      return (
-        `${p.name} ${p.instrument}`
-          .toLowerCase()
-          .includes(m.search.toLowerCase()) &&
-        (m.filter === 'all' ||
-          (m.filter === 'absent' && m.s.absent.includes(p.id)) ||
-          (m.filter === 'not tested' && !last && !m.s.absent.includes(p.id)) ||
-          (m.filter === 'needs practice' && last && last.status !== 'correct'))
-      );
-    });
+    const shown = m.s.roster
+      .filter((p) => {
+        const last = m.s.attempts.filter((a) => a.studentId === p.id).at(-1);
+        return (
+          `${p.name} ${p.instrument}`
+            .toLowerCase()
+            .includes(m.search.toLowerCase()) &&
+          (m.filter === 'all' ||
+            (m.filter === 'absent' && m.s.absent.includes(p.id)) ||
+            (m.filter === 'not tested' &&
+              !last &&
+              !m.s.absent.includes(p.id)) ||
+            (m.filter === 'needs practice' &&
+              last &&
+              last.status !== 'correct'))
+        );
+      })
+      .sort((a, b) => {
+        const ai = m.round.ids.indexOf(a.id);
+        const bi = m.round.ids.indexOf(b.id);
+        return (
+          (ai < 0 ? Number.MAX_SAFE_INTEGER : ai) -
+          (bi < 0 ? Number.MAX_SAFE_INTEGER : bi)
+        );
+      });
     this.placePractice(true);
     const list = $('cards');
     const outside = $('activeOutsideFilter');

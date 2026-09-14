@@ -169,7 +169,8 @@ export const adminView = {
       <p>
         In Classes, create your class and add students. In Settings, verify your
         mouthpiece targets, then start a session. Mark absent students and
-        select a name, or use Next / Random. Record a manual judgment or enable
+        select a name, or use Next. Shuffle changes the temporary round order
+        without changing the saved roster. Record a manual judgment or enable
         the microphone to log steady tones automatically.
       </p>
       <h3>Choose your theme</h3>
@@ -264,10 +265,11 @@ export const adminView = {
       <p>
         The shared session toolbar stays available in every view, including
         fullscreen. Split, Student, Class, and Full screen remain directly
-        available in the toolbar. Session options contains advancement rules,
-        feedback duration, clap navigation, and microphone selection. Back
-        returns to classes; Undo reverses the last change. Previous, listening,
-        and Next remain directly accessible below the toolbar.
+        available in the toolbar. Class navigation, the three advancement
+        choices, clap navigation, listening, microphone options, Undo, and
+        Shuffle, Finish session, and the other session controls are available
+        there too. Feedback popup timing stays in Settings. Previous and Next
+        remain beside the current student.
       </p>
       <p>
         Split shows the current student beside or above the class dashboard.
@@ -285,10 +287,10 @@ export const adminView = {
         reveals their card.
       </p>
       <p>
-        Session behavior settings contains advance mode, clap navigation, and
-        microphone input. Score the current student with the controls in the
-        tuner in Split or Class view. Pause, Previous, Next and Undo stay
-        available in every view.
+        The microphone button starts, pauses, or resumes listening. Its separate
+        dropdown selects an input or turns the microphone off; opening the
+        dropdown does not change listening. Score the current student with the
+        controls in the tuner in Split or Class view.
       </p>
       <p>
         At round completion, retry only students whose latest result needs
@@ -321,11 +323,11 @@ export const adminView = {
       </p>
       <h3>During class</h3>
       <p>
-        1 / 2 / 3 = low / in range / high. N = next, R = random, Space = start
+        1 / 2 / 3 = low / in range / high. N = next, S = shuffle, Space = start
         listening. Escape pauses listening. Ctrl/Cmd+Z undoes the latest session
         change. Shortcuts are disabled while typing or using a dialog. Next
-        follows roster order; Random prioritizes the fewest attempts within the
-        current round. Both exclude absent students.
+        follows the current round order. Shuffle randomizes that order without
+        recording an attempt. Both exclude absent students.
       </p>
       <h3>Local administration</h3>
       <p>

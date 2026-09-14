@@ -154,7 +154,9 @@ test('an unfinished session in another class resumes without creating a duplicat
     .getByRole('article', { name: 'Band', exact: true })
     .getByRole('button', { name: 'Resume session' })
     .click();
-  await expect(page.locator('#sessionTitle')).toHaveText('Rehearsal');
+  await expect(page.getByLabel('Class', { exact: true })).toHaveValue(
+    'class-1',
+  );
   expect((await saved(page)).sessions).toHaveLength(2);
   expect((await saved(page)).activeSession).toBe('session-1');
 });

@@ -33,9 +33,7 @@ for (const width of [390, 1440]) {
         page.evaluate(() => window.syntheticAudio.oscillatorFrequency),
       )
       .toBe(440);
-    await page
-      .getByRole('button', { name: 'Start listening', exact: true })
-      .click();
+    await page.locator('#pauseListening').click();
     await sound(page, 0, 3200);
     await sound(page, 440, 800);
     await expect(page.locator('#sessionShell')).toHaveAttribute(

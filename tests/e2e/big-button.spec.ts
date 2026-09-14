@@ -140,9 +140,7 @@ for (const [width, height] of [
       );
       await sessionControl(page, 'Class View');
       await expect(page.locator('.selected .target-readout')).toBeVisible();
-      await expect(
-        page.getByRole('button', { name: 'Start listening', exact: true }),
-      ).toBeVisible();
+      await expect(page.locator('#pauseListening')).toBeVisible();
       await expect(page.locator('#cards')).toBeVisible();
       const inactive = page.locator('.inactive-practice');
       await expect(inactive.locator('.tuner').first()).toHaveCSS(

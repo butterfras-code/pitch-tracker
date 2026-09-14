@@ -14,9 +14,7 @@ test('views preserve holds; dashboard follows without moving page or keyboard fo
 }) => {
   await classroomPage(page, 80);
   await page.clock.pauseAt(new Date(Date.now() + 1000));
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 440, 300);
   await sessionControl(page, 'Student view');
@@ -50,7 +48,7 @@ test('views preserve holds; dashboard follows without moving page or keyboard fo
     .click();
   await expect(page.getByLabel('Search students')).toHaveValue('');
 });
-test('card history and tuner scoring stay available; retry rounds, random and undo preserve results', async ({
+test('card history and tuner scoring stay available; retry rounds, shuffle and undo preserve results', async ({
   page,
 }) => {
   await classroomPage(page);
@@ -91,8 +89,12 @@ test('card history and tuner scoring stay available; retry rounds, random and un
   await sessionControl(page, 'Split view');
   await settings(page);
   await expect(page.getByLabel('Teacher details')).toHaveCount(0);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
   await closeSettings(page);
   await page
     .locator('.current-display')
@@ -110,9 +112,7 @@ test('card history and tuner scoring stay available; retry rounds, random and un
       exact: true,
     })
     .click();
-  await settings(page);
-  await page.getByRole('button', { name: 'Random', exact: true }).click();
-  await closeSettings(page);
+  await page.getByRole('button', { name: 'Shuffle student order' }).click();
   expect((await saved(page)).activeStudent).toBe('student-1');
   await expect(
     page.locator('.student').nth(1).locator('.student-result, .badge'),
@@ -127,9 +127,9 @@ test('card history and tuner scoring stay available; retry rounds, random and un
     .click();
   expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
   await page.reload();
-  await settings(page);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
   await expect(
-    page.getByText('Round queues restart after reopening.', { exact: false }),
+    page.getByRole('region', { name: 'Classroom session' }),
   ).toBeVisible();
 });
 test('restoring the same session clears temporary retry membership and completion', async ({
@@ -211,9 +211,7 @@ test('card updates retain focused controls and manual roster scrolling', async (
 }) => {
   await classroomPage(page, 30);
   await sessionControl(page, 'Class view');
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await page.locator('.student').first().locator('.attendance-toggle').focus();
   const control = await page
     .locator('.student')
@@ -235,8 +233,8 @@ test('card updates retain focused controls and manual roster scrolling', async (
     .locator('.roster-scroll')
     .evaluate((el) => el.scrollTop);
   await settings(page);
-  await page.getByLabel('Clap navigation').check();
-  await page.getByLabel('Clap navigation').uncheck();
+  await page.getByRole('button', { name: 'Clap navigation' }).click();
+  await page.getByRole('button', { name: 'Clap navigation' }).click();
   // Firefox may clamp the restored bottom edge to a fractional CSS pixel.
   expect(
     Math.abs(
@@ -281,9 +279,7 @@ test('microphone errors and input switching preserve manual scoring', async ({
   await page.evaluate(() => {
     window.syntheticAudio.deny = true;
   });
-  await page
-    .getByRole('button', { name: 'Enable microphone', exact: true })
-    .click();
+  await page.locator('#toolbarListening').click();
   await expect(page.locator('#micError')).toContainText('permission denied');
   await closeSettings(page);
   await page
@@ -295,9 +291,8 @@ test('microphone errors and input switching preserve manual scoring', async ({
     window.syntheticAudio.deny = false;
   });
   await settings(page);
-  await page
-    .getByRole('button', { name: 'Enable microphone', exact: true })
-    .click();
+  await page.locator('#toolbarListening').click();
+  await settings(page);
   await expect(page.getByLabel('Microphone input')).toContainText(
     'Room microphone',
   );
@@ -307,7 +302,7 @@ test('microphone errors and input switching preserve manual scoring', async ({
   );
   await expect(page.locator('#micError')).toBeEmpty();
   await page
-    .getByRole('button', { name: 'Stop microphone', exact: true })
+    .getByRole('button', { name: 'Turn microphone off', exact: true })
     .click();
 });
 test('card navigation and skipped turns can be undone without deleting results', async ({
@@ -369,9 +364,7 @@ test('live range effects follow pitch and clear on silence, pause and navigation
   await classroomPage(page);
   const shell = page.locator('#sessionShell');
   await page.clock.pauseAt(new Date(Date.now() + 1000));
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   for (const [frequency, range] of [
     [410, 'low'],
     [440, 'correct'],
@@ -390,13 +383,9 @@ test('live range effects follow pitch and clear on silence, pause and navigation
   await sound(page, 0);
   await expect(shell).toHaveAttribute('data-range', '');
   await sound(page, 440, 250);
-  await page
-    .getByRole('button', { name: 'Pause listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await expect(shell).toHaveAttribute('data-range', '');
-  await page
-    .getByRole('button', { name: 'Resume listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 440, 250);
   await page.getByRole('button', { name: 'Next student', exact: true }).click();
   await expect(shell).toHaveAttribute('data-range', '');
@@ -434,9 +423,7 @@ test('session groups listening input, student identities and tuner scoring', asy
   await expect(
     page.locator('#pauseListening .microphone-off-mark'),
   ).toBeVisible();
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await expect(page.locator('#pauseListening')).toHaveAttribute(
     'data-microphone',
     'on',

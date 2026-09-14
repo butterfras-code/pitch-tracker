@@ -11,8 +11,27 @@ export const classroomController = {
       this.roundQueue = createRound(s, 'whole');
       this.roundComplete = false;
     }
-    if (this.roundQueue.kind === 'whole')
-      this.roundQueue.ids = this.present().map((p) => p.id);
+    if (this.roundQueue.kind === 'whole') {
+      const presentIds = this.present().map((p) => p.id);
+      this.roundQueue.ids = [
+        ...this.roundQueue.ids.filter((id) => presentIds.includes(id)),
+        ...presentIds.filter((id) => !this.roundQueue!.ids.includes(id)),
+      ];
+    }
+  },
+  shuffleStudents(this: App): void {
+    this.ensureRound();
+    if (!this.roundQueue || this.roundQueue.ids.length < 2) return;
+    this.remember();
+    for (let i = this.roundQueue.ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.roundQueue.ids[i], this.roundQueue.ids[j]] = [
+        this.roundQueue.ids[j],
+        this.roundQueue.ids[i],
+      ];
+    }
+    this.render();
+    this.toast('Student order shuffled.');
   },
   resetRound(this: App): void {
     this.pitchFeedback.clear();
