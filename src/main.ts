@@ -3,6 +3,7 @@ import './themes/big-button.css';
 import './themes/lisa-lives.css';
 import './themes/vintage-audio.css';
 import './themes/boom-pow.css';
+import './themes/b-pop-tune-hunters.css';
 import './session-layout.css';
 import './header-layout.css';
 import './class-overview.css';

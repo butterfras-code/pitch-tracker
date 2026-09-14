@@ -33,3 +33,11 @@ Refinement direction: borrow the black plastic and milky backlit keys of vintage
 ## Pitch Press
 
 **Pitch Press** pairs clean ivory paper with condensed ink lettering, fine editorial rules, and a dark concert-target block edged in vermilion. Cobalt identifies primary actions; yellow marks the current student and in-range feedback. The live tuner sits on a separate warm-paper surface. Subtle grain is limited to the page backdrop, keeping controls and student records crisp. Existing local Anton, Alfa Slab One, paper grain and masthead ink assets remain bundled offline. All session geometry stays shared, with Full Screen Split View as the primary experience.
+
+## B Pop Tune Hunters
+
+**B Pop Tune Hunters** is glossy concert-stage equipment: obsidian smoked-glass panels with electric pink-to-cyan gradient borders, silver marquee lettering, holographic pink playback and teal listening controls. Celestial stars, thorn-like wave blades and small laser-gold geometric charms replace the original cat illustration. The fixed pitch grid has a gold center reference and a separate luminous live needle; only its light sheen sweeps when listening is on.
+
+Low/correct/high feedback uses cyan, neon green and pink. An in-range live or recorded result casts green light upward through the current panel. Inactive class instruments lose the laser glow and motion, keeping their last-result key and a softer green floor light for recorded success. The charm pulses only while the microphone is on; reduced motion stops all decorative animation. These effects consume existing microphone/range/result attributes without changing audio behavior or adding state.
+
+Two tiny original SVG assets are bundled through theme CSS, with existing local Anton lettering and system body fonts. No raster mascot, new font, runtime request or dependency is needed. The shared Full Screen Split View geometry, musical notation and saved-data format remain unchanged. See [the artwork record](docs/licenses/b-pop-stage-art.md).
