@@ -179,6 +179,20 @@ for (const [width, height] of [
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await expect(live.locator('.high')).toHaveCSS('animation-name', 'none');
       await sessionControl(page, 'Class View');
+      const selectedCard = page.locator('.student.selected');
+      await page.locator('#sessionShell').evaluate((el) => {
+        (el as HTMLElement).dataset.range = 'correct';
+      });
+      await expect(selectedCard).toHaveCSS(
+        'outline-color',
+        'rgb(74, 245, 237)',
+      );
+      await expect(selectedCard).toHaveCSS('outline-style', 'solid');
+      await expect(selectedCard).toHaveCSS('box-shadow', /154, 255, 105/);
+      await expect(
+        page.locator('.student:not(.selected)').first(),
+      ).not.toHaveCSS('background-image', /255, 66, 186/);
+
       await expect(page.locator('.inactive-practice .meter').first()).toHaveCSS(
         'background-image',
         'none',

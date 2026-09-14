@@ -1,6 +1,10 @@
 import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
-import { classroomPage, saved } from '../fixtures/classroom-page';
+import {
+  classroomPage,
+  dismissFeedback,
+  saved,
+} from '../fixtures/classroom-page';
 
 for (const width of [390, 1440]) {
   test(`toy theme preserves session geometry and selection at ${width}px`, async ({
@@ -28,6 +32,7 @@ for (const width of [390, 1440]) {
       element.setAttribute('data-retained', 'yes'),
     );
     await picker.selectOption('big-button', { force: true });
+    await expect(picker.locator('option:checked')).toHaveText('Pithcer-Frice');
     await expect(page.locator('html')).toHaveAttribute('data-treatment', 'toy');
     expect(await geometry()).toEqual(before);
     await expect(student).toHaveAttribute('data-retained', 'yes');
@@ -75,7 +80,7 @@ for (const [width, height] of [
       page,
     }, testInfo) => {
       await classroomPage(page, 32);
-      await sessionControl(page, 'Split view');
+      await sessionControl(page, 'Split View');
       if (width > 390) {
         await sessionControl(page, 'Full screen');
         await expect
@@ -133,12 +138,49 @@ for (const [width, height] of [
         'outline-style',
         'solid',
       );
-      await sessionControl(page, 'Class view');
+      await sessionControl(page, 'Class View');
       await expect(page.locator('.selected .target-readout')).toBeVisible();
       await expect(
         page.getByRole('button', { name: 'Start listening', exact: true }),
       ).toBeVisible();
       await expect(page.locator('#cards')).toBeVisible();
+      const inactive = page.locator('.inactive-practice');
+      await expect(inactive.locator('.tuner').first()).toHaveCSS(
+        'background-color',
+        'rgb(220, 233, 244)',
+      );
+      await expect(inactive.locator('.session-target').first()).toHaveCSS(
+        'background-image',
+        'none',
+      );
+      await expect(inactive.locator('.meter').first()).toHaveCSS(
+        'background-image',
+        'none',
+      );
+      for (const state of ['low', 'correct', 'high']) {
+        await page
+          .locator('.tuner-section[data-live-practice] .' + state)
+          .click();
+        await dismissFeedback(page);
+        await sessionControl(page, 'Next student');
+        const result = inactive
+          .locator(`[data-last-result='${state}']`)
+          .first();
+        await expect(result.locator('.' + state)).toHaveCSS(
+          'animation-name',
+          'none',
+        );
+        await expect(result.locator('.' + state)).toHaveCSS('opacity', '1');
+        expect(
+          await result.evaluate(
+            (el) => getComputedStyle(el, '::before').content,
+          ),
+        ).toBe('none');
+      }
+      await page.screenshot({
+        path: testInfo.outputPath('toy-class-off.png'),
+        fullPage: true,
+      });
     });
   });
 }

@@ -18,14 +18,14 @@ Appearance uses existing `low`/`low-bg`, `high`/`high-bg`, `correct`/`correct-bg
 
 The popup is modal and closes automatically or with Continue/Escape. Pitch detection and session shortcuts pause while it is open. The last result remains in the session after dismissal. Wording is theme-defined; timing uses one shared default. Users can override timing in session Settings or Classes & settings; their preference is saved and included in JSON backups. Leaving the duration field blank restores the shared 1-second default. After editing, run `npm run verify` and use the rebuilt `dist/index.html`.
 
-Current status: all appearance tokens, including the 12 new tokens, have shared CSS consumers. The print treatment is implemented for Pitch Press; the toy treatment is implemented for Big Button Sound Club; the six other non-mech treatment names still await decorative CSS. See [Pitch Press design](pitch-press-design.md) for its scoped visual system. See the handoff section below before building reference-inspired themes. Use this guide together with `src/themes/contract.ts`, the authoritative key/default/type definition.
+Current status: all appearance tokens, including the 12 new tokens, have shared CSS consumers. The print treatment is implemented for Pitch Press; the toy treatment is implemented for Pithcer-Frice; the six other non-mech treatment names still await decorative CSS. See [Pitch Press design](pitch-press-design.md) for its scoped visual system. See the handoff section below before building reference-inspired themes. Use this guide together with `src/themes/contract.ts`, the authoritative key/default/type definition.
 
 1. Copy `src/themes/theme.template.ts` to `src/themes/my-theme.theme.ts`.
 2. Give it a unique lowercase kebab-case `id` and a display `name`.
 3. Set values in `tokens`. Keep `satisfies ThemeDefinition` for editor completion and typo checking.
 4. Run `npm run verify`. Open `dist/index.html` and select the new theme.
 
-Every `*.theme.ts` in that folder is discovered at build time. No registry edit, server, runtime file loading, or dependencies are needed. The template itself is excluded. Rename the file freely; keep the ID stable to preserve saved selection. Removing a selected theme falls back to Big Button Sound Club. Theme preferences remain separate from v1 data backups; moving the HTML may lose browser storage.
+Every `*.theme.ts` in that folder is discovered at build time. No registry edit, server, runtime file loading, or dependencies are needed. The template itself is excluded. Rename the file freely; keep the ID stable to preserve saved selection. Removing a selected theme falls back to Pithcer-Frice. Theme preferences remain separate from v1 data backups; moving the HTML may lose browser storage.
 
 ## Appearance contract
 
@@ -78,7 +78,7 @@ Primary actions, destructive actions, low/correct/high results, active view butt
 - `comic`: Sonic Boom / halftone and comic decoration.
 - `studio`: Take One / recessed studio equipment.
 - `modular`: Field Unit 440 / compartment and equipment decoration.
-- `toy`: Big Button Sound Club / molded surfaces and controls.
+- `toy`: Pithcer-Frice / molded surfaces and controls.
 - `rave`: Prism Patrol / neon and glossy decoration.
 - `roadcase`: Pitch Crew / metal and tape decoration.
 - `arcade`: Dead Center / painted trim and marquee decoration.
@@ -89,7 +89,7 @@ Runtime validation now rejects unknown treatments, schemes other than `light`/`d
 
 ## Canonical session structure
 
-Big Button Sound Club is the default theme; Pitch Press, Lisa Lives!, Vintage Audio, and Boom Pow are also available. Cel-Shaded Mech has been removed. Classic and Nocturne definitions were deleted without a migration layer. Shared session components use neutral classes (`session-target`, `target-pitch`, `target-playback`, `meter-labels`, and `student-actions`). `src/session-layout.css` determines visibility, flow, and viewport bounds for both. Themes may paint these components but must not hide them or reorder the session. Class mode hides the target, tuner, and quick actions for both themes; Student and Split show them.
+Pithcer-Frice is the default theme; Pitch Press, Lisa Lives!, Vintage Audio, and Boom Pow are also available. Cel-Shaded Mech has been removed. Classic and Nocturne definitions were deleted without a migration layer. Shared session components use neutral classes (`session-target`, `target-pitch`, `target-playback`, `meter-labels`, and `student-actions`). `src/session-layout.css` determines visibility, flow, and viewport bounds for both. Themes may paint these components but must not hide them or reorder the session. Class mode hides the target, tuner, and quick actions for both themes; Student and Split show them.
 
 ### Live pitch range effects
 

@@ -56,6 +56,17 @@
   text-transform: var(--heading-transform);
   text-shadow: var(--heading-shadow);
 }
+/* Leave room for the italic glyph overhang inside the truncation box. */
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .roster-name-navigation
+  .name {
+  padding-inline-end: 0.2em;
+}
+:root[data-theme='b-pop-tune-hunters'] .student:not(.selected) {
+  --stage-border: linear-gradient(125deg, var(--line), var(--track));
+  box-shadow: inset 0 1px 1px color-mix(in srgb, var(--ink) 15%, transparent);
+}
 :root[data-theme='b-pop-tune-hunters'] .student-heading {
   border-image: var(--stage-border) 1;
 }
@@ -179,6 +190,8 @@
 }
 :root[data-theme='b-pop-tune-hunters'] #sessionShell .student.selected {
   border-color: transparent;
+  outline: 2px solid var(--highlight);
+  outline-offset: -2px;
   box-shadow:
     inset 0 0 0 2px var(--highlight),
     var(--surface-shadow);

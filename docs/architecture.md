@@ -204,7 +204,7 @@ The full-screen Split workspace normally allocates two-thirds of its width to th
 
 Both skins share DOM, visibility, dimensions, responsive rules and interaction handlers. Pitch Press supplies colors, texture and typeface only for session components; theme-generated feedback text and theme-specific session sizing were removed. Theme changes retain the session element, selection, attempts and live audio. The v1 tracker format is unchanged. Full-screen offline browser tests at 1366x768 and 1920x1080 assert simultaneous visibility in idle, result and listening states, a single playback/navigation entry point, equal panel geometry between skins and navigation after switching.
 
-### Big Button Sound Club variant
+### Pithcer-Frice variant
 
 The build discovers `big-button.theme.ts` alongside the two canonical themes. Its `toy` treatment is imported before shared session layout and changes only palette, typography, radii, backgrounds and shadows. Target and live-reading surfaces use cream text on recessed navy; playback is red and primary controls are cobalt. No DOM, layout rules, controller logic, dependencies, runtime assets or persistence formats change. Offline file-URL Chromium/Firefox coverage checks phone and desktop session geometry, data and element retention, palette reset, selection persistence and navigation.
 
@@ -256,4 +256,4 @@ Tuner presentation has independent placement and activity dimensions. Student an
 
 ## Retiring Cel-Shaded Mech
 
-Cel-Shaded Mech and its unused treatment CSS were removed. Big Button Sound Club is now the default. The existing unknown-theme fallback handles retired saved selections; tracker records and the saved-data format are unchanged.
+Cel-Shaded Mech and its unused treatment CSS were removed. Pithcer-Frice is now the default. The existing unknown-theme fallback handles retired saved selections; tracker records and the saved-data format are unchanged.

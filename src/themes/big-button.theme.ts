@@ -3,7 +3,7 @@ import type { ThemeDefinition } from './contract';
 /** Cream molded plastic, primary-color buttons and recessed blue displays and a perforated speaker-grille backdrop. */
 export default {
   id: 'big-button',
-  name: 'Big Button Sound Club',
+  name: 'Pithcer-Frice',
   treatment: 'toy',
   tokens: {
     'range-animation': 'range-wiggle 700ms ease-in-out infinite',
