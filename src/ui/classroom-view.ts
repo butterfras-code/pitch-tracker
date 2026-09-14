@@ -39,6 +39,34 @@ const studentChevron = (direction: 'previous' | 'next', extra = '') =>
     `<svg aria-hidden="true" viewBox="0 0 24 24"><path d="${direction === 'previous' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     `class="student-chevron ${extra}" aria-label="${direction === 'previous' ? 'Previous' : 'Next'} student"`,
   );
+const splitViewIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" class="layout-view-icon"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="2"/><line x1="13" y1="3" x2="13" y2="21" stroke="currentColor" stroke-width="2"/></svg>`;
+const studentViewIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" class="layout-view-icon"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3.1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+const classViewIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" class="layout-view-icon"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" stroke-width="2"/><line x1="15" y1="3" x2="15" y2="21" stroke="currentColor" stroke-width="2"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/></svg>`;
+const sessionViewOptions: {
+  view: 'split' | 'student' | 'class';
+  label: string;
+  tooltip: string;
+  icon: string;
+}[] = [
+  {
+    view: 'split',
+    label: 'Split View',
+    tooltip: 'Split View: Square split vertically',
+    icon: splitViewIcon,
+  },
+  {
+    view: 'student',
+    label: 'Student View',
+    tooltip: 'Student View: Square with User',
+    icon: studentViewIcon,
+  },
+  {
+    view: 'class',
+    label: 'Class View',
+    tooltip: 'Class View: Square 3 x 2 grid',
+    icon: classViewIcon,
+  },
+];
 const microphoneStatusIcon = `<svg class="microphone-status-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v3M9 21h6"/><path class="microphone-off-mark" d="m4 4 16 16"/></svg>`;
 const speakerIcon = `<svg aria-hidden="true" viewBox="0 0 48 40"><path d="M4 14h9L25 4v32L13 26H4z" fill="currentColor"/><path d="M32 11q12 9 0 18m6-25q20 16 0 32" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
 const historyIcon = `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>`;
@@ -66,9 +94,10 @@ const targetReadout = (
 const inactivePractice = (
   target: TrackerData['configs'][string] | undefined,
   a4: number,
+  lastStatus = '',
 ) => `<div class="inactive-practice" aria-hidden="true">
   <div class="session-target session-target--inactive"><div class="target-readout">${targetReadout(target, a4)}</div><div class="target-controls"><div class="target-actions"><button type="button" class="primary target-listening" disabled tabindex="-1">${microphoneStatusIcon}</button><button type="button" class="primary target-playback" disabled tabindex="-1">${speakerIcon}</button></div></div></div>
-  <div class="tuner-section tuner-section--inactive"><div class="tuner"><div class="note">—</div><div class="tuner-frequency"></div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle"></i></div><div class="input-signal"><span class="input-status" data-microphone="off">${microphoneStatusIcon}</span><meter aria-hidden="true" min="0" max="0.25" value="0"></meter></div><div class="tuner-cents">—</div><div class="progress"><i></i></div></div><div class="scorebar">${scoreButtons(false)}</div></div>
+  <div class="tuner-section tuner-section--inactive${lastStatus ? ' tuner-section--last-attempt' : ''}"${lastStatus ? ` data-last-result="${lastStatus}"` : ''}><div class="tuner"><div class="note">—</div><div class="tuner-frequency"></div><div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle"></i></div><div class="input-signal"><span class="input-status" data-microphone="off">${microphoneStatusIcon}</span><meter aria-hidden="true" min="0" max="0.25" value="0"></meter></div><div class="tuner-cents">—</div><div class="progress"><i></i></div></div><div class="scorebar">${scoreButtons(false)}</div></div>
 </div>`;
 const attendanceToggle = (id: string, name: string, absent: boolean) =>
   action(
@@ -93,8 +122,8 @@ interface StudentCardLayout {
 const studentCardLayout = (student: StudentCardLayout) => {
   const turn = student.active ? 'Current' : student.upNext ? 'Up next' : '';
   const result = student.result
-    ? `<span class="${student.hasAttempt ? `student-result ${student.resultStatus}` : 'badge'}">${esc(student.result)}</span>`
-    : '<span class="card-result-empty">No result yet</span>';
+        ? `<span class="${student.hasAttempt ? `student-result ${student.resultStatus}` : 'badge'}">${esc(student.result)}</span>`
+        : '<span class="card-result-empty">No result yet</span>';
   return `${student.outsideFilter ? '<small class="outside-filter-label">Current student · outside this filter</small>' : ''}<div class="roster-header"><small class="roster-instrument" title="${esc(student.instrument)}">${esc(student.instrument)}</small><span class="turn-label">${turn}</span><div class="roster-card-actions">${action('student-notes', historyIcon, `class="history-toggle" data-id="${esc(student.id)}" aria-label="History for ${esc(student.name)}" title="History for ${esc(student.name)}"`)}${attendanceToggle(student.id, student.name, student.absent)}</div></div><div class="roster-identity"><div class="roster-name-navigation">${student.active ? studentChevron('previous', 'class-chevron') : ''}<button class="name" data-ui-click="select-student" data-id="${esc(student.id)}" title="${esc(student.name)}">${esc(student.name)}</button>${student.active ? studentChevron('next', 'class-chevron') : ''}</div></div><div class="roster-rating">${result}</div><div class="card-practice">${student.inactivePractice}</div>`;
 };
 // Cards have a stable structure: patch nodes in place to preserve focus and inputs.
@@ -189,9 +218,9 @@ export class SessionView {
       const label = document.fullscreenElement
         ? 'Exit full screen'
         : 'Full screen';
-      const text = b.querySelector('.fullscreen-label');
-      if (text) text.textContent = label;
+      const tooltip = `${label} mode for the classroom session`;
       b.setAttribute('aria-label', label);
+      b.setAttribute('title', tooltip);
       b.setAttribute('aria-pressed', String(!!document.fullscreenElement));
     }
   }
@@ -257,8 +286,8 @@ export class SessionView {
 
  <div class="session-toolbar" aria-label="Session controls">
  ${action('back-to-classes', '←', 'aria-label="Back to classes" title="Back to classes"')}
- <div class="view-picker" role="group" aria-label="Content view">${['split', 'student', 'class'].map((v) => action('session-view', v[0].toUpperCase() + v.slice(1), `data-view="${v}" aria-label="${v[0].toUpperCase() + v.slice(1)} view"`)).join('')}</div>
- ${action('session-fullscreen', '<span class="fullscreen-icon" aria-hidden="true">⛶</span><span class="fullscreen-label">Full screen</span>', 'aria-label="Full screen" aria-pressed="false"')}
+ <div class="view-picker" role="group" aria-label="Content view">${sessionViewOptions.map((option) => action('session-view', option.icon, `data-view="${option.view}" aria-label="${option.label}" title="${option.tooltip}"`)).join('')}</div>
+ ${action('session-fullscreen', '<span class="fullscreen-icon" aria-hidden="true">⛶</span>', 'aria-label="Full screen" title="Full screen: enter full screen mode" aria-pressed="false"')}
  ${action('session-settings', 'Session options ▾', 'aria-label="Session options" aria-expanded="false" aria-controls="behaviorSettings" popovertarget="behaviorSettings"')}
  ${action('undo', '↶ Undo', 'id="sessionUndo" aria-label="Undo last change"')}
  <div class="session-meta"><strong id="sessionTitle"></strong><small id="roundLabel"></small></div>
@@ -443,7 +472,11 @@ export class SessionView {
         hasAttempt: !!last,
         inactivePractice: active
           ? ''
-          : inactivePractice(m.db.configs[p.instrument], m.db.settings.a4),
+          : inactivePractice(
+              m.db.configs[p.instrument],
+              m.db.settings.a4,
+              last?.status ?? '',
+            ),
       });
       const destination = outsideStudent?.id === p.id ? outside : list;
       let card = [...list.children, ...outside.children].find(

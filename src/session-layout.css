@@ -828,8 +828,24 @@ body.session-active {
   flex: none;
 }
 #sessionShell .view-picker button {
+  display: grid;
+  place-items: center;
   border-radius: 0;
   min-width: 0;
+  padding-inline: 10px;
+}
+#sessionShell .view-picker button svg {
+  width: 1.35em;
+  height: 1.35em;
+  pointer-events: none;
+}
+#sessionShell .view-picker .layout-view-icon,
+#sessionShell .session-toolbar .fullscreen-icon {
+  display: block;
+}
+#sessionShell .session-toolbar .fullscreen-icon {
+  width: 1.2em;
+  height: 1.2em;
 }
 #sessionShell .view-picker button + button {
   margin-left: -1px;
@@ -913,6 +929,35 @@ body.session-active {
 }
 #sessionShell .inactive-practice .tuner-section {
   opacity: 0.62;
+}
+#sessionShell .inactive-practice .tuner-section--last-attempt {
+  position: relative;
+}
+#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='low'] {
+  --tuner-result-color: var(--low);
+}
+#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='correct'] {
+  --tuner-result-color: var(--correct);
+}
+#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='high'] {
+  --tuner-result-color: var(--high);
+}
+#sessionShell .inactive-practice .tuner-section--last-attempt::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  border: 3px solid var(--tuner-result-color);
+  border-radius: var(--display-radius);
+  opacity: 0.75;
+  z-index: 1;
+}
+#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='low'] .low,
+#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='correct'] .correct,
+#sessionShell .inactive-practice .tuner-section--last-attempt[data-last-result='high'] .high {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  animation: var(--range-animation);
 }
 #sessionShell[data-view='class'] .session-content {
   grid-template-columns: minmax(0, 1fr);
@@ -1056,9 +1101,6 @@ body.session-active {
   }
   #sessionShell .session-toolbar .view-picker button {
     padding-inline: 6px;
-  }
-  #sessionShell .session-toolbar .fullscreen-label {
-    display: none;
   }
   #sessionShell .session-toolbar .session-meta {
     flex-basis: 100%;
