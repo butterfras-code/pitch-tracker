@@ -1,5 +1,12 @@
-/* Paint only: shared session/header CSS owns all component geometry. */
+/* Paint only. Shared session/header styles own geometry and hit targets. */
 :root[data-theme='b-pop-tune-hunters'] {
+  --stage-border: linear-gradient(
+    125deg,
+    var(--accent),
+    var(--soft) 42%,
+    var(--highlight) 78%,
+    var(--notice-bg)
+  );
   scrollbar-color: var(--line) var(--bg);
   caret-color: var(--highlight);
 }
@@ -15,41 +22,62 @@
   border-top-color: var(--accent);
   background-image: var(--page-pattern);
 }
-:root[data-theme='b-pop-tune-hunters'] .current-display {
-  border-color: var(--line);
-  background-image:
-    repeating-radial-gradient(
-      ellipse at 110% -20%,
-      transparent 0 23px,
-      color-mix(in srgb, var(--highlight) 8%, transparent) 24px,
-      transparent 25px 45px
-    ),
-    var(--surface-pattern);
+:root[data-theme='b-pop-tune-hunters'] :is(.app-header, .session-toolbar) {
+  background-color: var(--bg);
+  background-image: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--accent) 18%, transparent),
+    transparent 42%,
+    color-mix(in srgb, var(--highlight) 10%, transparent)
+  );
 }
-:root[data-theme='b-pop-tune-hunters'] :is(h1, #studentIdentity h2) {
-  color: var(--display-ink);
+/* Opaque smoked-glass layers keep the neon border out of reading surfaces. */
+:root[data-theme='b-pop-tune-hunters']
+  :is(.current-display, .student, .panel, .behavior-settings) {
+  --floor-light: transparent;
+  border-color: transparent;
+  background-image:
+    radial-gradient(ellipse at 50% 100%, var(--floor-light), transparent 70%),
+    var(--surface-pattern), var(--stage-border);
+  background-origin: border-box;
+  background-clip: padding-box, padding-box, border-box;
+  box-shadow: var(--panel-shadow);
+}
+:root[data-theme='b-pop-tune-hunters'] .current-display {
+  position: relative;
+  box-shadow: var(--surface-shadow);
+}
+:root[data-theme='b-pop-tune-hunters']
+  :is(h1, #studentIdentity h2, .student .name) {
+  color: var(--ink);
+  font-family: var(--heading-font);
+  font-style: var(--heading-style);
+  font-weight: var(--heading-weight);
+  text-transform: var(--heading-transform);
+  text-shadow: var(--heading-shadow);
 }
 :root[data-theme='b-pop-tune-hunters'] .student-heading {
-  border-image: linear-gradient(
-      to right,
-      var(--accent),
-      var(--highlight),
-      transparent
-    )
-    1;
+  border-image: var(--stage-border) 1;
 }
+/* Celestial stars and thorn-like sound-wave blades replace the raster mascot. */
 :root[data-theme='b-pop-tune-hunters'] #sessionShell .session-target {
   background-color: var(--edge);
-  background-image: url('../assets/b-pop-spirit-stage.png');
-  background-size: auto 100%;
-  background-position: right center;
+  background-image:
+    url('../assets/b-pop-celestial-blades.svg'),
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--highlight) 16%, var(--edge)),
+      var(--edge) 38% 62%,
+      color-mix(in srgb, var(--accent) 18%, var(--edge))
+    );
+  background-size: 100% 100%;
   background-repeat: no-repeat;
   color: var(--display-ink);
   border-radius: var(--display-radius);
   box-shadow: var(--display-shadow);
 }
 :root[data-theme='b-pop-tune-hunters'] .target-caption {
-  color: var(--correct);
+  color: var(--notice-bg);
   text-transform: var(--label-transform);
   letter-spacing: var(--label-tracking);
 }
@@ -60,46 +88,145 @@
   text-shadow: var(--note-shadow);
 }
 :root[data-theme='b-pop-tune-hunters']
+  #sessionShell
   :is(.target-listening, .target-playback) {
   background-color: var(--accent);
+  background-image:
+    linear-gradient(
+      120deg,
+      transparent 12%,
+      color-mix(in srgb, var(--display-ink) 40%, transparent) 12.5%,
+      transparent 24% 76%,
+      color-mix(in srgb, var(--highlight) 35%, transparent) 77%,
+      transparent 90%
+    ),
+    var(--control-pattern);
   color: var(--primary-ink);
-  border-color: var(--accent);
+  border-color: var(--primary-hover);
+  box-shadow: var(--button-shadow);
+}
+:root[data-theme='b-pop-tune-hunters'] #sessionShell .target-listening {
+  background-color: var(--highlight);
+  border-color: var(--display-ink);
+  color: var(--edge);
 }
 :root[data-theme='b-pop-tune-hunters']
+  #sessionShell
   :is(.target-listening, .target-playback):hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  filter: brightness(1.12);
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  :is(.target-listening, .target-playback):active:not(:disabled) {
+  box-shadow: var(--button-pressed-shadow);
 }
 :root[data-theme='b-pop-tune-hunters'] .tuner {
   border-color: var(--highlight);
   border-radius: var(--display-radius);
-  background-image: radial-gradient(
-    ellipse at 50% 100%,
-    color-mix(in srgb, var(--highlight) 13%, transparent),
-    transparent 75%
-  );
+  background-image:
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, var(--display-ink) 10%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      color-mix(in srgb, var(--highlight) 16%, transparent),
+      transparent 75%
+    );
 }
+/* Grid ticks stay fixed. Only the light sweeps; the real needle still reports pitch. */
 :root[data-theme='b-pop-tune-hunters'] .meter {
-  box-shadow: inset 0 0 0 1px var(--line);
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      transparent 0 calc(10% - 1px),
+      var(--display-bg) calc(10% - 1px) 10%
+    ),
+    linear-gradient(
+      110deg,
+      transparent 35%,
+      var(--display-ink) 50%,
+      transparent 65%
+    ),
+    linear-gradient(to right, var(--low), var(--soft) 42%, var(--high));
+  background-size:
+    100% 100%,
+    300% 100%,
+    100% 100%;
+  box-shadow:
+    inset 0 0 0 1px var(--highlight),
+    0 0 12px color-mix(in srgb, var(--highlight) 35%, transparent);
+}
+:root[data-theme='b-pop-tune-hunters'] .meter::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 2px;
+  background: var(--notice-bg);
+  box-shadow: 0 0 6px var(--notice-bg);
+  pointer-events: none;
 }
 :root[data-theme='b-pop-tune-hunters'] .needle {
   background-color: var(--display-ink);
-  box-shadow: 0 0 8px var(--highlight);
+  box-shadow:
+    0 0 4px var(--display-ink),
+    0 0 12px var(--highlight);
 }
-:root[data-theme='b-pop-tune-hunters'] .progress > div {
+:root[data-theme='b-pop-tune-hunters'] .progress > i {
   background: linear-gradient(to right, var(--highlight), var(--correct));
-}
-:root[data-theme='b-pop-tune-hunters'] .student {
-  box-shadow: var(--panel-shadow);
+  box-shadow: 0 0 8px var(--correct);
 }
 :root[data-theme='b-pop-tune-hunters'] #sessionShell .student.selected {
-  border-color: var(--correct);
+  border-color: transparent;
   box-shadow:
-    inset 0 0 0 1px var(--correct),
-    var(--panel-shadow);
+    inset 0 0 0 2px var(--highlight),
+    var(--surface-shadow);
+}
+/* Small geometric charm lives entirely within the existing corner gutter. */
+:root[data-theme='b-pop-tune-hunters']
+  :is(.current-display, .student.selected)::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  width: 9px;
+  height: 24px;
+  background-color: var(--notice-bg);
+  mask: url('../assets/b-pop-stage-sigil.svg') center / contain no-repeat;
+  pointer-events: none;
+  opacity: 0.65;
 }
 :root[data-theme='b-pop-tune-hunters']
-  :is(.student .name, [data-ui-click='show-current']) {
-  color: var(--ink);
+  #sessionShell:has(#pauseListening[data-microphone='on'])
+  :is(.current-display, .student.selected)::after {
+  animation: b-pop-sigil-pulse 2.4s ease-in-out infinite;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell:has(#pauseListening[data-microphone='on'])
+  .tuner-section[data-live-practice]
+  .meter {
+  animation: b-pop-laser-sweep 3s ease-in-out infinite;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell:is(
+    [data-range='correct'],
+    [data-result='correct']:not([data-range='low'], [data-range='high'])
+  )
+  :is(.current-display, .student.selected) {
+  --floor-light: color-mix(in srgb, var(--correct) 30%, transparent);
+  box-shadow:
+    inset 0 -35px 48px -32px var(--correct),
+    0 0 18px color-mix(in srgb, var(--correct) 25%, transparent),
+    var(--surface-shadow);
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .student:has(.inactive-practice [data-last-result='correct']) {
+  --floor-light: color-mix(in srgb, var(--correct) 17%, transparent);
+}
+:root[data-theme='b-pop-tune-hunters'] [data-ui-click='show-current'] {
+  color: var(--highlight);
 }
 :root[data-theme='b-pop-tune-hunters'] :is(.tabs button, .student .name) {
   box-shadow: none;
@@ -109,8 +236,12 @@
   color: var(--highlight);
   box-shadow: inset 0 -2px var(--accent);
 }
-
-/* The whole selected key illuminates, for live and recorded pitch states. */
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  button[aria-pressed='true'] {
+  background-color: var(--highlight);
+  color: var(--edge);
+}
 :root[data-theme='b-pop-tune-hunters'] .scorebar .low {
   --stage-light: var(--low);
 }
@@ -119,6 +250,10 @@
 }
 :root[data-theme='b-pop-tune-hunters'] .scorebar .high {
   --stage-light: var(--high);
+}
+:root[data-theme='b-pop-tune-hunters'] #sessionShell .scorebar button {
+  border-color: var(--stage-light);
+  background-image: var(--control-pattern);
 }
 :root[data-theme='b-pop-tune-hunters']
   #sessionShell[data-range='low']
@@ -149,29 +284,131 @@
   .high {
   color: var(--edge);
   background-color: var(--stage-light);
-  background-image: var(--control-pattern);
+  background-image: linear-gradient(
+    110deg,
+    transparent 30%,
+    var(--display-ink) 48%,
+    transparent 64%
+  );
+  background-size: 300% 100%;
   border-color: var(--stage-light);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--stage-light) 30%, transparent);
+  box-shadow:
+    inset 0 2px 2px var(--display-ink),
+    0 0 16px color-mix(in srgb, var(--stage-light) 35%, transparent);
   opacity: 1;
   outline: none;
 }
+/* Inactive instruments are unpowered; recorded feedback retains a steady light. */
 :root[data-theme='b-pop-tune-hunters']
   #sessionShell
   .inactive-practice
   :is(.session-target, .tuner) {
   background-image: none;
-  box-shadow: var(--panel-shadow);
+  background-color: var(--card);
+  color: var(--muted);
+  box-shadow: inset 0 3px 8px var(--edge);
   border-color: var(--line);
+}
+:root[data-theme='b-pop-tune-hunters'] #sessionShell .inactive-practice .meter {
+  background: var(--track);
+  box-shadow: none;
+  animation: none;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .inactive-practice
+  .meter::before {
+  background: var(--line);
+  box-shadow: none;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .inactive-practice
+  .needle {
+  background: var(--muted);
+  box-shadow: none;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .inactive-practice
+  :is(.note, .target-pitch) {
+  color: var(--muted);
+  text-shadow: none;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .inactive-practice
+  .scorebar
+  button {
+  animation: none;
+  box-shadow: none;
+  background-image: var(--control-pattern);
+  background-size: 100% 100%;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt::before {
+  opacity: 0.2;
+}
+:root[data-theme='b-pop-tune-hunters']
+  #sessionShell
+  .inactive-practice
+  .input-signal {
+  opacity: 0.4;
 }
 :root[data-theme='b-pop-tune-hunters']
   #sessionShell[data-range]
   .tuner-section[data-live-practice]
   .scorebar
   button:focus-visible,
-:root[data-theme='b-pop-tune-hunters']
-  #sessionShell
-  .scorebar
-  button:focus-visible {
+:root[data-theme='b-pop-tune-hunters'] #sessionShell button:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
+}
+@keyframes b-pop-key-sheen {
+  0%,
+  15% {
+    background-position: 100% 0;
+  }
+  75%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+@keyframes b-pop-laser-sweep {
+  0%,
+  100% {
+    background-position:
+      0 0,
+      100% 0,
+      0 0;
+  }
+  50% {
+    background-position:
+      0 0,
+      0% 0,
+      0 0;
+  }
+}
+@keyframes b-pop-sigil-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='b-pop-tune-hunters'] #sessionShell .scorebar button,
+  :root[data-theme='b-pop-tune-hunters']
+    #sessionShell:has(#pauseListening[data-microphone='on'])
+    .tuner-section[data-live-practice]
+    .meter,
+  :root[data-theme='b-pop-tune-hunters']
+    #sessionShell:has(#pauseListening[data-microphone='on'])
+    :is(.current-display, .student.selected)::after {
+    animation: none;
+  }
 }
