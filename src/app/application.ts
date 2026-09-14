@@ -30,6 +30,7 @@ export interface App extends AppState {
   resetRound(): void;
   renderClassroom(): void;
   classroomNavigate(direction: 1 | -1, manual?: boolean): void;
+  shuffleStudents(): void;
   startRound(kind: 'whole' | 'retry'): void;
   classroomStatus(): string;
   toggleClassroomPause(): void;

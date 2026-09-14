@@ -10,6 +10,14 @@ import {
 import catalog from '../../src/themes/feedback.json' with { type: 'json' };
 import { readFile } from 'node:fs/promises';
 
+async function openFeedbackSettings(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+}
+async function returnToSession(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: 'Classes', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume session' }).click();
+}
+
 for (const mode of ['Split view', 'Class view']) {
   test(`${mode}: feedback waits for audible pause and manual dismissal preserves waiting state`, async ({
     page,
@@ -19,11 +27,11 @@ for (const mode of ['Split view', 'Class view']) {
     await sessionControl(page, mode);
     await sessionControl(page, 'Full screen');
     await settings(page);
-    await page.getByLabel('Auto Advance', { exact: true }).check();
-    await closeSettings(page);
     await page
-      .getByRole('button', { name: 'Start listening', exact: true })
-      .click();
+      .getByLabel('Advance', { exact: true })
+      .selectOption('when-correct');
+    await closeSettings(page);
+    await page.locator('#pauseListening').click();
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
       'Microphone waiting for a pause',
     );
@@ -71,16 +79,14 @@ test('quiet during feedback satisfies handoff but does not shorten its minimum d
 }) => {
   await classroomPage(page);
   await page.clock.pauseAt(new Date(Date.now() + 1000));
-  await settings(page);
+  await openFeedbackSettings(page);
   const duration = page.getByLabel('Feedback popup duration (seconds)', {
     exact: true,
   });
   await duration.fill('3');
   await duration.press('Tab');
-  await closeSettings(page);
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await returnToSession(page);
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 440, 700);
   const feedback = page.locator('#pitchFeedback');
@@ -185,8 +191,12 @@ test('auto-advance keeps the recorded name; Continue and Escape restore keyboard
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.locator('#themeSelect').selectOption('boom-pow');
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
   await closeSettings(page);
   await page.locator('.current-display [data-status="low"]').click();
   await expect(page.locator('#studentIdentity')).toContainText('Lucas');
@@ -221,18 +231,16 @@ test('microphone popup waits for a recorded hold, blocks scoring and resumes aft
 }) => {
   await classroomPage(page);
   await page.clock.pauseAt(new Date(Date.now() + 1000));
-  await settings(page);
+  await openFeedbackSettings(page);
   await page
     .getByLabel('Feedback popup duration (seconds)', { exact: true })
     .fill('3');
   await page
     .getByLabel('Feedback popup duration (seconds)', { exact: true })
     .press('Tab');
-  await closeSettings(page);
+  await returnToSession(page);
   await page.locator('#themeSelect').selectOption('boom-pow');
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 440, 250);
   await expect(page.locator('#pitchFeedback')).toBeHidden();
@@ -326,13 +334,13 @@ test('long names remain literal text and the popup stays usable on a short phone
   await expect(page.locator('#pitchFeedback')).toBeHidden();
 });
 
-test('user duration saves from session settings, controls timing across themes and round trips in backups', async ({
+test('user duration saves from Settings, controls timing across themes and round trips in backups', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await classroomPage(page);
   await page.clock.pauseAt(new Date(Date.now() + 1000));
-  await settings(page);
+  await openFeedbackSettings(page);
   const duration = page.getByLabel('Feedback popup duration (seconds)', {
     exact: true,
   });
@@ -341,13 +349,12 @@ test('user duration saves from session settings, controls timing across themes a
   await duration.press('Tab');
   expect((await saved(page)).settings.feedbackDurationMs).toBe(1500);
   expect((await saved(page)).schema).toBe(3);
-  await closeSettings(page);
-  await sessionControl(page, 'Full screen');
-  await settings(page);
+  await returnToSession(page);
+  await openFeedbackSettings(page);
   await page.screenshot({
     path: testInfo.outputPath('feedback-settings-desktop.png'),
   });
-  await closeSettings(page);
+  await returnToSession(page);
   await page.locator('#themeSelect').selectOption('boom-pow', { force: true });
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.locator('.current-display [data-status="correct"]').click();
@@ -405,18 +412,18 @@ test('user duration saves from session settings, controls timing across themes a
   expect(await saved(page)).toEqual(before);
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
-  await settings(page);
+  await openFeedbackSettings(page);
   await duration.fill('');
   await duration.press('Tab');
   expect((await saved(page)).settings.feedbackDurationMs).toBeNull();
-  await closeSettings(page);
+  await returnToSession(page);
   await page.locator('.current-display [data-status="correct"]').click();
   await expect(page.locator('.feedback-hint')).toHaveText(
     'Closes automatically after 1 second',
   );
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 390, height: 844 });
-  await settings(page);
+  await openFeedbackSettings(page);
   await duration.scrollIntoViewIfNeeded();
   await page.screenshot({
     path: testInfo.outputPath('feedback-settings-phone.png'),

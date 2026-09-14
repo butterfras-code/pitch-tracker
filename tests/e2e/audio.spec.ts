@@ -52,9 +52,7 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
     .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 442);
   await expect(page.locator('#liveCents')).toHaveText('—');
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
@@ -79,7 +77,7 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
   await settings(page);
   await page
-    .getByRole('button', { name: 'Stop microphone', exact: true })
+    .getByRole('button', { name: 'Turn microphone off', exact: true })
     .click();
   expect(await page.evaluate(() => window.syntheticAudio.stopped)).toBe(1);
 });
@@ -88,9 +86,7 @@ test('denied permission leaves manual scoring available', async ({ page }) => {
   await page.evaluate(() => {
     window.syntheticAudio.deny = true;
   });
-  await page
-    .getByRole('button', { name: 'Enable microphone', exact: true })
-    .click();
+  await page.locator('#toolbarListening').click();
   await expect(page.locator('#toast')).toContainText(
     'Microphone permission denied',
   );
@@ -108,9 +104,7 @@ test('leaving a session while permission is pending stops the eventual stream', 
   await page.evaluate(() => {
     window.syntheticAudio.pending = true;
   });
-  await page
-    .getByRole('button', { name: 'Enable microphone', exact: true })
-    .click();
+  await page.locator('#toolbarListening').click();
   await expect
     .poll(() => page.evaluate(() => window.syntheticAudio.requests))
     .toBe(1);
@@ -125,18 +119,14 @@ test('leaving a session while permission is pending stops the eventual stream', 
     .toBe(1);
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
   await settings(page);
-  await expect(
-    page.getByRole('button', { name: 'Enable microphone', exact: true }),
-  ).toBeVisible();
+  await expect(page.locator('#toolbarListening')).toBeVisible();
 });
 test('reference playback cancels holds and disconnection cleans up', async ({
   page,
 }) => {
   await settings(page);
   await closeSettings(page);
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 440, 250);
   await page
@@ -149,9 +139,7 @@ test('reference playback cancels holds and disconnection cleans up', async ({
   expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
   await page.evaluate(() => window.syntheticAudio.endTrack?.());
   await settings(page);
-  await expect(
-    page.getByRole('button', { name: 'Enable microphone', exact: true }),
-  ).toBeVisible();
+  await expect(page.locator('#toolbarListening')).toBeVisible();
   await expect(page.locator('#micError')).toContainText(
     'Microphone disconnected',
   );
@@ -165,9 +153,7 @@ test('Escape during pending permission cannot start a later automatic check', as
     window.syntheticAudio.pending = true;
   });
   await closeSettings(page);
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await expect
     .poll(() => page.evaluate(() => window.syntheticAudio.requests))
     .toBe(1);
@@ -176,7 +162,7 @@ test('Escape during pending permission cannot start a later automatic check', as
   await page.evaluate(() => window.syntheticAudio.release?.());
   await settings(page);
   await expect(
-    page.getByRole('button', { name: 'Stop microphone', exact: true }),
+    page.getByRole('button', { name: 'Turn microphone off', exact: true }),
   ).toBeVisible();
   await sound(page, 0);
   await sound(page, 440);
@@ -192,9 +178,7 @@ async function twoSecondHold(page: import('@playwright/test').Page) {
     .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
 }
 
 test('saves a correct A over background noise and a brief impact; retries without literal silence', async ({

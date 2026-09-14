@@ -18,9 +18,7 @@ for (const recording of recordings) {
         .click();
       await page.getByRole('button', { name: 'Classes', exact: true }).click();
       await page.getByRole('button', { name: 'Resume session' }).click();
-      await page
-        .getByRole('button', { name: 'Start listening', exact: true })
-        .click();
+      await page.locator('#pauseListening').click();
       const samples = recordedAudio(recording.file);
       await page.evaluate((samples) => {
         window.syntheticAudio.recording = {

@@ -62,9 +62,7 @@ for (const [width, height] of [
             await dismissFeedback(page);
           }
           if (state === 'listening') {
-            await page
-              .getByRole('button', { name: /^(Start|Resume) listening$/ })
-              .click();
+            await page.locator('#pauseListening').click();
             await sound(page, 0);
             await sound(page, 440, 200);
           }
@@ -184,9 +182,7 @@ for (const [width, height] of [
             });
           }
         }
-        await page
-          .getByRole('button', { name: 'Pause listening', exact: true })
-          .click();
+        await page.locator('#pauseListening').click();
         await page
           .getByRole('button', { name: 'Next student', exact: true })
           .click();

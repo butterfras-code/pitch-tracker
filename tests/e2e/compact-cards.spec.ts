@@ -34,9 +34,7 @@ for (const width of [1366, 1920]) {
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
       'Microphone off',
     );
-    await page
-      .getByRole('button', { name: 'Start listening', exact: true })
-      .click();
+    await page.locator('#pauseListening').click();
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
       'Microphone waiting for a pause',
     );
@@ -68,9 +66,7 @@ for (const width of [1366, 1920]) {
     await page.clock.runFor(250);
     expect(await geometry()).toEqual(positions);
     await expect(page.locator('#liveCents')).toHaveText('—');
-    await page
-      .getByRole('button', { name: 'Pause listening', exact: true })
-      .click();
+    await page.locator('#pauseListening').click();
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
       'Microphone paused',
     );

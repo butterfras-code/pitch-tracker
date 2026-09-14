@@ -61,7 +61,7 @@ for (const width of [390, 1920]) {
           .locator(`.tuner-section[data-live-practice] button.${status}`)
           .click();
         await dismissFeedback(page);
-        await page.locator('#roundLabel').hover();
+        await page.locator('#sessionShell').hover();
         const skin = (el: Element) => {
           const css = getComputedStyle(el);
           return [

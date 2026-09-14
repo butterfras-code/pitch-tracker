@@ -51,10 +51,13 @@ export const sessionController = {
     this.render();
   },
   changeClass(this: App, id: string): void {
+    const sessionNavigation = this.tab === 'session';
+    if (id === this.db.classId && sessionNavigation) return;
     this.stopMic();
     if (!changes.changeClass(this, id)) return;
     this.resetRound();
     this.applySessionDefaults();
+    if (sessionNavigation && !this.ses()) this.tab = 'classes';
     this.save();
     this.render();
   },

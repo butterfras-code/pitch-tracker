@@ -17,11 +17,11 @@ test('automatic retries require quiet and complete the round without repeated sc
   page,
 }) => {
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await closeSettings(page);
   await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
+  await closeSettings(page);
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 392);
   let data = await saved(page);
@@ -50,18 +50,20 @@ test('one and done advances any result; switching auto advance off stays put', a
   page,
 }) => {
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await page.getByLabel('Advance mode').selectOption('one-and-done');
-  await closeSettings(page);
   await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
+  await closeSettings(page);
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 392);
   expect((await saved(page)).activeStudent).toBe('student-2');
   await dismissFeedback(page);
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).uncheck();
+  await page.getByLabel('Advance', { exact: true }).selectOption('manual');
   await closeSettings(page);
   await sound(page, 0);
   await sound(page, 440);
@@ -72,11 +74,9 @@ test('double/triple clap navigation preserves attempts and obeys pause and disab
   page,
 }) => {
   await settings(page);
-  await page.getByLabel('Clap navigation', { exact: true }).check();
+  await page.getByRole('button', { name: 'Clap navigation' }).click();
   await closeSettings(page);
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, 392);
   await dismissFeedback(page);
@@ -84,18 +84,14 @@ test('double/triple clap navigation preserves attempts and obeys pause and disab
   expect((await saved(page)).activeStudent).toBe('student-2');
   await claps(page, 3);
   expect((await saved(page)).activeStudent).toBe('student-1');
-  await page
-    .getByRole('button', { name: 'Pause listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await claps(page, 2);
   await sound(page, 440);
   expect((await saved(page)).activeStudent).toBe('student-1');
   expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
-  await page
-    .getByRole('button', { name: 'Resume listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await settings(page);
-  await page.getByLabel('Clap navigation', { exact: true }).uncheck();
+  await page.getByRole('button', { name: 'Clap navigation' }).click();
   await closeSettings(page);
   await claps(page, 2);
   expect((await saved(page)).activeStudent).toBe('student-1');
@@ -104,12 +100,12 @@ test('claps can return from round completion without deleting results', async ({
   page,
 }) => {
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await page.getByLabel('Clap navigation', { exact: true }).check();
-  await closeSettings(page);
   await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
+  await page.getByRole('button', { name: 'Clap navigation' }).click();
+  await closeSettings(page);
+  await page.locator('#pauseListening').click();
   for (let i = 0; i < 3; i++) {
     await sound(page, 0);
     await sound(page, 440);
@@ -122,7 +118,9 @@ test('claps can return from round completion without deleting results', async ({
 });
 test('manual scores follow advance policy', async ({ page }) => {
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
   await closeSettings(page);
   await page
     .locator('.current-display')
@@ -131,7 +129,9 @@ test('manual scores follow advance policy', async ({ page }) => {
   expect((await saved(page)).activeStudent).toBe('student-1');
   await dismissFeedback(page);
   await settings(page);
-  await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
   await closeSettings(page);
   await page
     .locator('.current-display')
@@ -142,9 +142,7 @@ test('manual scores follow advance policy', async ({ page }) => {
 test('noise, navigation, dialogs and reference playback cannot carry a hold', async ({
   page,
 }) => {
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await page.evaluate(() => {
     window.syntheticAudio.noise = true;
@@ -155,12 +153,9 @@ test('noise, navigation, dialogs and reference playback cannot carry a hold', as
   await page.getByRole('button', { name: 'Next student', exact: true }).click();
   await sound(page, 440, 1200);
   await sound(page, 0);
-  await settings(page);
-  await page
-    .getByRole('button', { name: 'Session notes', exact: true })
-    .click();
+  await page.getByRole('button', { name: 'History for Maya' }).click();
   await sound(page, 440, 1200);
-  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
   await sound(page, 440, 1200);
   await sound(page, 0);
   await page

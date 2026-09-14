@@ -15,8 +15,12 @@ test('class handoff keeps feedback with the scorer and stable card positions', a
   await classroomPage(page);
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await settings(page);
-  await page.getByLabel('Auto Advance', { exact: true }).check();
-  await page.getByLabel('Advance mode').selectOption('one-and-done');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('when-correct');
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
   await closeSettings(page);
   await sessionControl(page, 'Class view');
   const positions = () =>
@@ -53,9 +57,7 @@ test('class microphone failure, attendance and empty filters retain manual recov
   await page.evaluate(() => {
     window.syntheticAudio.deny = true;
   });
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await expect(page.locator('#micError')).toContainText('permission denied');
   await page.getByLabel('Search students').fill('no match');
   await expect(page.locator('#cards')).toContainText('No students match');

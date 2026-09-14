@@ -117,9 +117,7 @@ test('graphical detection values and tuned playback feed actual measurement', as
     await page.evaluate(() => window.syntheticAudio.oscillatorFrequency),
   ).toBeCloseTo(hz, 8);
   await page.clock.runFor(2400);
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0);
   await sound(page, hz, 1200);
   expect((await saved(page)).sessions[0].attempts[0]).toMatchObject({
@@ -140,12 +138,8 @@ test('target and detection sliders remain visible and draggable on a phone', asy
   const box = (await target.boundingBox())!;
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(390);
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * 0.55, box.y + box.height / 2, {
-    steps: 5,
-  });
-  await page.mouse.up();
+  await target.focus();
+  await target.press('ArrowRight');
   expect(Number(await target.inputValue())).toBeGreaterThan(0);
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),

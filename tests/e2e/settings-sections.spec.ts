@@ -123,30 +123,29 @@ test('defaults leave the active session alone, then initialize reopened and new 
   expect((await saved(page)).settings.advance).toBe(false);
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
-  await settings(page);
+  await expect(page.getByLabel('Advance', { exact: true })).toHaveValue(
+    'manual',
+  );
   await expect(
-    page.getByLabel('Auto Advance', { exact: true }),
-  ).not.toBeChecked();
-  await expect(page.getByLabel('Clap navigation')).not.toBeChecked();
+    page.getByRole('button', { name: 'Clap navigation' }),
+  ).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByLabel('Teacher details')).toHaveCount(0);
   await page.reload();
-  await settings(page);
   await expect(page.locator('#sessionShell')).toHaveAttribute(
     'data-view',
     'class',
   );
-  await expect(page.getByLabel('Auto Advance', { exact: true })).toBeChecked();
-  await expect(page.getByLabel('Advance mode')).toHaveValue('one-and-done');
-  await expect(page.getByLabel('Clap navigation')).toBeChecked();
-  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
+  await expect(page.getByLabel('Advance', { exact: true })).toHaveValue(
+    'after-attempt',
+  );
   await expect(
-    page.getByRole('button', { name: 'Enable microphone', exact: true }),
-  ).toBeVisible();
-  await page.getByLabel('Auto Advance', { exact: true }).uncheck();
-  await page.getByLabel('Clap navigation').uncheck();
-  await page.getByLabel('Advance mode').selectOption('until-correct');
+    page.getByRole('button', { name: 'Clap navigation' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Teacher details')).toHaveCount(0);
+  await expect(page.locator('#toolbarListening')).toBeVisible();
+  await page.getByLabel('Advance', { exact: true }).selectOption('manual');
+  await page.getByRole('button', { name: 'Clap navigation' }).click();
   expect((await saved(page)).sessionDefaults?.advance).toBe(true);
-  await closeSettings(page);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Finish session' }).click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
@@ -154,15 +153,14 @@ test('defaults leave the active session alone, then initialize reopened and new 
     .getByRole('button', { name: 'Start session', exact: true })
     .first()
     .click();
-  await settings(page);
-  await expect(page.getByLabel('Auto Advance', { exact: true })).toBeChecked();
-  await expect(page.getByLabel('Clap navigation')).toBeChecked();
+  await expect(page.getByLabel('Advance', { exact: true })).toHaveValue(
+    'after-attempt',
+  );
+  await expect(
+    page.getByRole('button', { name: 'Clap navigation' }),
+  ).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByLabel('Teacher details')).toHaveCount(0);
-  await expect(page.getByLabel('Advance mode')).toHaveValue('one-and-done');
-  await page
-    .getByRole('button', { name: 'Enable microphone', exact: true })
-    .click();
-  await closeSettings(page);
+  await page.locator('#toolbarListening').click();
   await page.locator('.student.selected .tuner-section button.low').click();
   expect((await saved(page)).activeStudent).toBe('student-2');
   // The saved clap default drives the real listener only after microphone activation.
