@@ -33,3 +33,9 @@ Refinement direction: borrow the black plastic and milky backlit keys of vintage
 ## Pitch Press
 
 **Pitch Press** pairs clean ivory paper with condensed ink lettering, fine editorial rules, and a dark concert-target block edged in vermilion. Cobalt identifies primary actions; yellow marks the current student and in-range feedback. The live tuner sits on a separate warm-paper surface. Subtle grain is limited to the page backdrop, keeping controls and student records crisp. Existing local Anton, Alfa Slab One, paper grain and masthead ink assets remain bundled offline. All session geometry stays shared, with Full Screen Split View as the primary experience.
+
+## B Pop Tune Hunters
+
+**B Pop Tune Hunters** translates the supplied supernatural pop poster into midnight-violet surfaces, silver-cyan condensed lettering, hot-pink playback, gold selection trim and fine curved sound-wave lines. A generated blue spirit-cat illustration decorates the active concert target; inactive class cards retain quiet reading surfaces. Cyan, gold and pink illuminate the entire low, correct and high feedback keys, with persistent recorded-result styling and visible keyboard focus. The theme has no continuous animation. Shared Full Screen Split View geometry, notation, settings and saved data remain unchanged.
+
+The PNG is bundled directly through theme CSS, with existing local Anton lettering and system body fonts. No runtime network requests or new dependencies are needed. Artwork provenance and the generation prompt are recorded in [the asset record](docs/licenses/b-pop-spirit-stage.md).

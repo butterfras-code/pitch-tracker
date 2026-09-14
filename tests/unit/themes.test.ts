@@ -11,6 +11,7 @@ import { THEME_REGISTRY } from '../../src/themes/registry';
 describe('theme contract', () => {
   it('discovers theme files but excludes the copyable template', () => {
     expect(THEME_REGISTRY.map((theme) => theme.id)).toEqual([
+      'b-pop-tune-hunters',
       'big-button',
       'boom-pow',
       'cel-mech',
