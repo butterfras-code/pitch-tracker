@@ -6,69 +6,69 @@
   font-display: swap;
 }
 /* Comic print is decorative; shared CSS retains component geometry. */
-:root[data-treatment='comic'] {
+:root[data-theme='boom-pow'] {
   scrollbar-color: var(--ink) var(--card);
   caret-color: var(--control-ink);
 }
-:root[data-treatment='comic'] body {
+:root[data-theme='boom-pow'] body {
   background-image: url('../assets/boom-pow-print.png');
   background-size: 700px;
 }
-:root[data-treatment='comic']
+:root[data-theme='boom-pow']
   :is(header, .tabs, .session-toolbar, .dashboard-header) {
   background-color: var(--card);
   border-radius: var(--help-radius);
   box-shadow: var(--panel-shadow);
 }
-:root[data-treatment='comic'] ::selection {
+:root[data-theme='boom-pow'] ::selection {
   background: var(--soft);
   color: var(--ink);
 }
-:root[data-treatment='comic'] ::placeholder {
+:root[data-theme='boom-pow'] ::placeholder {
   color: var(--muted);
   opacity: 1;
 }
-:root[data-treatment='comic'] .session-target {
+:root[data-theme='boom-pow'] .session-target {
   background: var(--display-bg);
   color: var(--display-ink);
   border-radius: var(--display-radius);
   box-shadow: var(--display-shadow);
 }
-:root[data-treatment='comic'] .target-frequency {
+:root[data-theme='boom-pow'] .target-frequency {
   color: var(--display-ink);
 }
-:root[data-treatment='comic']
+:root[data-theme='boom-pow']
   :is(.target-listening, .target-playback, .meter-labels) {
   font-family: var(--label-font);
   font-weight: var(--label-weight);
   letter-spacing: var(--label-tracking);
   text-transform: var(--label-transform);
 }
-:root[data-treatment='comic'] :is(.target-listening, .target-playback) {
+:root[data-theme='boom-pow'] :is(.target-listening, .target-playback) {
   background-color: var(--highlight);
   color: var(--primary-ink);
   border-color: var(--ink);
 }
-:root[data-treatment='comic']
+:root[data-theme='boom-pow']
   :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--danger);
 }
-:root[data-treatment='comic']
+:root[data-theme='boom-pow']
   :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
-:root[data-treatment='comic'] [data-ui-click='next-student'] {
+:root[data-theme='boom-pow'] [data-ui-click='next-student'] {
   background-color: var(--accent);
   color: var(--primary-ink);
 }
-:root[data-treatment='comic']
+:root[data-theme='boom-pow']
   [data-ui-click='next-student']:hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
-:root[data-treatment='comic'] .tuner {
+:root[data-theme='boom-pow'] .tuner {
   border-radius: var(--display-radius);
 }
-:root[data-treatment='comic'] .meter {
+:root[data-theme='boom-pow'] .meter {
   background:
     repeating-linear-gradient(to right, var(--ink) 0 1px, transparent 1px 8%),
     linear-gradient(
@@ -79,28 +79,349 @@
     );
   box-shadow: inset 0 0 0 2px var(--ink);
 }
-:root[data-treatment='comic'] .needle {
+:root[data-theme='boom-pow'] .needle {
   background: var(--ink);
   box-shadow: 0 0 0 2px var(--badge-bg);
 }
-:root[data-treatment='comic'] .student {
+:root[data-theme='boom-pow'] .student {
   box-shadow: var(--panel-shadow);
 }
-:root[data-treatment='comic'] .student.selected {
+:root[data-theme='boom-pow'] .student.selected {
   background-color: var(--badge-bg);
 }
-:root[data-treatment='comic']
+:root[data-theme='boom-pow']
   .session-shell[data-result='correct']
   .classroom-feedback:has(#lastResult:not(:empty)) {
   background: var(--notice-bg);
   color: var(--notice-ink);
   box-shadow: var(--display-shadow);
 }
-:root[data-treatment='comic'] :is(.tabs button, .student .name) {
+:root[data-theme='boom-pow'] :is(.tabs button, .student .name) {
   box-shadow: none;
   background-image: none;
 }
-:root[data-treatment='comic'] .tabs button.on {
+:root[data-theme='boom-pow'] .tabs button.on {
   color: var(--ink);
   box-shadow: inset 0 -3px var(--highlight);
+}
+
+/* Inked paper surfaces; geometry remains shared. */
+:root[data-theme='boom-pow']
+  :is(.student, .current-display, .panel, .session-target) {
+  background-image: var(--surface-pattern);
+  background-size: 5px 5px;
+}
+:root[data-theme='boom-pow'] #sessionShell .student.selected {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+:root[data-theme='boom-pow'] #sessionShell .student .name {
+  font-family: var(--heading-font);
+  font-weight: var(--heading-weight);
+  text-transform: var(--heading-transform);
+  text-shadow: var(--heading-shadow);
+  letter-spacing: 0.015em;
+}
+:root[data-theme='boom-pow'] #sessionShell .target-pitch {
+  font-family: var(--heading-font);
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  :is(.roster-instrument, #studentIdentity p) {
+  background: var(--help-bg);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  font-family: var(--label-font);
+  font-weight: var(--label-weight);
+  text-transform: uppercase;
+  text-indent: 4px;
+}
+:root[data-theme='boom-pow'] :is(.app-header, .session-toolbar) button {
+  box-shadow: var(--button-shadow);
+}
+:root[data-theme='boom-pow']
+  :is(.app-header, .session-toolbar, .target-actions, .scorebar)
+  button:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  :is(.target-listening, .target-playback) {
+  background: var(--low-bg);
+  color: var(--ink);
+  box-shadow: var(--button-shadow);
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
+  background: var(--correct-bg);
+}
+:root[data-theme='boom-pow'] #sessionShell .scorebar button {
+  color: var(--ink);
+  border-color: var(--ink);
+  box-shadow: var(--button-shadow);
+  font-family: var(--heading-font);
+  font-weight: var(--heading-weight);
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+  text-shadow: 1px 1px 0 var(--card);
+  position: relative;
+  isolation: isolate;
+}
+:root[data-theme='boom-pow'] #sessionShell .scorebar .low {
+  --comic-color: var(--low-bg);
+  background:
+    linear-gradient(135deg, var(--ink) 0 5px, transparent 5px),
+    linear-gradient(315deg, var(--ink) 0 5px, transparent 5px),
+    var(--comic-color);
+}
+:root[data-theme='boom-pow'] #sessionShell .scorebar .correct {
+  --comic-color: var(--correct-bg);
+  background:
+    linear-gradient(135deg, var(--ink) 0 5px, transparent 5px),
+    linear-gradient(315deg, var(--ink) 0 5px, transparent 5px),
+    var(--comic-color);
+}
+:root[data-theme='boom-pow'] #sessionShell .scorebar .high {
+  --comic-color: var(--high-bg);
+  background:
+    linear-gradient(135deg, var(--ink) 0 5px, transparent 5px),
+    linear-gradient(315deg, var(--ink) 0 5px, transparent 5px),
+    var(--comic-color);
+}
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='low']
+  .tuner-section[data-live-practice]
+  .low,
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='correct']
+  .tuner-section[data-live-practice]
+  .correct,
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='high']
+  .tuner-section[data-live-practice]
+  .high {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  background-image: var(--surface-pattern);
+  background-size: 4px 4px;
+}
+@keyframes comic-ink-pulse {
+  0%,
+  55%,
+  100% {
+    transform: translate(0, 0);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+  12%,
+  30% {
+    transform: translate(-2px, -2px) rotate(-0.7deg);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  21% {
+    transform: translate(-2px, -2px) rotate(0.7deg);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+}
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='low']
+  .tuner-section[data-live-practice]
+  .low::before,
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='correct']
+  .tuner-section[data-live-practice]
+  .correct::before,
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='high']
+  .tuner-section[data-live-practice]
+  .high::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  pointer-events: none;
+  z-index: -1;
+  border: 6px solid var(--ink);
+  clip-path: polygon(
+    0 0,
+    20% 10%,
+    27% 0,
+    40% 10%,
+    50% 0,
+    63% 10%,
+    77% 0,
+    85% 10%,
+    100% 0,
+    90% 35%,
+    100% 50%,
+    90% 65%,
+    100% 100%,
+    80% 90%,
+    70% 100%,
+    57% 90%,
+    47% 100%,
+    33% 90%,
+    20% 100%,
+    12% 90%,
+    0 100%,
+    10% 65%,
+    0 50%,
+    10% 35%
+  );
+  animation: comic-action-lines 1.6s ease-out infinite;
+}
+@keyframes comic-action-lines {
+  0%,
+  45%,
+  100% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  12%,
+  26% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+/* Delay filters fleeting range crossings; one impact, not a looping flash. */
+:root[data-theme='boom-pow'] #liveNote {
+  position: relative;
+  isolation: isolate;
+}
+:root[data-theme='boom-pow']
+  #sessionShell[data-range='correct']
+  #liveNote::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+  width: 2.7em;
+  max-width: 95%;
+  height: 1.5em;
+  left: 50%;
+  top: 50%;
+  background: var(--correct-bg);
+  clip-path: polygon(
+    50% 0,
+    59% 23%,
+    78% 5%,
+    77% 30%,
+    100% 25%,
+    86% 47%,
+    100% 65%,
+    75% 68%,
+    80% 95%,
+    58% 78%,
+    47% 100%,
+    39% 77%,
+    15% 95%,
+    23% 67%,
+    0 64%,
+    15% 47%,
+    0 26%,
+    27% 30%,
+    25% 5%,
+    43% 23%
+  );
+  opacity: 0;
+  animation: comic-impact 650ms 250ms ease-out both;
+}
+@keyframes comic-impact {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.65) rotate(-8deg);
+  }
+  20%,
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+:root[data-theme='boom-pow'] #sessionShell .inactive-practice .tuner-section {
+  opacity: 1;
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  .inactive-practice
+  :is(.tuner, .session-target) {
+  background: var(--help-bg);
+  color: var(--muted);
+  box-shadow: inset 0 0 0 1px var(--muted);
+  border-color: var(--track);
+}
+:root[data-theme='boom-pow'] #sessionShell .inactive-practice .meter {
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px var(--muted);
+}
+:root[data-theme='boom-pow'] #sessionShell .inactive-practice .needle {
+  background: var(--muted);
+  box-shadow: none;
+}
+:root[data-theme='boom-pow'] #sessionShell .inactive-practice .scorebar button {
+  background: var(--help-bg);
+  color: var(--muted);
+  box-shadow: none;
+  animation: none;
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  .inactive-practice
+  [data-last-result='low']
+  .low,
+:root[data-theme='boom-pow']
+  #sessionShell
+  .inactive-practice
+  [data-last-result='correct']
+  .correct,
+:root[data-theme='boom-pow']
+  #sessionShell
+  .inactive-practice
+  [data-last-result='high']
+  .high {
+  background:
+    linear-gradient(135deg, var(--ink) 0 5px, transparent 5px),
+    linear-gradient(315deg, var(--ink) 0 5px, transparent 5px),
+    var(--comic-color);
+  color: var(--ink);
+  opacity: 1;
+  outline: 2px solid var(--ink);
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt::before {
+  content: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='boom-pow']
+    #sessionShell[data-range]
+    .tuner-section[data-live-practice]
+    .scorebar
+    button::before,
+  :root[data-theme='boom-pow'] #sessionShell[data-range] #liveNote::before,
+  :root[data-theme='boom-pow'] #sessionShell .scorebar button {
+    animation: none;
+  }
+  :root[data-theme='boom-pow'] button:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+:root[data-theme='boom-pow']
+  #sessionShell
+  .inactive-practice
+  :is(.target-listening, .target-playback) {
+  background: var(--track);
+  color: var(--muted);
+  box-shadow: none;
+}
+:root[data-theme='boom-pow']
+  #sessionShell
+  .target-actions
+  button:active:not(:disabled) {
+  box-shadow: var(--button-pressed-shadow);
 }
