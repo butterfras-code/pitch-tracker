@@ -13,7 +13,7 @@ for (const width of [390, 1440]) {
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await sessionControl(page, 'Student view');
+    await sessionControl(page, 'Student View');
     await expect(page.locator('.press-brand')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Pitch Tracker', exact: true }),
@@ -76,11 +76,11 @@ for (const width of [390, 1440]) {
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await sessionControl(page, 'Class view');
+    await sessionControl(page, 'Class View');
     await expect(page.locator('.selected .target-readout')).toBeVisible();
     await expect(page.locator('#pauseListening')).toBeVisible();
     await expect(page.locator('#cards')).toBeVisible();
-    await sessionControl(page, 'Student view');
+    await sessionControl(page, 'Student View');
     await page
       .getByRole('button', { name: 'Next student', exact: true })
       .click();
@@ -115,7 +115,7 @@ for (const [width, height] of [
       page,
     }, testInfo) => {
       await classroomPage(page, 30);
-      await sessionControl(page, 'Split view');
+      await sessionControl(page, 'Split View');
       if (width > 390) {
         await sessionControl(page, 'Full screen');
         await expect
@@ -143,6 +143,56 @@ for (const [width, height] of [
         'background-color',
         'rgb(255, 230, 0)',
       );
+      await expect(page.locator('#studentIdentity h2')).toHaveCSS(
+        'font-family',
+        '"Press Slab", Georgia, serif',
+      );
+      await expect(page.locator('.student.selected')).toHaveCSS(
+        'border-style',
+        'double',
+      );
+      await expect(page.locator('.student.selected')).toHaveCSS(
+        'border-width',
+        '4px',
+      );
+      await expect(page.locator('#liveHz')).toHaveCSS(
+        'font-family',
+        '"Courier New", Courier, monospace',
+      );
+      const live = page.locator('.tuner-section[data-live-practice] .scorebar');
+      for (const [state, color] of [
+        ['low', 'rgb(147, 47, 34)'],
+        ['correct', 'rgb(41, 75, 50)'],
+        ['high', 'rgb(24, 59, 96)'],
+      ]) {
+        await page.locator('#sessionShell').evaluate((element, range) => {
+          (element as HTMLElement).dataset.range = range;
+        }, state);
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'background-color',
+          color,
+        );
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'color',
+          'rgb(255, 249, 234)',
+        );
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'animation-name',
+          'press-strike',
+        );
+      }
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(live.locator('.high')).toHaveCSS('animation-name', 'none');
+      await page.keyboard.press('Tab');
+      await live.locator('.high').focus();
+      await expect(live.locator('.high')).toHaveCSS('outline-style', 'solid');
+      await page.locator('#sessionShell').evaluate((element) => {
+        (element as HTMLElement).dataset.range = '';
+      });
+      await live
+        .locator('.high')
+        .evaluate((element) => (element as HTMLElement).blur());
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.screenshot({
         path: testInfo.outputPath(`press-split-${width}.png`),
         fullPage: true,
