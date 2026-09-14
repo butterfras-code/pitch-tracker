@@ -22,7 +22,9 @@ Select **Lisa Lives!** for the neon mockup-inspired variant: rainbow leopard/zeb
 
 ## Vintage Audio
 
-**Vintage Audio** uses worn black amplifier tolex, recessed ivory target lettering, amber instrument illumination and deep-red switches. The studio treatment preserves shared session layout and live meter behavior. Its local generated texture and existing bundled condensed font work entirely offline.
+**Vintage Audio** uses matte charcoal-black stereo housing, dark physical controls, paired amber target/tuner instruments and translucent illuminated range buttons. Navigation uses muted oxide-red trim; an amber inset outline identifies the current student. Inactive target and tuner lenses have a flat, dimmer tint without a bulb hotspot. Selected live buttons briefly warm up, then stay lit; inactive last results retain a softer steady light and a subdued panel border. Reduced motion keeps the illumination without the entrance flutter. Fine CSS grain replaces the leather-like tolex texture; existing bundled condensed lettering is used for instrument labels and readings, with body lettering on action buttons. All decoration works offline and preserves shared geometry, with Full Screen Split View as the primary review surface.
+
+Refinement direction: borrow the black plastic and milky backlit keys of vintage Alpine equipment while retaining the existing warm amber meter. Feedback fills the button face to be obvious to children, with limited surrounding glow and no continuous flicker. Review this first theme before refining the remaining themes.
 
 ## Boom Pow
 

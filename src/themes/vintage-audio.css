@@ -1,57 +1,58 @@
 /* Build-owned material; all colors and hardware paint remain theme tokens. */
-:root[data-treatment='studio'] {
+:root[data-theme='vintage-audio'] {
   scrollbar-color: var(--line) var(--bg);
   caret-color: var(--control-ink);
 }
-:root[data-treatment='studio']
-  :is(body, .panel, .student, .current-display, dialog, .behavior-settings) {
-  background-image: url('../assets/vintage-audio-tolex.png');
-  background-size: 480px;
-  background-blend-mode: soft-light;
+:root[data-theme='vintage-audio'] body {
+  background-size: 3px 3px;
 }
-:root[data-treatment='studio'] ::selection {
+:root[data-theme='vintage-audio'] ::selection {
   background: var(--notice-bg);
   color: var(--notice-ink);
 }
-:root[data-treatment='studio'] ::placeholder {
+:root[data-theme='vintage-audio'] ::placeholder {
   color: var(--control-ink);
   opacity: 0.75;
 }
-:root[data-treatment='studio'] .session-target {
-  background-color: var(--control);
-  background-image: var(--control-pattern);
-  color: var(--control-ink);
+:root[data-theme='vintage-audio'] #sessionShell .session-target {
+  background-color: var(--display-bg);
+  background-image: radial-gradient(
+    ellipse at center,
+    var(--soft),
+    transparent 80%
+  );
+  color: var(--display-ink);
   border-radius: var(--display-radius);
   box-shadow: var(--display-shadow);
 }
-:root[data-treatment='studio'] .target-frequency {
-  color: var(--control-ink);
+:root[data-theme='vintage-audio'] .target-frequency {
+  color: var(--display-ink);
 }
-:root[data-treatment='studio'] .target-caption {
+:root[data-theme='vintage-audio'] .target-caption {
   letter-spacing: var(--label-tracking);
   text-transform: var(--label-transform);
 }
-:root[data-treatment='studio']
+:root[data-theme='vintage-audio']
   :is(.target-listening, .target-playback, .meter-labels) {
   font-family: var(--label-font);
   font-weight: var(--label-weight);
   letter-spacing: var(--label-tracking);
   text-transform: var(--label-transform);
 }
-:root[data-treatment='studio'] :is(.target-listening, .target-playback) {
+:root[data-theme='vintage-audio'] :is(.target-listening, .target-playback) {
   background-color: var(--accent);
   color: var(--primary-ink);
   border-color: var(--edge);
 }
-:root[data-treatment='studio']
+:root[data-theme='vintage-audio']
   :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
-:root[data-treatment='studio']
+:root[data-theme='vintage-audio']
   :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
-:root[data-treatment='studio'] .tuner {
+:root[data-theme='vintage-audio'] .tuner {
   border-radius: var(--display-radius);
   border-color: var(--edge);
   background-image: radial-gradient(
@@ -60,7 +61,7 @@
     transparent 80%
   );
 }
-:root[data-treatment='studio'] .meter {
+:root[data-theme='vintage-audio'] .meter {
   border-radius: 0;
   background: repeating-linear-gradient(
     to right,
@@ -69,28 +70,186 @@
   );
   box-shadow: inset 0 -2px var(--display-ink);
 }
-:root[data-treatment='studio'] .needle {
+:root[data-theme='vintage-audio'] .needle {
   background: var(--accent);
   box-shadow: 0 1px 3px var(--edge);
 }
-:root[data-treatment='studio'] .progress {
+:root[data-theme='vintage-audio'] .progress {
   background: color-mix(in srgb, var(--display-ink) 22%, var(--display-bg));
 }
-:root[data-treatment='studio'] .classroom-feedback {
+:root[data-theme='vintage-audio'] .classroom-feedback {
   color: var(--correct);
 }
-:root[data-treatment='studio'] .student {
+:root[data-theme='vintage-audio'] .student {
   box-shadow: var(--panel-shadow);
 }
-:root[data-treatment='studio']
+:root[data-theme='vintage-audio']
   :is(.student .name, [data-ui-click='show-current']) {
   color: var(--ink);
 }
-:root[data-treatment='studio'] :is(.tabs button, .student .name) {
+:root[data-theme='vintage-audio'] :is(.tabs button, .student .name) {
   box-shadow: none;
   background-image: none;
 }
-:root[data-treatment='studio'] .tabs button.on {
+:root[data-theme='vintage-audio'] .tabs button.on {
   color: var(--ink);
   box-shadow: inset 0 -2px var(--highlight);
+}
+
+/* Translucent lenses light across the whole face, then hold steady. */
+:root[data-theme='vintage-audio'] #sessionShell .scorebar .low {
+  --lamp-color: var(--low);
+  --lamp-base: var(--low-bg);
+}
+:root[data-theme='vintage-audio'] #sessionShell .scorebar .correct {
+  --lamp-color: var(--correct);
+  --lamp-base: var(--correct-bg);
+}
+:root[data-theme='vintage-audio'] #sessionShell .scorebar .high {
+  --lamp-color: var(--high);
+  --lamp-base: var(--high-bg);
+}
+:root[data-theme='vintage-audio'] #sessionShell .scorebar button {
+  background-image: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--lamp-color) 18%, transparent),
+    transparent 45%,
+    color-mix(in srgb, var(--edge) 25%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--lamp-color) 35%, var(--edge));
+  box-shadow: var(--button-shadow);
+}
+:root[data-theme='vintage-audio']
+  #sessionShell[data-range='low']
+  .tuner-section[data-live-practice]
+  .low,
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='low']
+  .low,
+:root[data-theme='vintage-audio']
+  #sessionShell[data-range='correct']
+  .tuner-section[data-live-practice]
+  .correct,
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='correct']
+  .correct,
+:root[data-theme='vintage-audio']
+  #sessionShell[data-range='high']
+  .tuner-section[data-live-practice]
+  .high,
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='high']
+  .high {
+  color: var(--display-ink);
+  opacity: 1;
+  background-color: var(--lamp-color);
+  background-image: radial-gradient(
+    ellipse at 50% 45%,
+    var(--soft),
+    var(--lamp-color) 65%,
+    color-mix(in srgb, var(--lamp-color) 70%, var(--lamp-base))
+  );
+  border-color: var(--lamp-color);
+  outline: none;
+  box-shadow:
+    inset 0 1px 2px var(--soft),
+    inset 0 -3px 5px color-mix(in srgb, var(--lamp-base) 50%, transparent),
+    0 0 12px color-mix(in srgb, var(--lamp-color) 35%, transparent),
+    0 2px 3px var(--edge);
+}
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt
+  .scorebar
+  button {
+  animation: none;
+}
+:root[data-theme='vintage-audio'] #sessionShell .inactive-practice .scorebar {
+  --soft: var(--display-bg);
+}
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .scorebar
+  .low {
+  --lamp-color: color-mix(in srgb, var(--low) 75%, var(--low-bg));
+}
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .scorebar
+  .correct {
+  --lamp-color: color-mix(in srgb, var(--correct) 75%, var(--correct-bg));
+}
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .scorebar
+  .high {
+  --lamp-color: color-mix(in srgb, var(--high) 75%, var(--high-bg));
+}
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt::before {
+  border-width: 1px;
+  opacity: 0.25;
+}
+:root[data-theme='vintage-audio']
+  #sessionShell
+  :is(.target-listening, .target-playback) {
+  font-family: var(--body-font);
+  font-weight: var(--button-weight);
+  letter-spacing: normal;
+}
+:root[data-theme='vintage-audio']
+  #sessionShell[data-range]
+  .tuner-section[data-live-practice]
+  .scorebar
+  button:focus-visible,
+:root[data-theme='vintage-audio'] #sessionShell .scorebar button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+@keyframes vintage-lamp-on {
+  0% {
+    filter: brightness(0.8);
+  }
+  35% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(0.94);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='vintage-audio'] #sessionShell .scorebar button {
+    animation: none;
+  }
+}
+
+/* Unpowered instruments retain their tinted lens without a bulb hotspot. */
+:root[data-theme='vintage-audio']
+  #sessionShell
+  .inactive-practice
+  :is(.session-target, .tuner) {
+  background-color: color-mix(in srgb, var(--display-bg) 62%, var(--card));
+  background-image: none;
+  box-shadow: var(--surface-shadow);
+}
+:root[data-theme='vintage-audio'] #sessionShell .student.selected {
+  border-color: var(--focus-ring);
+  box-shadow:
+    inset 0 0 0 2px var(--focus-ring),
+    var(--panel-shadow);
 }
