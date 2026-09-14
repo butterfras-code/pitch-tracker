@@ -30,7 +30,7 @@ for (const width of [390, 1440]) {
       name: 'Theme',
       exact: true,
     });
-    await themePicker.selectOption('cel-mech');
+    await themePicker.selectOption('big-button');
     const staff = page.locator('.pitch-staff').first();
     const originalSize = await staff.evaluate((el) => [
       getComputedStyle(el).width,
@@ -92,11 +92,11 @@ for (const width of [390, 1440]) {
     );
     await expect(page.locator('.danger').first()).toHaveCSS(
       'color',
-      'rgb(255, 131, 162)',
+      'rgb(163, 32, 21)',
     );
     await expect(page.locator('.primary').first()).toHaveCSS(
       'color',
-      'rgb(17, 17, 21)',
+      'rgb(255, 252, 240)',
     );
     expect(await staff.innerHTML()).toBe(draftArtwork);
     expect(
@@ -110,16 +110,13 @@ for (const width of [390, 1440]) {
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');
     await expect(button).toHaveCSS('outline-style', 'solid');
-    await expect(button).toHaveCSS('outline-color', 'rgb(255, 230, 0)');
+    await expect(button).toHaveCSS('outline-color', 'rgb(163, 32, 21)');
     await button.hover();
     await page.mouse.down();
     await expect(button).toHaveCSS('box-shadow', /inset/);
     await page.mouse.move(1, 1);
     await page.mouse.up();
-    await expect(button).toHaveCSS(
-      'box-shadow',
-      'rgb(0, 0, 0) 2px 2px 0px 0px',
-    );
+    await expect(button).toHaveCSS('box-shadow', /inset/);
 
     await themePicker.selectOption('pitch-press');
     await expect(draft).toHaveValue('18');
@@ -128,7 +125,7 @@ for (const width of [390, 1440]) {
     await expect(label).toHaveCSS('font-weight', '800');
     await expect(page.locator('h1')).toHaveCSS('font-weight', '400');
     await expect(button).toHaveCSS('color', 'rgb(21, 21, 21)');
-    await themePicker.selectOption('cel-mech');
+    await themePicker.selectOption('big-button');
     await applyOverrides();
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
@@ -144,7 +141,7 @@ for (const width of [390, 1440]) {
     ).toHaveCSS('box-shadow', /inset/);
     await expect(page.locator('#liveNote')).toHaveCSS(
       'color',
-      'rgb(255, 230, 0)',
+      'rgb(255, 209, 128)',
     );
     await expect(page.locator('#liveHz')).toHaveCSS(
       'color',
@@ -159,9 +156,9 @@ for (const width of [390, 1440]) {
       page.locator('.tuner-section[data-live-practice] .needle'),
     ).toHaveCSS('background-color', 'rgb(255, 209, 128)');
     for (const [status, color] of [
-      ['low', 'rgb(0, 27, 38)'],
-      ['correct', 'rgb(23, 32, 0)'],
-      ['high', 'rgb(38, 0, 11)'],
+      ['low', 'rgb(0, 91, 205)'],
+      ['correct', 'rgb(0, 117, 46)'],
+      ['high', 'rgb(189, 32, 24)'],
     ]) {
       await expect(
         page.locator(`.current-display .scorebar .${status}`),
@@ -171,10 +168,7 @@ for (const width of [390, 1440]) {
     await expect(disabled).toBeDisabled();
     await disabled.hover();
     await page.mouse.down();
-    await expect(disabled).toHaveCSS(
-      'box-shadow',
-      'rgb(0, 0, 0) 2px 2px 0px 0px',
-    );
+    await expect(disabled).toHaveCSS('box-shadow', /inset/);
     await page.mouse.up();
     await page.screenshot({
       path: testInfo.outputPath(`token-consumers-${width}.png`),
@@ -189,7 +183,7 @@ for (const width of [390, 1440]) {
     await page.goto(pathToFileURL(resolve('dist/index.html')).href);
     await page
       .getByRole('combobox', { name: 'Theme', exact: true })
-      .selectOption('cel-mech');
+      .selectOption('big-button');
     await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const slider = page.getByRole('slider', {
       name: 'Flute target adjustment',
@@ -223,11 +217,17 @@ for (const width of [390, 1440]) {
         height: getComputedStyle(el).height,
       })),
     ).toEqual(dimensions);
-    expect(
-      await page
-        .locator('.detection-controls')
-        .evaluate((el) => getComputedStyle(el).gridTemplateColumns),
-    ).toBe(structure);
+    const columns = await page
+      .locator('.detection-controls')
+      .evaluate((el) =>
+        getComputedStyle(el).gridTemplateColumns.split(' ').map(parseFloat),
+      );
+    const previousColumns = structure.split(' ').map(parseFloat);
+    expect(columns).toHaveLength(previousColumns.length);
+    // Existing theme borders differ by one pixel on each side.
+    columns.forEach((size, index) =>
+      expect(Math.abs(size - previousColumns[index]!)).toBeLessThanOrEqual(2),
+    );
     await expect(slider).toHaveValue('18');
     await page.screenshot({
       path: `test-results/theme-pitch-press-${width}-${test.info().project.name}.png`,
@@ -235,21 +235,21 @@ for (const width of [390, 1440]) {
     });
     await page
       .getByRole('combobox', { name: 'Theme', exact: true })
-      .selectOption('cel-mech');
+      .selectOption('big-button');
     await page
       .getByRole('combobox', { name: 'Theme', exact: true })
-      .selectOption('cel-mech');
+      .selectOption('big-button');
     await expect(page.locator('body')).toHaveCSS(
       'background-color',
-      'rgb(17, 17, 21)',
+      'rgb(232, 227, 210)',
     );
     await expect(page.locator('h1')).toHaveCSS(
       'text-shadow',
-      'rgb(255, 46, 99) 2px 2px 0px',
+      /rgb\(255, 249, 231\)/,
     );
     await expect(page.locator('.panel').first()).toHaveCSS(
       'background-image',
-      'none',
+      /linear-gradient/,
     );
     await expect(slider).toHaveValue('18');
     await page
@@ -263,13 +263,17 @@ for (const width of [390, 1440]) {
   });
 }
 
-test('unknown saved theme falls back to the existing default', async ({
-  page,
-}) => {
+test('retired saved theme falls back to the default', async ({ page }) => {
   await page.goto(pathToFileURL(resolve('dist/index.html')).href);
   await page.evaluate(() =>
-    localStorage.setItem('mouthpiece.pitchtracker.theme.v1', 'removed-theme'),
+    localStorage.setItem('mouthpiece.pitchtracker.theme.v1', 'cel-mech'),
   );
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'cel-mech');
+  await expect(
+    page.locator('#themeSelect option[value="cel-mech"]'),
+  ).toHaveCount(0);
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-theme',
+    'big-button',
+  );
 });

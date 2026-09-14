@@ -46,12 +46,7 @@ for (const width of [390, 1920]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1080 });
     await classroomPage(page);
     const card = page.locator('.student').first();
-    for (const theme of [
-      'cel-mech',
-      'pitch-press',
-      'big-button',
-      'lisa-lives',
-    ]) {
+    for (const theme of ['pitch-press', 'big-button', 'lisa-lives']) {
       await page.evaluate(
         (theme) =>
           localStorage.setItem('mouthpiece.pitchtracker.theme.v1', theme),

@@ -1,4 +1,3 @@
-import { sessionControl } from '../fixtures/session-controls';
 import { expect, test } from '@playwright/test';
 import { classroomPage, saved } from '../fixtures/classroom-page';
 
@@ -19,8 +18,8 @@ for (const [width, height] of [
       const picker = page.locator('#themeSelect');
       await picker.selectOption('big-button', { force: true });
       if (width > 390) {
-        await sessionControl(page, 'Split view');
-        await sessionControl(page, 'Full screen');
+        await page.getByRole('button', { name: /^split view$/i }).click();
+        await page.getByRole('button', { name: /^full screen$/i }).click();
         await expect
           .poll(() => page.evaluate(() => !!document.fullscreenElement))
           .toBe(true);
@@ -56,7 +55,7 @@ for (const [width, height] of [
           await page.locator(selector).evaluate(async (element) => {
             const background = getComputedStyle(element).backgroundImage;
             const url = background.match(/url\(["']?(.*?)["']?\)/)?.[1];
-            if (!url?.startsWith('data:image/png;base64,')) return false;
+            if (!url?.startsWith('data:image/')) return false;
             const image = new Image();
             image.src = url;
             await image.decode();
@@ -66,10 +65,10 @@ for (const [width, height] of [
       }
       await expect(
         page.locator('.tuner-section[data-live-practice] .tuner'),
-      ).toHaveCSS('background-color', 'rgb(9, 19, 34)');
+      ).toHaveCSS('background-color', 'rgb(41, 18, 63)');
       await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'background-color',
-        'rgb(191, 0, 123)',
+        'rgba(0, 0, 0, 0)',
       );
       await page.locator('[data-ui-click="reference-tone"]').click();
       await expect
@@ -85,6 +84,36 @@ for (const [width, height] of [
         .getByRole('button', { name: 'Next student', exact: true })
         .click();
       await expect(page.locator('#studentIdentity')).toContainText('Lucas');
+      await page.getByRole('button', { name: /^class view$/i }).click();
+      const inactive = page.locator('.inactive-practice .tuner').first();
+      await expect(inactive).not.toHaveCSS(
+        'background-color',
+        'rgb(41, 18, 63)',
+      );
+      await expect(inactive.locator('.meter')).toHaveCSS(
+        'background-image',
+        'none',
+      );
+      await expect(
+        page.locator('.inactive-practice .session-target').first(),
+      ).toHaveCSS('background-image', 'none');
+      const live = page.locator('.tuner-section[data-live-practice]');
+      for (const state of ['low', 'correct', 'high']) {
+        await page.locator('#sessionShell').evaluate((el, state) => {
+          el.setAttribute('data-range', state);
+        }, state);
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'animation-name',
+          'lisa-shimmer',
+        );
+      }
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(live.locator('.high')).toHaveCSS('animation-name', 'none');
+      await page.screenshot({
+        path: testInfo.outputPath('lisa-class.png'),
+        fullPage: true,
+      });
+      await page.getByRole('button', { name: /^student view$/i }).click();
       await picker.selectOption('big-button', { force: true });
       await expect(
         page.locator('.tuner-section[data-live-practice] .tuner'),

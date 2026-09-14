@@ -25,11 +25,11 @@ Current status: all appearance tokens, including the 12 new tokens, have shared 
 3. Set values in `tokens`. Keep `satisfies ThemeDefinition` for editor completion and typo checking.
 4. Run `npm run verify`. Open `dist/index.html` and select the new theme.
 
-Every `*.theme.ts` in that folder is discovered at build time. No registry edit, server, runtime file loading, or dependencies are needed. The template itself is excluded. Rename the file freely; keep the ID stable to preserve saved selection. Removing a selected theme falls back to Cel-Shaded Mech. Theme preferences remain separate from v1 data backups; moving the HTML may lose browser storage.
+Every `*.theme.ts` in that folder is discovered at build time. No registry edit, server, runtime file loading, or dependencies are needed. The template itself is excluded. Rename the file freely; keep the ID stable to preserve saved selection. Removing a selected theme falls back to Big Button Sound Club. Theme preferences remain separate from v1 data backups; moving the HTML may lose browser storage.
 
 ## Appearance contract
 
-`src/themes/contract.ts` is the complete list of accepted values and defaults, including the appearance extensions documented below. Missing keys always inherit these defaults, never the previously selected theme. The table here covers tokens with existing CSS consumers. The two canonical definitions are `cel-mech.theme.ts` and `pitch-press.theme.ts`. Both use the same session structure; copy `theme.template.ts` only for an intentional new theme.
+`src/themes/contract.ts` is the complete list of accepted values and defaults, including the appearance extensions documented below. Missing keys always inherit these defaults, never the previously selected theme. The table here covers tokens with existing CSS consumers. The two canonical definitions are `big-button.theme.ts` and `pitch-press.theme.ts`. Both use the same session structure; copy `theme.template.ts` only for an intentional new theme.
 
 | Tokens                                                                                                              | Purpose                                                        |
 | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -43,15 +43,15 @@ Every `*.theme.ts` in that folder is discovered at build time. No registry edit,
 | `page-pattern`, `surface-pattern`, `control-pattern`, `surface-border-style`                                        | CSS gradients/patterns and surface border style                |
 | `slider-track`, `slider-band`, `slider-handle`, `slider-target`                                                     | Pitch editing track, accepted interval and handles             |
 | `scheme`                                                                                                            | Native browser light/dark controls                             |
-| `edge`, `highlight`                                                                                                 | Accents for the preserved legacy mech treatment                |
+| `edge`, `highlight`                                                                                                 | Theme borders and highlights                                   |
 
 Values are CSS strings. Use system/local font stacks and CSS gradients; URL assets and imports are rejected. Type checking catches unknown keys, while registry tests catch duplicate IDs, empty values and URL references. This is a developer-authored configuration, not an untrusted CSS sandbox or full CSS-value validator. Verify contrast, keyboard focus and readable feedback pairs when authoring a palette.
 
-Layout, spacing, font sizes, responsive breakpoints, hit-target sizes, SVG paths, staff geometry, and scoring semantics are intentionally outside the theme contract. Fonts can affect wrapping, so inspect desktop and phone sizes. Omit `treatment` for a token-only theme, or select one of the treatment names documented below. Currently `mech`, `print` and `toy` have specialized CSS. Print output keeps the existing legibility overrides; browser printing is separate from the Pitch Press `print` treatment.
+Layout, spacing, font sizes, responsive breakpoints, hit-target sizes, SVG paths, staff geometry, and scoring semantics are intentionally outside the theme contract. Fonts can affect wrapping, so inspect desktop and phone sizes. Omit `treatment` for a token-only theme, or select one of the treatment names documented below. Theme-specific stylesheets provide specialized decoration. Print output keeps the existing legibility overrides; browser printing is separate from the Pitch Press `print` treatment.
 
 ## Handoff: reference-style contract extensions
 
-All 12 additions below are now consumed by the shared CSS. Another agent can author theme files using these values immediately. The `mech` and Pitch Press `print` treatments have specialized rendering rules; the other treatment names are accepted and set `data-treatment`, but their decoration still needs implementation. Pitch Press adds a build-owned poster presentation; music artwork remains shared.
+All 12 additions below are now consumed by the shared CSS. Another agent can author theme files using these values immediately. Treatment names set `data-treatment`; theme-specific stylesheets supply additional decoration. Pitch Press adds a build-owned poster presentation; music artwork remains shared.
 
 | New token               | Default            | CSS consumer                                                                 |
 | ----------------------- | ------------------ | ---------------------------------------------------------------------------- |
@@ -66,17 +66,14 @@ All 12 additions below are now consumed by the shared CSS. Another agent can aut
 | `label-tracking`        | `normal`           | Label letter spacing                                                         |
 | `label-transform`       | `none`             | Label capitalization                                                         |
 | `display-shadow`        | `none`             | Recessed/raised pitch-reading display                                        |
-| `button-pressed-shadow` | `none`             | Enabled pressed buttons, with legacy mech behavior preserved                 |
+| `button-pressed-shadow` | `none`             | Enabled pressed buttons                                                      |
 
 Palette and font references follow existing theme overrides instead of hard-coding Classic colors into dark themes. Label typography affects labels; nested inputs, selects and textareas retain their body font, original weight and normal capitalization/tracking so entered values are not transformed. Musical note text and summary statistics retain `heading-font`; only the listed numeric readings use `data-font`. Merely naming a font does not bundle it.
 
 Primary actions, destructive actions, low/correct/high results, active view buttons and tabs retain their semantic colors. Tuner hints inherit `display-ink` so a dark display can remain readable inside a light card. Secondary text outside the tuner still uses `muted`. Empty-state panels retain their muted text. Disabled buttons do not receive the pressed shadow; navigation tabs and student-name controls retain their existing decoration. Keyboard focus styling remains independent of shadows.
 
-The existing Cel-Shaded Mech definition now explicitly sets `display-bg: 'var(--help-bg)'` and `display-shadow: '4px 4px var(--edge)'`, replacing its former hard-coded treatment values. Its highlighted note lettering, button movement and other legacy decorations remain intact. When authoring a different `mech` definition, set display tokens explicitly if that legacy appearance is wanted. The display surface may now be opaque; set `display-bg: 'transparent'` if the card pattern should show through.
-
 `ThemeTreatment` is exported from `contract.ts`, derived from `THEME_TREATMENTS`:
 
-- `mech`: existing Cel-Shaded Mech treatment.
 - `print`: Pitch Press / printed outlines and stamp decoration.
 - `comic`: Sonic Boom / halftone and comic decoration.
 - `studio`: Take One / recessed studio equipment.
@@ -92,7 +89,7 @@ Runtime validation now rejects unknown treatments, schemes other than `light`/`d
 
 ## Canonical session structure
 
-Cel-Shaded Mech and Pitch Press are the canonical themes; Big Button Sound Club is an additional toy variant. Classic and Nocturne definitions were deleted without a migration layer. Shared session components use neutral classes (`session-target`, `target-pitch`, `target-playback`, `meter-labels`, and `student-actions`). `src/session-layout.css` determines visibility, flow, and viewport bounds for both. Themes may paint these components but must not hide them or reorder the session. Class mode hides the target, tuner, and quick actions for both themes; Student and Split show them.
+Big Button Sound Club is the default theme; Pitch Press, Lisa Lives!, Vintage Audio, and Boom Pow are also available. Cel-Shaded Mech has been removed. Classic and Nocturne definitions were deleted without a migration layer. Shared session components use neutral classes (`session-target`, `target-pitch`, `target-playback`, `meter-labels`, and `student-actions`). `src/session-layout.css` determines visibility, flow, and viewport bounds for both. Themes may paint these components but must not hide them or reorder the session. Class mode hides the target, tuner, and quick actions for both themes; Student and Split show them.
 
 ### Live pitch range effects
 

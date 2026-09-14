@@ -599,64 +599,6 @@ h3 {
 #toast {
   border-radius: var(--toast-radius);
 }
-/* Optional structural treatment shared by any theme with treatment: 'mech'. */
-:root[data-treatment='mech'] h1 {
-  font-style: italic;
-  text-transform: uppercase;
-  text-shadow: 2px 2px var(--edge);
-}
-:root[data-treatment='mech'] .panel {
-  border: 2px solid var(--accent);
-}
-:root[data-treatment='mech'] .focus {
-  border-top: 6px solid var(--highlight);
-}
-:root[data-treatment='mech'] .tabs button.on {
-  color: var(--highlight);
-  box-shadow: inset 0 -3px var(--highlight);
-}
-:root[data-treatment='mech'] .tabs button,
-:root[data-treatment='mech'] .student .name {
-  box-shadow: none;
-}
-:root[data-treatment='mech'] button,
-:root[data-treatment='mech'] .student-result {
-  font-weight: 800;
-}
-:root[data-treatment='mech'] button:active:not(:disabled) {
-  translate: 1px 1px;
-  box-shadow: var(--button-pressed-shadow);
-}
-:root[data-treatment='mech'] .primary {
-  background: var(--highlight);
-  border-color: var(--highlight);
-}
-:root[data-treatment='mech'] .primary:hover {
-  background: var(--primary-hover);
-}
-:root[data-treatment='mech'] .tuner {
-  padding: 20px 12px;
-  border: 2px solid var(--line);
-  background: var(--display-bg);
-  box-shadow: var(--display-shadow);
-}
-:root[data-treatment='mech'] .note {
-  color: var(--highlight);
-  font-style: italic;
-  text-shadow: 3px 3px var(--edge);
-}
-:root[data-treatment='mech'] .help {
-  border-left: 4px solid var(--accent);
-}
-:root[data-treatment='mech'] .badge {
-  border-radius: 0;
-}
-:root[data-treatment='mech'] .focus .primary {
-  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-}
-:root[data-treatment='mech'] .focus .primary:focus-visible {
-  clip-path: none;
-}
 @media print {
   :root {
     color-scheme: light;

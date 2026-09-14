@@ -119,7 +119,7 @@ for (const [width, height] of [
         ).toBeGreaterThan(0);
       }
       const data = await saved(page);
-      await picker.selectOption('cel-mech', { force: true });
+      await picker.selectOption('pitch-press', { force: true });
       await expect(page.locator('body')).not.toHaveCSS(
         'background-size',
         '8px 8px, 8px 8px',

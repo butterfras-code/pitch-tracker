@@ -120,7 +120,7 @@ for (const [width, height] of [
           .toBe(true);
       }
       const popup = page.locator('#pitchFeedback');
-      for (const theme of ['cel-mech', 'boom-pow']) {
+      for (const theme of ['big-button', 'boom-pow']) {
         await page.locator('#themeSelect').selectOption(theme, { force: true });
         for (const [rating, label] of [
           ['low', 'Too low'],
@@ -273,7 +273,9 @@ test('replacement cancels old timers; theme switches clear the popup without lea
     'data-rating',
     'high',
   );
-  await page.locator('#themeSelect').selectOption('cel-mech', { force: true });
+  await page
+    .locator('#themeSelect')
+    .selectOption('big-button', { force: true });
   await expect(page.locator('#pitchFeedback')).toBeHidden();
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.locator('.current-display [data-status="correct"]').click();

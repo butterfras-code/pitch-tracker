@@ -65,7 +65,7 @@ for (const width of [390, 1440]) {
       'data-result',
       '',
     );
-    await theme.selectOption('cel-mech');
+    await theme.selectOption('big-button');
     await expect(
       page.locator('.session-target[data-live-practice]'),
     ).toBeVisible();
@@ -164,7 +164,7 @@ for (const [width, height] of [
         });
         expect(await cards.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
       }
-      await picker.selectOption('cel-mech', { force: true });
+      await picker.selectOption('big-button', { force: true });
       await expect(
         page.locator('.session-target[data-live-practice]'),
       ).not.toHaveCSS('background-color', 'rgb(21, 21, 21)');

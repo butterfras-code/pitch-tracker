@@ -8,7 +8,7 @@ const modules = import.meta.glob<{ default: ThemeDefinition }>('./*.theme.ts', {
 export const THEME_REGISTRY = validateThemes(
   Object.values(modules).map((module) => module.default),
 );
-export const DEFAULT_THEME = 'cel-mech';
+export const DEFAULT_THEME = 'big-button';
 export const FEEDBACK_CATALOG = validateFeedbackCatalog(
   feedback,
   THEME_REGISTRY.map((theme) => theme.id),

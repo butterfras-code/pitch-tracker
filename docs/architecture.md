@@ -253,3 +253,7 @@ Class cards reserve 340px at ordinary desktop scales and share a compact target/
 Session listening controls belong to the movable target/tuner surface. Compact targets use an accessible microphone icon toggle; wider targets retain the text label beside target playback. Student navigation stays beside the current identity in student and split views; class view provides the same compact chevrons on its active card and supports direct selection from the card surface.
 
 Tuner presentation has independent placement and activity dimensions. Student and Split host the active tuner in the standalone display; Class moves that same live target/tuner DOM into the selected card. Every unselected Class card renders an embedded, noninteractive representation with its own configured target and neutral telemetry. Static representations have no IDs or delegated actions, are hidden from assistive technology, and cannot receive input; pointer events pass through them so the containing student card remains selectable. Selection replaces the new card's static representation with the sole live tuner without recreating the detector, microphone stream, display smoothing, or pitch hold. Transient range highlighting is scoped to the live tuner. This is presentation-only and adds no saved data.
+
+## Retiring Cel-Shaded Mech
+
+Cel-Shaded Mech and its unused treatment CSS were removed. Big Button Sound Club is now the default. The existing unknown-theme fallback handles retired saved selections; tracker records and the saved-data format are unchanged.

@@ -1,14 +1,14 @@
 # Pitch Tracker themes
 
-The canonical themes are **Cel-Shaded Mech** (default) and **Pitch Press**, with **Big Button Sound Club** as a toy-inspired variant. Build with `npm run build`, then open `dist/index.html` directly. All work offline with all fonts and artwork bundled into the HTML.
+The available themes are **Big Button Sound Club** (default), **Pitch Press**, **Lisa Lives!**, **Vintage Audio**, and **Boom Pow**. Build with `npm run build`, then open `dist/index.html` directly. All work offline with all fonts and artwork bundled into the HTML.
 
 All themes use the same session components and layout: a collapsible left sidebar, student identity, concert target and playback, live tuner, feedback, a scoring/navigation footer, and an internally scrolling grid of student cards. Student, Split, and Class modes are controlled by the session, not by the theme. Theme switching changes appearance without rebuilding the UI or interrupting a pitch check.
 
-`src/session-layout.css` owns session structure, component visibility, sizing, and responsive behavior. Theme definitions in `src/themes/` supply palette and typography tokens; treatment CSS supplies visual decoration. Theme styles must not add a different session flow or document scrolling. Classic and Nocturne have been removed.
+`src/session-layout.css` owns session structure, component visibility, sizing, and responsive behavior. Theme definitions in `src/themes/` supply palette and typography tokens; treatment CSS supplies visual decoration. Theme styles must not add a different session flow or document scrolling. Classic, Nocturne, and Cel-Shaded Mech have been removed. Saved selections of removed themes fall back to Big Button Sound Club.
 
 ## Theme development
 
-Copy `src/themes/theme.template.ts` to a new `*.theme.ts` file only when adding an intentional new theme. The build discovers definitions automatically. `src/themes/contract.ts` validates their appearance tokens and supplies defaults. Use Cel Mech and Pitch Press as the canonical examples; see [the theme contract](docs/themes.md) for details.
+Copy `src/themes/theme.template.ts` to a new `*.theme.ts` file only when adding an intentional new theme. The build discovers definitions automatically. `src/themes/contract.ts` validates their appearance tokens and supplies defaults. Use Big Button Sound Club and Pitch Press as the canonical examples; see [the theme contract](docs/themes.md) for details.
 
 Theme preferences use `mouthpiece.pitchtracker.theme.v1`, separately from tracker records. Backups contain tracker data, not appearance preferences. The v1 tracker format is unchanged.
 
@@ -18,7 +18,7 @@ Select **Big Button Sound Club** in the Theme picker for warm ivory molded surfa
 
 ## Lisa Lives!
 
-Select **Lisa Lives!** for the neon mockup-inspired variant: rainbow leopard/zebra print, a holographic leopard sticker, hot-pink playback, cyan candy controls and lime center feedback. The theme preserves shared layout and content, including Full Screen Split View. Paint uses theme tokens; two local generated PNG assets are bundled into the standalone HTML. No runtime requests or new dependencies are required.
+**Lisa Lives!** uses rainbow sparkle navigation, light pink–cyan–yellow holographic cards, puffy outlined lettering, and white-edged microphone/speaker stickers. Dark plum live instruments contrast with the stationery surfaces. Active range buttons carry a repeating candy shimmer; reduced motion retains a static highlight. Inactive class-view instruments have matte muted lenses, plain uncolored meters, and no animation; recorded results remain static. Saturated leopard/zebra artwork and the leopard sticker remain bundled, with an original faint dolphin/rainbow SVG watermark layered into the wallpaper. Existing bundled Bangers lettering adds playful headings without changing shared geometry or offline operation.
 
 ## Vintage Audio
 

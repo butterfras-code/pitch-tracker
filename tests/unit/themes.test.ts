@@ -13,7 +13,6 @@ describe('theme contract', () => {
     expect(THEME_REGISTRY.map((theme) => theme.id)).toEqual([
       'big-button',
       'boom-pow',
-      'cel-mech',
       'lisa-lives',
       'pitch-press',
       'vintage-audio',
