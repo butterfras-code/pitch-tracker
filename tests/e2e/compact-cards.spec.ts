@@ -106,7 +106,6 @@ test('target surface uses paired theme colors and direct toggle preserves attend
   await classroomPage(page);
   await sessionControl(page, 'Class view');
   for (const theme of [
-    'cel-mech',
     'pitch-press',
     'big-button',
     'lisa-lives',

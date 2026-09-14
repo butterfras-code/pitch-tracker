@@ -1,33 +1,29 @@
 /* Rave decoration consumes theme tokens; session geometry remains shared. */
-:root[data-treatment='rave'] {
+:root[data-theme='lisa-lives'] {
   scrollbar-color: var(--line) var(--bg);
   caret-color: var(--edge);
 }
-:root[data-treatment='rave'] body {
-  background-image: url('../assets/lisa-rainbow-print.png');
-  background-size: 640px;
-}
-:root[data-treatment='rave']
+:root[data-theme='lisa-lives']
   :is(header, .tabs, .session-toolbar, .dashboard-header) {
   background-color: var(--bg);
   border-radius: var(--help-radius);
 }
-:root[data-treatment='rave'] .student {
+:root[data-theme='lisa-lives'] .student {
   background-color: var(--card);
   box-shadow: var(--panel-shadow);
 }
-:root[data-treatment='rave'] ::selection {
+:root[data-theme='lisa-lives'] ::selection {
   background: var(--highlight);
   color: var(--bg);
 }
-:root[data-treatment='rave'] ::placeholder {
+:root[data-theme='lisa-lives'] ::placeholder {
   color: var(--control-ink);
   opacity: 1;
 }
-:root[data-treatment='rave'] .current-display {
+:root[data-theme='lisa-lives'] .current-display {
   border-color: var(--edge);
 }
-:root[data-treatment='rave'] .session-target {
+:root[data-theme='lisa-lives'] .session-target {
   background-color: var(--display-bg);
   background-image: url('../assets/lisa-leopard-sticker.png');
   background-size: clamp(48px, 7vw, 140px);
@@ -37,39 +33,39 @@
   border-radius: var(--display-radius);
   box-shadow: var(--display-shadow);
 }
-:root[data-treatment='rave'] .student .name {
+:root[data-theme='lisa-lives'] .student .name {
   color: var(--ink);
 }
-:root[data-treatment='rave'] [data-ui-click='show-current'] {
+:root[data-theme='lisa-lives'] [data-ui-click='show-current'] {
   color: var(--edge);
 }
-:root[data-treatment='rave'] .target-caption {
+:root[data-theme='lisa-lives'] .target-caption {
   color: var(--edge);
 }
-:root[data-treatment='rave'] .target-frequency {
+:root[data-theme='lisa-lives'] .target-frequency {
   color: var(--display-ink);
 }
-:root[data-treatment='rave'] .target-pitch {
+:root[data-theme='lisa-lives'] .target-pitch {
   text-shadow: var(--note-shadow);
 }
-:root[data-treatment='rave'] :is(.target-listening, .target-playback) {
+:root[data-theme='lisa-lives'] :is(.target-listening, .target-playback) {
   background-color: var(--accent);
   color: var(--primary-ink);
   border-color: var(--highlight);
 }
-:root[data-treatment='rave']
+:root[data-theme='lisa-lives']
   :is(.target-listening, .target-playback):hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
-:root[data-treatment='rave']
+:root[data-theme='lisa-lives']
   :is(.target-listening, .target-playback):active:not(:disabled) {
   box-shadow: var(--button-pressed-shadow);
 }
-:root[data-treatment='rave'] .tuner {
+:root[data-theme='lisa-lives'] .tuner {
   border-color: var(--edge);
   border-radius: var(--display-radius);
 }
-:root[data-treatment='rave'] .meter {
+:root[data-theme='lisa-lives'] .meter {
   background: linear-gradient(
     to right,
     var(--low),
@@ -78,10 +74,10 @@
   );
   box-shadow: var(--button-pressed-shadow);
 }
-:root[data-treatment='rave'] .needle {
+:root[data-theme='lisa-lives'] .needle {
   background: var(--display-bg);
 }
-:root[data-treatment='rave']
+:root[data-theme='lisa-lives']
   .classroom-feedback:has(
     #classroomStatus:not(:empty),
     #lastResult:not(:empty),
@@ -92,7 +88,230 @@
   color: var(--display-ink);
   box-shadow: var(--display-shadow);
 }
-:root[data-treatment='rave'] :is(.tabs button, .student .name) {
+:root[data-theme='lisa-lives'] :is(.tabs button, .student .name) {
   box-shadow: none;
   background-image: none;
+}
+
+/* Holographic stationery: light canvases over saturated animal print. */
+:root[data-theme='lisa-lives'] body {
+  background-image:
+    url('../assets/lisa-fantasy-watermark.svg'),
+    url('../assets/lisa-rainbow-print.png');
+  background-size: 520px, 640px;
+  background-blend-mode: screen, normal;
+}
+:root[data-theme='lisa-lives'] :is(.student, .current-display, .panel) {
+  background-image: var(--surface-pattern);
+  background-size:
+    13px 17px,
+    100% 100%;
+}
+:root[data-theme='lisa-lives'] :is(.app-header, .session-toolbar) {
+  color: var(--ink);
+  background-color: var(--card);
+  background-image:
+    radial-gradient(circle, var(--primary-ink) 0 0.6px, transparent 1px),
+    linear-gradient(
+      105deg,
+      var(--low),
+      var(--notice-bg),
+      var(--correct),
+      var(--high),
+      var(--line),
+      var(--low)
+    );
+  background-size:
+    11px 19px,
+    100% 100%;
+}
+:root[data-theme='lisa-lives'] .tabs {
+  background: transparent;
+}
+:root[data-theme='lisa-lives'] .tabs button.on {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+:root[data-theme='lisa-lives'] header h1 {
+  color: var(--accent);
+  text-shadow: var(--heading-shadow);
+  letter-spacing: 0.025em;
+}
+:root[data-theme='lisa-lives'] :is(.student .name, #studentIdentity h2) {
+  font-family: var(--heading-font);
+  font-weight: var(--heading-weight);
+  letter-spacing: 0.025em;
+  text-shadow: var(--heading-shadow);
+}
+:root[data-theme='lisa-lives'] #sessionShell .student.selected {
+  border-color: var(--correct);
+  box-shadow:
+    inset 0 0 0 3px var(--correct),
+    0 0 9px var(--correct);
+}
+:root[data-theme='lisa-lives'] [data-ui-click='show-current'] {
+  color: var(--ink);
+}
+:root[data-theme='lisa-lives'] #sessionShell .session-target {
+  background-color: var(--card);
+  color: var(--ink);
+  box-shadow: var(--panel-shadow);
+}
+:root[data-theme='lisa-lives'] :is(.target-caption, .target-frequency) {
+  color: var(--ink);
+}
+/* White die-cut edges follow the glyph, preserving the original hit area. */
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.target-listening, .target-playback) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--accent);
+  text-shadow: 0 1px var(--primary-ink);
+}
+:root[data-theme='lisa-lives'] :is(.target-listening, .target-playback) svg {
+  filter: drop-shadow(2px 0 0 var(--primary-ink))
+    drop-shadow(-2px 0 0 var(--primary-ink))
+    drop-shadow(0 2px 0 var(--primary-ink))
+    drop-shadow(0 -2px 0 var(--primary-ink))
+    drop-shadow(0 2px 2px var(--highlight));
+}
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.target-listening, .target-playback):hover:not(:disabled) {
+  color: var(--primary-hover);
+}
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.target-listening, .target-playback):active:not(:disabled)
+  svg {
+  filter: drop-shadow(0 0 2px var(--primary-ink));
+}
+:root[data-theme='lisa-lives'] #sessionShell .scorebar .low {
+  --candy: var(--low);
+}
+:root[data-theme='lisa-lives'] #sessionShell .scorebar .correct {
+  --candy: var(--correct);
+}
+:root[data-theme='lisa-lives'] #sessionShell .scorebar .high {
+  --candy: var(--high);
+}
+:root[data-theme='lisa-lives'] #sessionShell .scorebar button {
+  color: var(--ink);
+  background-color: var(--candy);
+  background-image: var(--control-pattern);
+  border-color: var(--primary-ink);
+  box-shadow: var(--button-shadow);
+}
+:root[data-theme='lisa-lives']
+  #sessionShell[data-range='low']
+  .tuner-section[data-live-practice]
+  .low,
+:root[data-theme='lisa-lives']
+  #sessionShell[data-range='correct']
+  .tuner-section[data-live-practice]
+  .correct,
+:root[data-theme='lisa-lives']
+  #sessionShell[data-range='high']
+  .tuner-section[data-live-practice]
+  .high {
+  outline: 3px solid var(--candy);
+  outline-offset: 2px;
+  background-image: linear-gradient(
+    110deg,
+    transparent 30%,
+    var(--primary-ink) 48%,
+    transparent 64%
+  );
+  background-size: 300% 100%;
+  box-shadow:
+    inset 0 2px 3px var(--primary-ink),
+    0 0 12px var(--candy);
+}
+@keyframes lisa-shimmer {
+  0%,
+  15% {
+    background-position: 100% 0;
+  }
+  75%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+/* Unpowered class instruments have no colored meter, glow or moving shimmer. */
+:root[data-theme='lisa-lives'] #sessionShell .inactive-practice .tuner {
+  background: color-mix(in srgb, var(--display-bg) 80%, var(--muted));
+  color: color-mix(in srgb, var(--display-ink) 60%, var(--display-bg));
+  border-color: var(--muted);
+  box-shadow: inset 0 2px 5px var(--bg);
+}
+:root[data-theme='lisa-lives'] #sessionShell .inactive-practice .meter {
+  background: var(--track);
+  box-shadow: none;
+}
+:root[data-theme='lisa-lives']
+  #sessionShell
+  .inactive-practice
+  .session-target {
+  background-image: none;
+  background-color: color-mix(in srgb, var(--card) 65%, var(--muted));
+  box-shadow: none;
+}
+:root[data-theme='lisa-lives']
+  #sessionShell
+  .inactive-practice
+  .scorebar
+  button {
+  animation: none;
+  box-shadow: none;
+}
+:root[data-theme='lisa-lives']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='low']
+  .low,
+:root[data-theme='lisa-lives']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='correct']
+  .correct,
+:root[data-theme='lisa-lives']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt[data-last-result='high']
+  .high {
+  opacity: 1;
+  border-color: var(--ink);
+  box-shadow: inset 0 2px 2px var(--primary-ink);
+}
+:root[data-theme='lisa-lives']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt::before {
+  opacity: 0.2;
+  animation: none;
+}
+:root[data-theme='lisa-lives'] #sessionShell button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='lisa-lives'] #sessionShell .scorebar button {
+    animation: none;
+  }
+}
+:root[data-theme='lisa-lives'] .dashboard-header {
+  background-color: var(--card);
+}
+:root[data-theme='lisa-lives'] #toast {
+  background: var(--display-bg);
+  color: var(--display-ink);
+}
+:root[data-theme='lisa-lives'] #sessionShell button[aria-pressed='true'] {
+  background-color: var(--correct);
+  color: var(--ink);
+}
+:root[data-theme='lisa-lives'] #sessionShell .inactive-practice .input-signal {
+  opacity: 0.4;
 }

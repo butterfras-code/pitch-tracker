@@ -81,10 +81,8 @@ export const DEFAULT_TOKENS = {
 };
 export type ThemeTokens = typeof DEFAULT_TOKENS;
 
-// Shared vocabulary for theme authors. Mech and print have CSS implemented;
-// the other treatments are reserved for the next shared-styling implementation.
+// Shared decoration vocabulary for theme authors.
 export const THEME_TREATMENTS = [
-  'mech',
   'print',
   'comic',
   'studio',

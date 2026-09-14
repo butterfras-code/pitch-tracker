@@ -14,7 +14,6 @@ describe('theme contract', () => {
       'b-pop-tune-hunters',
       'big-button',
       'boom-pow',
-      'cel-mech',
       'lisa-lives',
       'pitch-press',
       'vintage-audio',
