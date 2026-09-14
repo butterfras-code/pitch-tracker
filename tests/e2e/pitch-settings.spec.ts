@@ -7,6 +7,7 @@ import {
   sound,
 } from '../fixtures/classroom-page';
 import { selectTarget, setSlider } from '../fixtures/settings-controls';
+import { defaultPitchTargets } from '../../src/domain/defaults';
 
 test.beforeEach(async ({ page }) => {
   await classroomPage(page, 1);
@@ -80,6 +81,10 @@ test('graphical detection values and tuned playback feed actual measurement', as
     page.getByRole('slider', { name: 'Flute target adjustment', exact: true }),
     '18',
   );
+  await page
+    .getByRole('button', { name: 'Save settings', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
   for (const [label, value] of [
     ['A4 reference', '442'],
     ['Steady hold', '0.7'],
@@ -94,9 +99,6 @@ test('graphical detection values and tuned playback feed actual measurement', as
     await setSlider(slider, value);
     await expect(slider.locator('..').locator('output')).toContainText(value);
   }
-  await page
-    .getByRole('button', { name: 'Save settings', exact: true })
-    .click();
   expect((await saved(page)).settings).toMatchObject({
     a4: 442,
     hold: 0.7,
@@ -249,39 +251,30 @@ test('shared track scales and all three handles work without changing saved boun
   await expect(scale).toHaveValue('200');
   await expect(row.locator('.max-slider')).toHaveValue('150');
 });
-test('reset loads score-order band defaults with the tuned clarinet range', async ({
+test('instrument selector loads one editor with the tuned clarinet range', async ({
   page,
 }) => {
   await classroomPage(page);
+  await page.evaluate(
+    ({ key, configs }) => {
+      const data = JSON.parse(localStorage.getItem(key)!);
+      data.configs = configs;
+      localStorage.setItem(key, JSON.stringify(data));
+    },
+    {
+      key: 'mouthpiece.pitchtracker.v1',
+      configs: defaultPitchTargets(),
+    },
+  );
+  await page.reload();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  page.once('dialog', (dialog) => dialog.accept());
-  await page
-    .getByRole('button', { name: 'Reset pitch targets to defaults' })
-    .click();
-  await expect(page.locator('#configTable tbody tr')).toHaveCount(9);
-  await expect(
-    page
-      .locator('#configTable tbody tr')
-      .evaluateAll((rows) =>
-        rows.map((row) => (row as HTMLElement).dataset.instrument),
-      ),
-  ).resolves.toEqual([
-    'Flute',
-    'Oboe',
-    'Bassoon',
-    'Clarinet',
-    'Alto Saxophone',
-    'Trumpet',
-    'French Horn',
-    'Trombone/Euphonium',
-    'Tuba',
-  ]);
+  await page.getByLabel('Edit instrument').selectOption('Clarinet');
+  await expect(page.locator('#configTable tbody tr')).toHaveCount(1);
   const clarinet = page.locator('#configTable tr[data-instrument="Clarinet"]');
   await expect(clarinet.locator('.pitch')).toHaveValue('F#5');
   await expect(clarinet.locator('.min')).toHaveValue('-10');
   await expect(clarinet.locator('.target-offset')).toHaveValue('10');
   await expect(clarinet.locator('.max')).toHaveValue('90');
-  await page.getByRole('button', { name: 'Save settings' }).click();
   expect((await saved(page)).configs.Clarinet).toEqual({
     pitch: 'F#5',
     offset: 10,

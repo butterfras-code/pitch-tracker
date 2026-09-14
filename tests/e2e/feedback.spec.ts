@@ -368,16 +368,19 @@ test('user duration saves from session settings, controls timing across themes a
   expect(backup.settings.feedbackDurationMs).toBe(1500);
   await page.reload();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Defaults', exact: true }).click();
   await expect(duration).toHaveValue('1.5');
   await duration.fill('5');
   await duration.press('Tab');
   expect((await saved(page)).settings.feedbackDurationMs).toBe(5000);
   // Saving pitch settings later must not downgrade schema 3 or discard timing.
+  await page.getByRole('button', { name: 'Instruments', exact: true }).click();
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
   expect((await saved(page)).schema).toBe(3);
   expect((await saved(page)).settings.feedbackDurationMs).toBe(5000);
+  await page.getByRole('button', { name: 'Defaults', exact: true }).click();
   await duration.fill('0.1');
   await duration.dispatchEvent('change');
   expect((await saved(page)).settings.feedbackDurationMs).toBe(5000);

@@ -10,7 +10,9 @@ export function createBindings(app: App): UiBindings {
     click: {
       'target-clef': ({ element }) => editTarget(element, 'clef'),
       'target-clef-auto': ({ element }) => editTarget(element, 'auto'),
-      'target-reset': ({ element }) => editTarget(element, 'reset'),
+      'target-reset': ({ element }) => {
+        editTarget(element, 'reset');
+      },
       'session-view': ({ data }) =>
         app.workspace?.setView(data.view ?? 'split'),
       'session-fullscreen': () => app.workspace?.fullscreen(),
@@ -51,6 +53,8 @@ export function createBindings(app: App): UiBindings {
       'close-dialog': () => app.closeDialog(),
       'add-students': () => app.addStudent(),
       'add-instrument': () => app.addInstrument(),
+      'delete-instrument': () => app.deleteInstrument(),
+      'discard-settings': () => app.discardSettings(),
       'reset-pitch-targets': () => app.resetPitchTargets(),
       'toggle-focus': () => {
         app.focusMode = !app.focusMode;
@@ -103,6 +107,8 @@ export function createBindings(app: App): UiBindings {
           'application/json',
         ),
       'switch-tab': ({ data }) => app.switchTab(data.tab!),
+      'settings-section': ({ data }) =>
+        app.selectSettingsSection(data.section!),
     },
     change: {
       'feedback-duration': ({ value, element }) => {
@@ -110,7 +116,11 @@ export function createBindings(app: App): UiBindings {
           app.setFeedbackDuration(value);
       },
       'target-scale': ({ element }) => editTarget(element, 'scale'),
-      'target-note': ({ element }) => editTarget(element, 'note'),
+      'target-note': ({ element }) => {
+        editTarget(element, 'note');
+      },
+      'settings-instrument': ({ value }) => app.selectSettingsInstrument(value),
+      'session-defaults-auto-save': () => app.saveSessionDefaults(),
       'microphone-input': ({ value }) => app.changeMicrophone(value),
       'classroom-mode': ({ value }) => {
         if (value !== 'until-correct' && value !== 'one-and-done') return;
@@ -143,8 +153,13 @@ export function createBindings(app: App): UiBindings {
       'import-backup': ({ event }) => app.importBackup(event),
     },
     input: {
-      'target-slide': ({ element }) => editTarget(element, 'slide'),
-      'detection-slide': ({ element }) => editDetection(element),
+      'target-slide': ({ element }) => {
+        editTarget(element, 'slide');
+      },
+      'detection-slide': ({ element }) => {
+        editDetection(element);
+        app.saveDetectionSetting();
+      },
       search: ({ value }) => {
         app.search = value;
         app.renderCards();

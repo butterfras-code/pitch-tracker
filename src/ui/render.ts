@@ -21,6 +21,7 @@ export const render = {
       'admin-active',
       this.tab === 'admin' || this.tab === 'settings',
     );
+    document.body.classList.toggle('settings-active', this.tab === 'settings');
     if (this.tab === 'session' && this.ses()) {
       this.renderClassroom();
       return;

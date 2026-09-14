@@ -83,67 +83,131 @@ export const adminView = {
       </div> `;
   },
   settingsHTML(this: App): string {
-    return /* HTML */ `<h2 class="settings-title">Settings</h2>
-      <form data-ui-submit="settings">
-        <details class="panel settings-shade" open>
-          <summary>Pitch targets</summary>
-          <div class="shade-content">
+    const names = Object.keys(this.db.configs);
+    const selected = this.db.configs[this.settingsInstrument]
+      ? this.settingsInstrument
+      : (names[0] ?? '');
+    this.settingsInstrument = selected;
+    const nav = /* HTML */ `<nav
+      class="settings-nav"
+      aria-label="Settings sections"
+    >
+      ${[
+        ['instruments', 'Instruments'],
+        ['detection', 'Detection'],
+        ['defaults', 'Defaults'],
+      ]
+        .map(
+          ([section, label]) =>
+            `<button type="button" data-ui-click="settings-section" data-section="${section}" class="${this.settingsSection === section ? 'on' : ''}" aria-current="${this.settingsSection === section ? 'page' : 'false'}">${label}</button>`,
+        )
+        .join('')}
+    </nav>`;
+    let content: string;
+    if (this.settingsSection === 'instruments')
+      content = /* HTML */ `<form
+        class="settings-pane panel"
+        data-ui-submit="settings"
+      >
+        <header class="settings-pane-header">
+          <div>
+            <h2>Instruments</h2>
             <p class="muted">
-              Choose a concert note and octave, then drag Min, Target, and Max.
-              Moving Target keeps the range width. Min and Max are cents
-              relative to Target. Use arrow keys for precise adjustments.
+              Set the concert pitch target and accepted range.
             </p>
-            <div class="row" style="margin-bottom:16px">
-              <button type="button" data-ui-click="reset-pitch-targets">
-                Reset pitch targets to defaults
-              </button>
-            </div>
-            <div class="tablewrap target-table-wrap">
-              <table id="configTable">
-                <thead>
-                  <tr>
-                    <th>Instrument & note</th>
-                    <th>Staff · click to switch clef</th>
-                    <th>Accepted pitch range</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${Object.entries(this.db.configs)
-                    .map(([name, config]) =>
-                      targetRow(name, config, this.db.settings.a4),
-                    )
-                    .join('')}
-                </tbody>
-              </table>
-            </div>
           </div>
-        </details>
-        <details class="panel settings-shade" open>
-          <summary>Detection</summary>
-          <div class="shade-content">
-            <div class="detection-controls">
-              ${detectionSlider('a4', 'A4 reference (Hz)', this.db.settings.a4, 400, 480, 0.1, 'Hz', '400 Hz', '480 Hz')}
-              ${detectionSlider('hold', 'Steady hold (seconds)', this.db.settings.hold, 0.5, 5, 0.1, 'seconds', 'Shorter hold', 'Longer hold')}
-              ${detectionSlider('stability', 'Allowed pitch spread (cents)', this.db.settings.stability, 5, 100, 1, 'cents', 'Steadier pitch', 'More variation')}
-              ${detectionSlider('gate', 'Noise gate (RMS; lower = more sensitive)', this.db.settings.gate, 0.001, 0.2, 0.001, 'RMS', 'More sensitive', 'More noise filtering')}
-            </div>
+          <div class="instrument-toolbar">
+            <label
+              >Instrument<select
+                aria-label="Edit instrument"
+                data-ui-change="settings-instrument"
+              >
+                ${names.map((name) => `<option ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}
+              </select></label
+            >
+            <button
+              type="button"
+              aria-label="Add instrument"
+              data-ui-click="add-instrument"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              aria-label="Delete instrument"
+              class="danger"
+              data-ui-click="delete-instrument"
+            >
+              Delete
+            </button>
           </div>
-        </details>
-        <div class="row" style="margin-top:18px">
-          <button class="primary">Save settings</button
-          ><button type="button" data-ui-click="add-instrument">
-            Add instrument
-          </button>
+        </header>
+        <div class="settings-pane-scroll">
+          <p class="muted">
+            Choose a concert note and octave, then drag Min, Target, and Max.
+            Moving Target keeps the range width. Min and Max are cents relative
+            to Target. Use arrow keys for precise adjustments.
+          </p>
+          <div class="tablewrap target-table-wrap">
+            <table id="configTable" data-a4="${this.db.settings.a4}">
+              <tbody>
+                ${selected ? targetRow(selected, this.db.configs[selected], this.db.settings.a4) : ''}
+              </tbody>
+            </table>
+          </div>
         </div>
         <p id="settingsError" role="alert" class="danger"></p>
-      </form>
-      <details class="panel settings-shade" open>
-        <summary>Feedback popups</summary>
-        <div class="shade-content">
-          ${feedbackDurationControl(this.db.settings.feedbackDurationMs)}
+        <div class="settings-action-bar">
+          <span id="settingsDraftStatus" role="status">All changes saved</span>
+          <div class="row">
+            <button
+              type="button"
+              data-ui-click="discard-settings"
+              data-settings-dirty-action
+              disabled
+            >
+              Revert changes
+            </button>
+            <button class="primary">Save settings</button>
+          </div>
         </div>
-      </details>
-      ${sessionDefaultsHTML(this.db)}`;
+      </form>`;
+    else if (this.settingsSection === 'detection')
+      content = /* HTML */ `<section class="settings-pane panel">
+        <header class="settings-pane-header">
+          <div>
+            <h2>Detection</h2>
+            <p class="muted">Changes save automatically.</p>
+          </div>
+        </header>
+        <div class="settings-pane-scroll">
+          <div class="detection-controls">
+            ${detectionSlider('a4', 'A4 reference (Hz)', this.db.settings.a4, 400, 480, 0.1, 'Hz', '400 Hz', '480 Hz')}
+            ${detectionSlider('hold', 'Steady hold (seconds)', this.db.settings.hold, 0.5, 5, 0.1, 'seconds', 'Shorter hold', 'Longer hold')}
+            ${detectionSlider('stability', 'Allowed pitch spread (cents)', this.db.settings.stability, 5, 100, 1, 'cents', 'Steadier pitch', 'More variation')}
+            ${detectionSlider('gate', 'Noise gate (RMS; lower = more sensitive)', this.db.settings.gate, 0.001, 0.2, 0.001, 'RMS', 'More sensitive', 'More noise filtering')}
+          </div>
+        </div>
+      </section>`;
+    else
+      content = /* HTML */ `<section class="settings-pane panel">
+        <header class="settings-pane-header">
+          <div>
+            <h2>Defaults</h2>
+            <p class="muted">Changes save automatically.</p>
+          </div>
+        </header>
+        <div class="settings-pane-scroll stack">
+          <section class="panel settings-default-card">
+            <h3>Feedback popups</h3>
+            ${feedbackDurationControl(this.db.settings.feedbackDurationMs)}
+          </section>
+          <section class="panel settings-default-card">
+            ${sessionDefaultsHTML(this.db)}
+          </section>
+        </div>
+      </section>`;
+    return /* HTML */ `<div class="settings-shell">${nav}${content}</div>`;
   },
   helpHTML(this: App): string {
     return /* HTML */ `<div class="panel stack" style="max-width:850px">
@@ -239,19 +303,20 @@ export const adminView = {
         cents, Normal ±100, and Wide ±200. Arrow keys adjust one step. Reset to
         note removes custom tuning. The staff uses treble at middle C (C4) and
         above, bass below; click it to override or choose Auto clef. Detection
-        sliders show their values as you drag. Save settings applies the
-        changes. Older JSON backups remain supported.
+        sliders show their values as you drag and save automatically. Save
+        settings applies instrument changes. Older JSON backups remain
+        supported.
       </p>
       <h3>Settings and session defaults</h3>
       <p>
-        Pitch targets, Detection, and Session defaults can each be collapsed.
-        Collapsing keeps unsaved edits. Save settings applies pitch and
-        detection changes; Save session defaults saves session behavior
-        separately. Defaults apply when starting, resuming, switching classes,
-        reopening, or restoring sessions. They do not change the session
-        currently running. Microphone activation remains manual. Saving defaults
-        upgrades the backup format; older app versions cannot read these new
-        backups.
+        Use the Instruments, Detection, and Defaults sections in Settings.
+        Instrument changes remain drafts until saved; the app warns before
+        navigation would discard them. Detection and default changes save
+        automatically. Defaults apply when starting, resuming, switching
+        classes, reopening, or restoring sessions. They do not change the
+        session currently running. Microphone activation remains manual.
+        Changing defaults upgrades the backup format; older app versions cannot
+        read these new backups.
       </p>
       <h3>Session views</h3>
       <p>

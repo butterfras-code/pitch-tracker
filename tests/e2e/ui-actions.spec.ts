@@ -76,17 +76,20 @@ test('class, student and settings forms retain their behavior', async ({
   page.once('dialog', (dialog) => dialog.accept('Custom brass'));
   await page.getByRole('button', { name: 'Add instrument' }).click();
   await selectTarget(page, 'Custom brass', 'Bb3');
-  await setSlider(page.getByLabel('A4 reference (Hz)'), '442');
   await page.getByRole('button', { name: 'Save settings' }).click();
   await expect(page.locator('#toast')).toContainText('Pitch settings saved');
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
+  await setSlider(page.getByLabel('A4 reference (Hz)'), '442');
   await page.reload();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByLabel('Edit instrument').selectOption('Custom brass');
   await expect(
     page.getByLabel('Custom brass note', { exact: true }),
   ).toHaveValue('Bb');
   await expect(
     page.getByLabel('Custom brass octave', { exact: true }),
   ).toHaveValue('3');
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
   await expect(page.getByLabel('A4 reference (Hz)')).toHaveValue('442');
 });
 

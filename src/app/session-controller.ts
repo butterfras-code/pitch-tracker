@@ -17,6 +17,16 @@ export const sessionController = {
     this.save();
   },
   switchTab(this: App, tab: string): void {
+    const settings = document.querySelector<HTMLFormElement>(
+      '[data-ui-submit="settings"]',
+    );
+    if (
+      this.tab === 'settings' &&
+      tab !== 'settings' &&
+      settings?.dataset.dirty === 'true' &&
+      !confirm('Leave without saving your instrument changes?')
+    )
+      return;
     this.pitchFeedback.clear();
     this.cancelCheck();
     this.tab = tab;

@@ -49,6 +49,11 @@ export interface App extends AppState {
   saveStudent(id: string): void;
   archiveStudent(id: string): void;
   addInstrument(): void;
+  deleteInstrument(): void;
+  discardSettings(): void;
+  selectSettingsSection(section: string): void;
+  selectSettingsInstrument(name: string): void;
+  saveDetectionSetting(): void;
   resetPitchTargets(): void;
   saveSettings(): void;
   setFeedbackDuration(value: string): void;

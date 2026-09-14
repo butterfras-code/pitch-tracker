@@ -29,6 +29,8 @@ export interface AppState extends SessionState {
   filter: string;
   focusMode: boolean;
   historyStudent: string;
+  settingsSection: 'instruments' | 'detection' | 'defaults';
+  settingsInstrument: string;
   toastTimer: ReturnType<typeof setTimeout> | undefined;
   pitchFeedback: PitchFeedback;
   disposed: boolean;
@@ -76,6 +78,8 @@ export function createState(
     filter: 'all',
     focusMode: false,
     historyStudent: 'all',
+    settingsSection: 'instruments',
+    settingsInstrument: Object.keys(db.configs)[0] ?? '',
     toastTimer: undefined,
     pitchFeedback: new PitchFeedback(),
     undoStack: [],

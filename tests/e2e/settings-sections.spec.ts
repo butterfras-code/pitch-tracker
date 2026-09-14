@@ -11,34 +11,103 @@ import { setSlider } from '../fixtures/settings-controls';
 
 async function openDefaults(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Defaults', exact: true }).click();
   return page.locator('[data-ui-submit="session-defaults"]');
 }
 
-test('settings shades preserve drafts when toggled by mouse and keyboard', async ({
+test('settings navigation warns before discarding a pitch draft and detection autosaves', async ({
   page,
 }) => {
   await classroomPage(page);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Flute note', { exact: true }).selectOption('B');
-  await setSlider(page.getByLabel('Steady hold (seconds)'), '3');
-  for (const name of ['Pitch targets', 'Detection', 'Session defaults']) {
-    const shade = page
-      .locator('details')
-      .filter({ has: page.locator('summary', { hasText: name }) });
-    await shade.locator('summary').click();
-    await expect(shade).not.toHaveAttribute('open');
-    await shade.locator('summary').press('Enter');
-    await expect(shade).toHaveAttribute('open');
-  }
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Instruments' }),
+  ).toBeVisible();
   await expect(page.getByLabel('Flute note', { exact: true })).toHaveValue('B');
-  await expect(page.getByLabel('Steady hold (seconds)')).toHaveValue('3');
-  await page.locator('summary', { hasText: 'Pitch targets' }).click();
-  await page.locator('summary', { hasText: 'Detection' }).click();
-  await page
-    .getByRole('button', { name: 'Save settings', exact: true })
-    .click();
-  expect((await saved(page)).configs.Flute.pitch).toBe('B4');
-  expect((await saved(page)).settings.hold).toBe(3);
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
+  await setSlider(page.getByLabel('Steady hold (seconds)'), '3');
+  await expect.poll(async () => (await saved(page)).settings.hold).toBe(3);
+  expect((await saved(page)).configs.Flute.pitch).toBe('A4');
+});
+
+test('adding an instrument stays in the current draft until save and can be discarded', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const save = page.getByRole('button', { name: 'Save settings', exact: true });
+  const discard = page.getByRole('button', { name: 'Revert changes' });
+  await expect(discard).toBeDisabled();
+  await expect(page.locator('#settingsDraftStatus')).toHaveText(
+    'All changes saved',
+  );
+
+  await page.getByLabel('Flute note', { exact: true }).selectOption('B');
+  await save.click();
+  page.once('dialog', (dialog) => dialog.accept('Piccolo'));
+  await page.getByRole('button', { name: 'Add instrument' }).click();
+  await expect(page.locator('tr[data-instrument="Piccolo"]')).toBeVisible();
+  await expect(discard).toBeEnabled();
+  await expect(page.locator('#settingsDraftStatus')).toHaveText(
+    'Unsaved changes',
+  );
+  expect((await saved(page)).configs.Piccolo).toBeUndefined();
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await discard.click();
+  await expect(page.locator('tr[data-instrument="Piccolo"]')).toHaveCount(0);
+  await expect(page.getByLabel('Flute note', { exact: true })).toHaveValue('B');
+
+  page.once('dialog', (dialog) => dialog.accept('Piccolo'));
+  await page.getByRole('button', { name: 'Add instrument' }).click();
+  await page.getByLabel('Piccolo note', { exact: true }).selectOption('B');
+  await save.click();
+  await expect(discard).toBeDisabled();
+  expect((await saved(page)).configs).toMatchObject({
+    Flute: { pitch: 'B4' },
+    Piccolo: { pitch: 'B' },
+  });
+});
+
+test('instrument selector shows one editor and assigned instruments cannot be deleted', async ({
+  page,
+}) => {
+  await classroomPage(page);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  expect(
+    await page.evaluate(() => {
+      const main = document.querySelector('main')!;
+      return {
+        documentFits: document.documentElement.scrollHeight <= innerHeight,
+        mainFits: main.scrollHeight <= main.clientHeight,
+        editorOwnsOverflow:
+          document.querySelector('.settings-pane-scroll')!.scrollHeight >=
+          document.querySelector('.settings-pane-scroll')!.clientHeight,
+      };
+    }),
+  ).toEqual({
+    documentFits: true,
+    mainFits: true,
+    editorOwnsOverflow: true,
+  });
+  await expect(page.locator('#configTable tbody tr')).toHaveCount(1);
+  page.once('dialog', (dialog) => dialog.accept('Piccolo'));
+  await page.getByRole('button', { name: 'Add instrument' }).click();
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByLabel('Edit instrument').selectOption('Flute');
+  await expect(page.locator('#configTable tbody tr')).toHaveAttribute(
+    'data-instrument',
+    'Flute',
+  );
+  await page.getByRole('button', { name: 'Delete instrument' }).click();
+  await expect(page.locator('#toast')).toContainText(
+    'cannot be deleted while it is assigned to a student',
+  );
+  expect((await saved(page)).configs.Flute).toBeDefined();
 });
 
 test('defaults leave the active session alone, then initialize reopened and new sessions', async ({
@@ -50,8 +119,7 @@ test('defaults leave the active session alone, then initialize reopened and new 
   await form.getByLabel('Advance mode').selectOption('one-and-done');
   await form.getByLabel('Clap navigation').check();
   await form.getByLabel('Starting view').selectOption('class');
-  await form.getByRole('button', { name: 'Save session defaults' }).click();
-  expect((await saved(page)).schema).toBe(3);
+  await expect.poll(async () => (await saved(page)).schema).toBe(3);
   expect((await saved(page)).settings.advance).toBe(false);
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
@@ -86,11 +154,6 @@ test('defaults leave the active session alone, then initialize reopened and new 
     .getByRole('button', { name: 'Start session', exact: true })
     .first()
     .click();
-  await page.getByLabel('Session name').fill('Defaults rehearsal');
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
   await settings(page);
   await expect(page.getByLabel('Auto Advance', { exact: true })).toBeChecked();
   await expect(page.getByLabel('Clap navigation')).toBeChecked();
@@ -114,13 +177,12 @@ test('failed default saves keep the previous defaults and report the failure', a
   await classroomPage(page);
   const form = await openDefaults(page);
   const before = await saved(page);
-  await form.getByLabel('Clap navigation').check();
   await page.evaluate(() => {
     Storage.prototype.setItem = () => {
       throw new DOMException('Full', 'QuotaExceededError');
     };
   });
-  await form.getByRole('button', { name: 'Save session defaults' }).click();
+  await form.getByLabel('Clap navigation').check();
   await expect(page.locator('#sessionDefaultsError')).toContainText(
     'could not be saved',
   );
@@ -133,7 +195,10 @@ test('restored defaults survive pitch saves and apply on resume', async ({
   await classroomPage(page);
   const form = await openDefaults(page);
   await form.getByLabel('Starting view').selectOption('student');
-  await form.getByRole('button', { name: 'Save session defaults' }).click();
+  await expect
+    .poll(async () => (await saved(page)).sessionDefaults?.view)
+    .toBe('student');
+  await page.getByRole('button', { name: 'Instruments', exact: true }).click();
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();

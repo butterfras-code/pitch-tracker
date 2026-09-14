@@ -20,6 +20,21 @@ const chromatic = [
 const signed = (n: number) => `${n > 0 ? '+' : ''}${n}¢`;
 const input = (row: Element, cls: string) =>
   row.querySelector<HTMLInputElement>(`.${cls}`)!;
+
+/** Reflect whether the explicit pitch/detection settings draft differs from storage. */
+export function setSettingsDirty(dirty: boolean): void {
+  const form = document.querySelector<HTMLFormElement>(
+    '[data-ui-submit="settings"]',
+  );
+  if (!form) return;
+  form.dataset.dirty = String(dirty);
+  form
+    .querySelectorAll<HTMLButtonElement>('[data-settings-dirty-action]')
+    .forEach((button) => (button.disabled = !dirty));
+  const status = form.querySelector<HTMLElement>('#settingsDraftStatus');
+  if (status)
+    status.textContent = dirty ? 'Unsaved changes' : 'All changes saved';
+}
 /** Preserve imported precision until a slider is explicitly edited. */
 export function rangeValue(slider: HTMLInputElement): number {
   return +(slider.dataset.originalValue ?? slider.value);
@@ -110,7 +125,10 @@ function refresh(row: HTMLElement): void {
   const config = draft(row),
     offset = config.offset ?? 0;
   const scale = +row.dataset.scale!;
-  const a4 = rangeValue(document.querySelector<HTMLInputElement>('#a4')!);
+  const a4Slider = document.querySelector<HTMLInputElement>('#a4');
+  const a4 = a4Slider
+    ? rangeValue(a4Slider)
+    : Number(row.closest<HTMLTableElement>('table')!.dataset.a4);
   row.querySelector('.target-summary')!.innerHTML = summary(config, a4);
   row.querySelector('.range-readouts')!.innerHTML = readouts(config);
   row.querySelector('.pitch-ticks')!.innerHTML = ticks(config.pitch, scale);
@@ -205,6 +223,8 @@ export function editTarget(
     row.dataset.clef = current === 'treble' ? 'bass' : 'treble';
   }
   refresh(row);
+  if (action === 'note' || action === 'slide' || action === 'reset')
+    setSettingsDirty(true);
 }
 
 export function detectionSlider(

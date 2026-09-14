@@ -196,9 +196,6 @@ for (const width of [390, 1440]) {
       width: getComputedStyle(el).width,
       height: getComputedStyle(el).height,
     }));
-    const structure = await page
-      .locator('.detection-controls')
-      .evaluate((el) => getComputedStyle(el).gridTemplateColumns);
     await page
       .getByRole('combobox', { name: 'Theme', exact: true })
       .selectOption('pitch-press');
@@ -206,7 +203,7 @@ for (const width of [390, 1440]) {
       'background-color',
       'rgb(232, 223, 201)',
     );
-    await expect(page.locator('.panel').first()).toHaveCSS(
+    await expect(page.locator('.settings-pane')).toHaveCSS(
       'border-radius',
       '0px',
     );
@@ -217,17 +214,6 @@ for (const width of [390, 1440]) {
         height: getComputedStyle(el).height,
       })),
     ).toEqual(dimensions);
-    const columns = await page
-      .locator('.detection-controls')
-      .evaluate((el) =>
-        getComputedStyle(el).gridTemplateColumns.split(' ').map(parseFloat),
-      );
-    const previousColumns = structure.split(' ').map(parseFloat);
-    expect(columns).toHaveLength(previousColumns.length);
-    // Existing theme borders differ by one pixel on each side.
-    columns.forEach((size, index) =>
-      expect(Math.abs(size - previousColumns[index]!)).toBeLessThanOrEqual(2),
-    );
     await expect(slider).toHaveValue('18');
     await page.screenshot({
       path: `test-results/theme-pitch-press-${width}-${test.info().project.name}.png`,

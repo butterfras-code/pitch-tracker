@@ -1,4 +1,4 @@
-import { rangeValue } from '../ui/pitch-settings';
+import { rangeValue, setSettingsDirty } from '../ui/pitch-settings';
 import { migrateToV2 } from '../domain/backup';
 /** Coordinates roster and settings forms with validation and persistence. */
 import type { TrackerData } from '../domain/tracker';
@@ -114,22 +114,129 @@ export const rosterController = {
     this.toast(p.name + ' deleted from class.');
   },
   addInstrument(this: App): void {
-    const name = prompt('Instrument name (save any pending settings first):');
+    const form = document.querySelector<HTMLFormElement>(
+      '[data-ui-submit="settings"]',
+    );
+    if (form?.dataset.dirty === 'true') {
+      this.toast(
+        'Save or revert the current instrument before adding another.',
+      );
+      return;
+    }
+    const name = prompt('Instrument name:');
     if (!name?.trim()) return;
     const n = name.trim();
     if (
       n.length > 120 ||
       ['__proto__', 'constructor', 'prototype'].includes(n) ||
       Object.keys(this.db.configs).some(
-        (k) => k.toLowerCase() === n.toLowerCase(),
+        (instrument) => instrument.toLowerCase() === n.toLowerCase(),
+      ) ||
+      Array.from(document.querySelectorAll('#configTable tbody tr')).some(
+        (row) =>
+          (row as HTMLElement).dataset.instrument!.toLowerCase() ===
+          n.toLowerCase(),
       )
     ) {
       this.toast('Use a unique instrument name.');
       return;
     }
-    this.db.configs[n] = { pitch: 'C', min: -25, max: 25 };
-    this.save();
+    const select = document.querySelector<HTMLSelectElement>(
+      '[data-ui-change="settings-instrument"]',
+    )!;
+    select.insertAdjacentHTML('beforeend', `<option selected>${n}</option>`);
+    select.value = n;
+    this.settingsInstrument = n;
+    document.querySelector('#configTable tbody')!.innerHTML = targetRow(
+      n,
+      { pitch: 'C', min: -25, max: 25 },
+      this.db.settings.a4,
+    );
+    setSettingsDirty(true);
+    this.toast(`${n} added to the settings draft.`);
+  },
+  deleteInstrument(this: App): void {
+    const name = this.settingsInstrument;
+    if (!name) return;
+    const used = this.db.classes.some((c) =>
+      c.students.some((student) => student.instrument === name),
+    );
+    if (used) {
+      this.toast(
+        `${name} cannot be deleted while it is assigned to a student.`,
+      );
+      return;
+    }
+    const isPersisted = Object.hasOwn(this.db.configs, name);
+    if (isPersisted && !confirm(`Delete ${name}? This cannot be undone.`))
+      return;
+    if (isPersisted) {
+      const previous = this.db.configs[name];
+      delete this.db.configs[name];
+      if (!this.save()) {
+        this.db.configs[name] = previous;
+        this.toast(`${name} could not be deleted.`);
+        return;
+      }
+    }
+    this.settingsInstrument = Object.keys(this.db.configs)[0] ?? '';
     this.render();
+    this.toast(`${name} deleted.`);
+  },
+  discardSettings(this: App): void {
+    const form = document.querySelector<HTMLFormElement>(
+      '[data-ui-submit="settings"]',
+    );
+    if (form?.dataset.dirty !== 'true') return;
+    if (!confirm('Discard unsaved pitch and detection changes?')) return;
+    this.render();
+    this.toast('Unsaved settings discarded.');
+  },
+  selectSettingsSection(this: App, section: string): void {
+    if (!['instruments', 'detection', 'defaults'].includes(section)) return;
+    const form = document.querySelector<HTMLFormElement>(
+      '[data-ui-submit="settings"]',
+    );
+    if (
+      form?.dataset.dirty === 'true' &&
+      !confirm('Continue without saving your instrument changes?')
+    )
+      return;
+    this.settingsSection = section as App['settingsSection'];
+    this.render();
+  },
+  selectSettingsInstrument(this: App, name: string): void {
+    const select = document.querySelector<HTMLSelectElement>(
+      '[data-ui-change="settings-instrument"]',
+    );
+    const form = document.querySelector<HTMLFormElement>(
+      '[data-ui-submit="settings"]',
+    );
+    if (
+      form?.dataset.dirty === 'true' &&
+      !confirm('Switch instruments without saving your changes?')
+    ) {
+      if (select) select.value = this.settingsInstrument;
+      return;
+    }
+    if (!Object.hasOwn(this.db.configs, name)) return;
+    this.settingsInstrument = name;
+    this.render();
+  },
+  saveDetectionSetting(this: App): void {
+    const settings = {
+      ...this.db.settings,
+      a4: rangeValue($('a4')),
+      hold: rangeValue($('hold')),
+      stability: rangeValue($('stability')),
+      gate: rangeValue($('gate')),
+    };
+    const previous = this.db.settings;
+    this.db.settings = settings;
+    if (!this.save()) {
+      this.db.settings = previous;
+      this.toast('Detection settings could not be saved.');
+    }
   },
   resetPitchTargets(this: App): void {
     if (!confirm('Reset every pitch target to the band defaults?')) return;
@@ -139,11 +246,12 @@ export const rosterController = {
       .map(([name, config]) => targetRow(name, config, this.db.settings.a4))
       .join('');
     $('settingsError').textContent = '';
+    setSettingsDirty(true);
     this.toast('Pitch target defaults loaded. Save settings to apply them.');
   },
   saveSettings(this: App): void {
     try {
-      const configs: TrackerData['configs'] = {};
+      const configs: TrackerData['configs'] = { ...this.db.configs };
       document
         .querySelectorAll<HTMLTableRowElement>('#configTable tbody tr')
         .forEach((row) => {
@@ -162,22 +270,24 @@ export const rosterController = {
           );
           configs[row.dataset.instrument!] = { pitch, min, max, offset };
         });
-      const settings = {
-        ...this.db.settings,
-        a4: rangeValue($('a4')),
-        hold: rangeValue($('hold')),
-        stability: rangeValue($('stability')),
-        gate: rangeValue($('gate')),
-      };
+      const settings = this.db.settings;
       const upgraded = migrateToV2(this.db);
       validate({ ...upgraded, configs, settings });
+      const previous = this.db;
+      const candidate = { ...upgraded, configs, settings };
       this.cancelCheck();
-      this.db = { ...upgraded, configs, settings };
+      this.db = candidate;
       $('settingsError').textContent = '';
-      if (this.save())
-        this.toast(
-          'Pitch settings saved. Existing measurements keep their original targets.',
-        );
+      if (!this.save()) {
+        this.db = previous;
+        $('settingsError').textContent =
+          'Settings could not be saved. Your previous settings are unchanged.';
+        return;
+      }
+      setSettingsDirty(false);
+      this.toast(
+        'Pitch settings saved. Existing measurements keep their original targets.',
+      );
     } catch (e) {
       $('settingsError').textContent = errorMessage(e);
     }
