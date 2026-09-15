@@ -25,11 +25,9 @@ export const detection = {
       return;
     }
     this.analyser.getFloatTimeDomainData(this.buffer);
-    const freq = detectPitch(
-      this.buffer,
-      this.ctx.sampleRate,
-      this.db.settings.gate,
-    );
+    // Observe quiet tones below the scoring gate so a softer sustained note
+    // cannot masquerade as a pause. The configured gate still controls scoring.
+    const freq = detectPitch(this.buffer, this.ctx.sampleRate, 0.001);
     const rms = Math.sqrt(
       this.buffer.reduce((sum, x) => sum + x * x, 0) / this.buffer.length,
     );
@@ -87,7 +85,7 @@ export const detection = {
       }
       const hold = this.pitchHold.frame(
         now,
-        freq,
+        rms >= this.db.settings.gate ? freq : null,
         this.db.configs[pupil.instrument],
         this.db.settings.a4,
         this.db.settings.hold,
@@ -97,7 +95,10 @@ export const detection = {
       if (findElement('holdProgress'))
         $('holdProgress').style.width = hold.progress * 100 + '%';
     }
-    const displayFrequency = this.pitchDisplay.frame(now, freq);
+    const displayFrequency = this.pitchDisplay.frame(
+      now,
+      rms >= this.db.settings.gate ? freq : null,
+    );
     const sessionShell = findElement('sessionShell');
     if (!displayFrequency || !pupil) {
       if (sessionShell) sessionShell.dataset.range = '';

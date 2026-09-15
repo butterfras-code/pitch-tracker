@@ -178,3 +178,56 @@ test('projected student view keeps large name and navigation together', async ({
     page.getByRole('button', { name: 'Next student', exact: true }),
   ).toBeInViewport();
 });
+
+test('hands-off handoff accepts fluctuating quieter noise but rejects a continuing softer tone', async ({
+  page,
+}) => {
+  await settings(page);
+  await page
+    .getByLabel('Advance', { exact: true })
+    .selectOption('after-attempt');
+  await closeSettings(page);
+  await page.locator('#pauseListening').click();
+  await sound(page, 0);
+  await sound(page, 392, 900);
+  expect((await saved(page)).activeStudent).toBe('student-2');
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  // Both a long held tone and a decrescendo below the scoring gate must stay locked.
+  await sound(page, 392, 2000);
+  await page.evaluate(() => {
+    window.syntheticAudio.amplitude = 0.008;
+  });
+  await page.clock.runFor(2000);
+  await sound(page, 392, 1000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  // A brief interruption cannot release the previous attempt.
+  await sound(page, 0, 160);
+  await sound(page, 392, 1000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  // Entirely above the noise gate, with >1.5x variation: neither older
+  // pause path can accept this, but it is much quieter than the played tone.
+  await page.evaluate(() => {
+    window.syntheticAudio.amplitude = 0;
+  });
+  for (let i = 0; i < 12; i++) {
+    await page.evaluate(
+      (amplitude) => {
+        window.syntheticAudio.noiseAmplitude = amplitude;
+      },
+      i % 2 ? 0.075 : 0.03,
+    );
+    await page.clock.runFor(100);
+  }
+  await expect(
+    page.locator('.card-feedback, #pitchFeedback[open]'),
+  ).toHaveCount(0);
+  await sound(page, 440, 900);
+  const data = await saved(page);
+  expect(data.activeStudent).toBe('student-3');
+  expect(data.sessions[0].attempts.map((attempt) => attempt.status)).toEqual([
+    'low',
+    'correct',
+  ]);
+  await sound(page, 440, 4000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(2);
+});

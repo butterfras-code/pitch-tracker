@@ -57,7 +57,7 @@ export function fresh(): TrackerData {
     schema: 2,
     classes: [c],
     configs: defaultPitchTargets(),
-    settings: { a4: 440, hold: 2, stability: 35, gate: 0.015, advance: false },
+    settings: { a4: 440, hold: 2, stability: 35, gate: 0.015, advance: true },
     sessions: [],
     classId: c.id,
     activeSession: null,

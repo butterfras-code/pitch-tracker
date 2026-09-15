@@ -6,7 +6,7 @@ import {
 } from '../../src/domain/classroom';
 
 describe('classroom turn rules', () => {
-  it('defaults to advancing only correct attempts; one and done accepts any completed result', () => {
+  it('advances according to the selected policy; one and done accepts any completed result', () => {
     expect(shouldAdvance(true, 'until-correct', 'low')).toBe(false);
     expect(shouldAdvance(true, 'until-correct', 'correct')).toBe(true);
     expect(shouldAdvance(true, 'one-and-done', 'high')).toBe(true);
@@ -60,6 +60,53 @@ describe('microphone handoff and clap commands', () => {
     const l = new ClassroomListener();
     frame(l, 0);
     expect(frame(l, 1000).ready).toBe(false);
+  });
+  it('uses a completed attempt to recognize fluctuating quieter noise', () => {
+    const l = new ClassroomListener();
+    for (let t = 0; t <= 700; t += 100)
+      frame(l, t, t === 300 ? 0.8 : 0.2, 440, false);
+    expect(l.attemptLevel).toBe(0.2);
+    l.reset(l.attemptLevel);
+    for (let t = 800; t < 1400; t += 100)
+      expect(frame(l, t, t % 200 ? 0.06 : 0.02, null, false).ready).toBe(false);
+    expect(frame(l, 1400, 0.04, null, false).ready).toBe(true);
+  });
+  it('rejects a decrescendo, pitch changes, and tones below the scoring gate', () => {
+    const l = new ClassroomListener();
+    l.reset(0.2);
+    for (let t = 0; t <= 5000; t += 100)
+      expect(
+        frame(l, t, t < 1000 ? 0.2 : 0.005, t % 200 ? 440 : 392, false).ready,
+      ).toBe(false);
+  });
+  it('restarts release evidence after pitch returns, a loud interruption, or a missing interval', () => {
+    for (const interruption of ['pitch', 'loud', 'gap'] as const) {
+      const l = new ClassroomListener();
+      l.reset(0.2);
+      for (let t = 0; t <= 400; t += 100) frame(l, t, 0.02, null, false);
+      const start = interruption === 'gap' ? 1000 : 500;
+      expect(
+        frame(
+          l,
+          start,
+          interruption === 'loud' ? 0.15 : 0.02,
+          interruption === 'pitch' ? 440 : null,
+          false,
+        ).ready,
+      ).toBe(false);
+      for (let t = start + 100; t <= start + 500; t += 100)
+        expect(frame(l, t, t % 200 ? 0.02 : 0.06, null, false).ready).toBe(
+          false,
+        );
+      expect(frame(l, start + 700, 0.03, null, false).ready).toBe(true);
+    }
+  });
+  it('discards the completed level on ordinary navigation/reset', () => {
+    const l = new ClassroomListener();
+    l.reset(0.2);
+    l.reset();
+    for (let t = 0; t <= 2000; t += 100)
+      expect(frame(l, t, t % 200 ? 0.02 : 0.06, null, false).ready).toBe(false);
   });
   function clap(l: ClassroomListener, t: number, enabled = true) {
     frame(l, t, 0.2, null, enabled);

@@ -125,6 +125,9 @@ export const sessionController = {
     const s = this.ses();
     if (!id || !s?.roster.some((p) => p.id === id) || s.absent.includes(id))
       return;
+    const completedLevel = measurement
+      ? this.classroomListener.attemptLevel
+      : 0;
     this.cancelCheck();
     this.ensureRound();
     const attempt = changes.recordAttempt(this, status, id, measurement);
@@ -143,6 +146,9 @@ export const sessionController = {
     if (shouldAdvance(this.db.settings.advance, this.classroomMode, status))
       this.classroomNavigate(1, false);
     else this.render();
+    // Navigation also resets listening; restore only the completed attempt’s
+    // volume reference, never its armed state or scoring evidence.
+    this.classroomListener.reset(completedLevel);
     this.pitchFeedback.show(
       attempt.name,
       status,

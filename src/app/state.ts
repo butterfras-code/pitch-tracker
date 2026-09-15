@@ -64,7 +64,7 @@ export function createState(
     classroomListener: new ClassroomListener(),
     classroomListenerReady: false,
     classroomPaused: false,
-    classroomMode: 'until-correct',
+    classroomMode: 'one-and-done',
     clapNavigation: false,
     microphoneDevices: [],
     microphoneId: '',

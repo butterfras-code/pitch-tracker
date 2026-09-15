@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { migrateToV2, migrateToV3, parseBackup } from '../../src/domain/backup';
+import { fresh } from '../../src/domain/defaults';
 import { sessionDefaults } from '../../src/domain/session-defaults';
 import {
   createTrackerStore,
@@ -8,6 +9,19 @@ import {
 import { trackerFixture } from '../fixtures/tracker';
 
 describe('versioned session defaults', () => {
+  it('defaults new installations to automatic advancement after one attempt', () => {
+    expect(sessionDefaults(fresh())).toMatchObject({
+      advance: true,
+      mode: 'one-and-done',
+    });
+  });
+  it('preserves an explicitly saved until-correct preference', () => {
+    const data = migrateToV3(trackerFixture());
+    data.sessionDefaults!.mode = 'until-correct';
+    expect(sessionDefaults(parseBackup(JSON.stringify(data))).mode).toBe(
+      'until-correct',
+    );
+  });
   it.each([1, 2])(
     'upgrades v%s losslessly and round-trips defaults through storage and backup',
     (schema) => {
@@ -20,7 +34,7 @@ describe('versioned session defaults', () => {
       expect(next.schema).toBe(3);
       expect(next.sessionDefaults).toEqual({
         advance: true,
-        mode: 'until-correct',
+        mode: 'one-and-done',
         claps: false,
         teacher: false,
         view: 'auto',

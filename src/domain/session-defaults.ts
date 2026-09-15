@@ -13,7 +13,7 @@ export function sessionDefaults(data: TrackerData): SessionDefaults {
     ? { ...data.sessionDefaults }
     : {
         advance: data.settings.advance,
-        mode: 'until-correct',
+        mode: 'one-and-done',
         claps: false,
         teacher: false,
         view: 'auto',

@@ -187,6 +187,13 @@ export const adminView = {
             ${detectionSlider('stability', 'Allowed pitch spread (cents)', this.db.settings.stability, 5, 100, 1, 'cents', 'Steadier pitch', 'More variation')}
             ${detectionSlider('gate', 'Noise gate (RMS; lower = more sensitive)', this.db.settings.gate, 0.001, 0.2, 0.001, 'RMS', 'More sensitive', 'More noise filtering')}
           </div>
+          <p class="muted">
+            The noise gate sets the minimum volume for scoring. Keep it below a
+            student's playing level. Between attempts, listening resumes after a
+            pause, settled background noise, or a sustained large volume drop
+            with no clear tone. Playing more softly while holding a tone does
+            not start another turn.
+          </p>
         </div>
       </section>`;
     else

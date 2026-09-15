@@ -26,12 +26,27 @@ export class ClassroomListener {
   private lastClap = 0;
   private background: { time: number; rms: number }[] = [];
 
-  reset(): void {
+  private playedLevels: { time: number; rms: number }[] = [];
+  private releaseLevel = 0;
+  private releaseSince: number | null = null;
+
+  /** Median recent pitched level avoids treating a single impact as the attempt. */
+  get attemptLevel(): number {
+    const levels = this.playedLevels
+      .map((sample) => sample.rms)
+      .sort((a, b) => a - b);
+    return levels.length >= 3 ? levels[Math.floor(levels.length / 2)] : 0;
+  }
+
+  reset(completedLevel = 0): void {
     this.quietSince = this.lastTime = this.pulseStart = null;
     this.armed = false;
     this.claps = 0;
     this.pulsePitched = false;
     this.background = [];
+    this.playedLevels = [];
+    this.releaseLevel = completedLevel;
+    this.releaseSince = null;
   }
 
   frame(
@@ -47,7 +62,19 @@ export class ClassroomListener {
     if (gap) {
       this.quietSince = null;
       this.background = [];
+      this.releaseSince = null;
+      this.playedLevels = [];
     }
+    if (!Number.isFinite(rms) || rms < 0) {
+      this.quietSince = this.releaseSince = null;
+      this.background = [];
+      this.playedLevels = [];
+      return { ready: false, command: null };
+    }
+    this.playedLevels = this.playedLevels.filter(
+      (sample) => now - sample.time <= 800,
+    );
+    if (frequency !== null) this.playedLevels.push({ time: now, rms });
     if (!clapEnabled) {
       this.claps = 0;
       this.pulseStart = null;
@@ -84,10 +111,21 @@ export class ClassroomListener {
         this.pulseStart = null;
       }
     }
-    if (rms < gate) {
+    // A decrescendo with a detectable tone is still the same attempt.
+    if (frequency === null && rms < gate) {
       this.quietSince ??= now;
       if (now - this.quietSince >= 500) this.armed = true;
     } else this.quietSince = null;
+    // A completed attempt supplies a fixed reference: never adapt it down
+    // toward a continuing tone or up toward subsequent classroom noise.
+    if (
+      frequency === null &&
+      this.releaseLevel > 0 &&
+      rms <= this.releaseLevel * 0.35
+    ) {
+      this.releaseSince ??= now;
+      if (now - this.releaseSince >= 600) this.armed = true;
+    } else this.releaseSince = null;
     // A settled, unpitched background can separate turns without literal
     // silence. Never learn a detected sustained note as room noise. Abrupt
     // changes restart settling, so an impact is not a handoff by itself.
