@@ -13,7 +13,7 @@ for (const width of [390, 1440]) {
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await sessionControl(page, 'Student view');
+    await sessionControl(page, 'Student View');
     await expect(page.locator('.press-brand')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Pitch Tracker', exact: true }),
@@ -74,11 +74,11 @@ for (const width of [390, 1440]) {
     await theme.selectOption('pitch-press');
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
-    await sessionControl(page, 'Class view');
+    await sessionControl(page, 'Class View');
     await expect(page.locator('.selected .target-readout')).toBeVisible();
     await expect(page.locator('#pauseListening')).toBeVisible();
     await expect(page.locator('#cards')).toBeVisible();
-    await sessionControl(page, 'Student view');
+    await sessionControl(page, 'Student View');
     await page
       .getByRole('button', { name: 'Next student', exact: true })
       .click();
@@ -113,7 +113,7 @@ for (const [width, height] of [
       page,
     }, testInfo) => {
       await classroomPage(page, 30);
-      await sessionControl(page, 'Split view');
+      await sessionControl(page, 'Split View');
       if (width > 390) {
         await sessionControl(page, 'Full screen');
         await expect
@@ -139,8 +139,108 @@ for (const [width, height] of [
       );
       await expect(page.locator('.student.selected')).toHaveCSS(
         'background-color',
-        'rgb(255, 230, 0)',
+        'rgb(21, 21, 21)',
       );
+      await expect(page.locator('#studentIdentity h2')).toHaveCSS(
+        'font-family',
+        '"Press Wood", "Press Slab", Georgia, serif',
+      );
+      await expect(page.locator('.student.selected')).toHaveCSS(
+        'border-style',
+        'double',
+      );
+      await expect(page.locator('.student.selected')).toHaveCSS(
+        'border-width',
+        '4px',
+      );
+      await expect(page.locator('#liveHz')).toHaveCSS(
+        'font-family',
+        '"Courier New", Courier, monospace',
+      );
+      expect(
+        await page.evaluate(() => document.fonts.check('18px "Press Wood"')),
+      ).toBe(true);
+      expect(
+        await page.evaluate(async () => {
+          const material = getComputedStyle(
+            document.documentElement,
+          ).getPropertyValue('--press-grain');
+          const url = material
+            .trim()
+            .slice(4, -1)
+            .replace(/^["']|["']$/g, '');
+          const image = new Image();
+          image.src = url;
+          await image.decode();
+          return image.naturalWidth > 0 && url.startsWith('data:');
+        }),
+      ).toBe(true);
+      await expect(page.locator('.current-display')).toHaveCSS(
+        'background-image',
+        /url\("data:image/,
+      );
+      await expect(
+        page.locator('.view-picker [aria-pressed="true"]'),
+      ).toHaveCSS('color', 'rgb(255, 249, 234)');
+
+      await expect(page.locator('.session-toolbar button').first()).toHaveCSS(
+        'font-family',
+        '"Press Wood", Georgia, serif',
+      );
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.body, '::after').content,
+        ),
+      ).toContain('PLATE 04-B');
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.body, '::before').pointerEvents,
+        ),
+      ).toBe('none');
+      const live = page.locator('.tuner-section[data-live-practice] .scorebar');
+      await expect(live.locator('.low')).toHaveCSS(
+        'background-color',
+        'rgb(21, 21, 21)',
+      );
+      for (const [state, color] of [
+        ['low', 'rgb(147, 47, 34)'],
+        ['correct', 'rgb(41, 75, 50)'],
+        ['high', 'rgb(24, 59, 96)'],
+      ]) {
+        await page.locator('#sessionShell').evaluate((element, range) => {
+          (element as HTMLElement).dataset.range = range;
+        }, state);
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'background-color',
+          color,
+        );
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'color',
+          'rgb(255, 249, 234)',
+        );
+        await expect(live.locator('.' + state)).toHaveCSS(
+          'animation-name',
+          'press-strike',
+        );
+      }
+      if (width === 1920) {
+        await page.screenshot({
+          path: testInfo.outputPath('press-live-high.png'),
+          fullPage: true,
+        });
+      }
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(live.locator('.high')).toHaveCSS('animation-name', 'none');
+      await page.keyboard.press('Tab');
+      await live.locator('.high').focus();
+      await expect(live.locator('.high')).toHaveCSS('outline-style', 'solid');
+      await page.locator('#sessionShell').evaluate((element) => {
+        (element as HTMLElement).dataset.range = '';
+      });
+      await live
+        .locator('.high')
+        .evaluate((element) => (element as HTMLElement).blur());
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.screenshot({
         path: testInfo.outputPath(`press-split-${width}.png`),
         fullPage: true,
@@ -166,6 +266,11 @@ for (const [width, height] of [
       await expect(
         page.locator('.session-target[data-live-practice]'),
       ).not.toHaveCSS('background-color', 'rgb(21, 21, 21)');
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.body, '::after').content,
+        ),
+      ).toBe('none');
       await picker.selectOption('pitch-press', { force: true });
       expect(await saved(page)).toEqual(data);
       await page.keyboard.press('Tab');
@@ -176,7 +281,7 @@ for (const [width, height] of [
       );
       await expect(page.locator('[data-ui-click="reference-tone"]')).toHaveCSS(
         'outline-color',
-        'rgb(255, 230, 0)',
+        'rgb(255, 249, 234)',
       );
     });
   });

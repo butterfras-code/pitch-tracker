@@ -261,3 +261,24 @@ Tuner presentation has independent placement and activity dimensions. Student an
 ## Retiring Cel-Shaded Mech
 
 Cel-Shaded Mech and its unused treatment CSS were removed. Pithcer-Frice is now the default. The existing unknown-theme fallback handles retired saved selections; tracker records and the saved-data format are unchanged.
+
+### Pitch Press letterpress refinement
+
+Pitch Press reuses the bundled slab/condensed fonts and paper grain for a ledger
+treatment. Theme tokens define ink colors, inset cardstock shadows, and the brief
+range strike; scoped CSS supplies double roster rules, monospace annotations,
+pressed grading slugs, and a ruled meter with a red blade. Live range and historical
+attempt attributes drive decoration without controller changes. Reduced motion
+removes the strike and button transitions. The shared fullscreen Split geometry
+and saved-data format remain unchanged.
+
+### Pitch Press broadside treatment
+
+Pitch Press now uses bundled Smokum for ornamental wood-type UI lettering and
+generated rag-paper material for both stock and multiply-blended black plates.
+Appearance remains in theme tokens and scoped CSS. Slight name rotations and
+masked edge impressions do not rotate controls or alter shared layout. Crop marks
+and a decorative plate slug are pointer-transparent pseudo-elements in the outer
+margin with no session-state semantics. Color is concentrated in live tuner
+feedback; the selected roster card is reversed black and stock. No controller,
+saved-data, runtime fetch, or dependency changes are required.

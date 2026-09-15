@@ -5,151 +5,6 @@
   font-weight: 400 900;
   font-display: swap;
 }
-.press-brand {
-  display: none;
-}
-:root[data-theme='pitch-press'] {
-  --press-red: var(--low);
-  --press-yellow: var(--correct-bg);
-  --press-grain: url('../assets/press-grain.png');
-  scrollbar-color: var(--muted) var(--bg);
-  caret-color: var(--accent);
-}
-:root[data-theme='pitch-press'] body {
-  background-image:
-    linear-gradient(
-      color-mix(in srgb, var(--bg) 85%, transparent),
-      color-mix(in srgb, var(--bg) 85%, transparent)
-    ),
-    var(--press-grain);
-}
-:root[data-theme='pitch-press'] ::selection {
-  background: var(--press-yellow);
-  color: var(--ink);
-}
-:root[data-theme='pitch-press'] header h1 {
-  font-weight: 400;
-}
-:root[data-theme='pitch-press'] .standard-brand {
-  display: none;
-}
-:root[data-theme='pitch-press'] .press-brand {
-  display: inline;
-  white-space: nowrap;
-}
-:root[data-theme='pitch-press'] .press-brand > span {
-  color: var(--press-red);
-}
-:root[data-theme='pitch-press'] :is(button, .student-result) {
-  border: 1px solid var(--edge);
-  background-image: none;
-}
-:root[data-theme='pitch-press'] button:active:not(:disabled) {
-  translate: 1px 1px;
-  box-shadow: var(--button-pressed-shadow);
-}
-:root[data-theme='pitch-press'] .tabs button {
-  border: 0;
-  box-shadow: none;
-  font:
-    400 1rem 'Pitch Press',
-    sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-:root[data-theme='pitch-press'] .tabs button.on {
-  color: var(--ink);
-  box-shadow: inset 0 -5px var(--press-red);
-}
-:root[data-theme='pitch-press']
-  :is(.panel, .student, dialog, .behavior-settings) {
-  border-width: 2px;
-  border-color: var(--line);
-  background-image: none;
-}
-:root[data-theme='pitch-press'] :is(h2, h3) {
-  font-weight: 400;
-  letter-spacing: 0.015em;
-}
-:root[data-theme='pitch-press'] .student .name {
-  border: 0;
-  box-shadow: none;
-}
-:root[data-theme='pitch-press'] .student.selected {
-  border-color: var(--ink);
-  box-shadow: inset 0 4px var(--ink);
-  background-color: var(--press-yellow);
-}
-:root[data-theme='pitch-press'] .badge {
-  border: 1px solid var(--ink);
-}
-/* Session composition, sizes and feedback content belong to session-layout.css. */
-:root[data-theme='pitch-press'] .current-display {
-  background: var(--card);
-  box-shadow: var(--surface-shadow);
-}
-:root[data-theme='pitch-press'] #studentIdentity {
-  border-bottom-color: var(--ink);
-}
-:root[data-theme='pitch-press']
-  :is(
-    .target-caption,
-    .target-frequency,
-    .target-listening,
-    .target-playback,
-    .meter-labels,
-    #classroomStatus,
-    .student-actions button
-  ) {
-  font-family: 'Pitch Press', sans-serif;
-  text-transform: uppercase;
-}
-:root[data-theme='pitch-press'] .current-display .tuner {
-  background: var(--display-bg);
-  color: var(--display-ink);
-  box-shadow:
-    inset 0 1px var(--line),
-    inset 0 -1px var(--line);
-  border-color: var(--line);
-}
-/* Graduations belong to the functional pitch ruler, not a page pattern. */
-:root[data-theme='pitch-press'] .meter {
-  border-radius: 0;
-  background:
-    linear-gradient(var(--ink), var(--ink)) center / 3px 100% no-repeat,
-    repeating-linear-gradient(
-        to right,
-        var(--press-red) 0 3px,
-        transparent 3px 10%
-      )
-      left center / 34% 100% no-repeat,
-    repeating-linear-gradient(to right, var(--ink) 0 3px, transparent 3px 10%)
-      center / 32% 100% no-repeat,
-    repeating-linear-gradient(
-        to right,
-        var(--accent) 0 3px,
-        transparent 3px 10%
-      )
-      right center / 34% 100% no-repeat;
-}
-:root[data-theme='pitch-press'] .needle {
-  background: var(--ink);
-}
-:root[data-theme='pitch-press'] .progress {
-  border-radius: 0;
-}
-:root[data-theme='pitch-press']
-  .session-shell[data-result='correct']
-  .classroom-feedback {
-  background-color: var(--press-yellow);
-}
-@media print {
-  .student-actions,
-  :is(.target-listening, .target-playback) {
-    display: none;
-  }
-}
-
 @font-face {
   font-family: 'Press Slab';
   src: url('../assets/alfa-slab-one.ttf') format('truetype');
@@ -157,96 +12,444 @@
   font-weight: 400;
   font-display: swap;
 }
-:root[data-theme='pitch-press'] .target-pitch {
-  font-family: 'Press Slab', Georgia, serif;
+@font-face {
+  font-family: 'Press Wood';
+  src: url('../assets/smokum.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+.press-brand {
+  display: none;
+}
+:root[data-theme='pitch-press'] {
+  --press-grain: url('../assets/press-rag-paper.webp');
+  --press-wear: url('../assets/press-ink.png');
+  --press-paper:
+    linear-gradient(
+      color-mix(in srgb, var(--card) 26%, transparent),
+      color-mix(in srgb, var(--card) 26%, transparent)
+    ),
+    var(--press-grain);
+  --press-bleed: 0.4px 0.3px 0 currentColor, -0.25px 0 0 currentColor;
+  scrollbar-color: var(--line) var(--bg);
+  caret-color: var(--ink);
+}
+:root[data-theme='pitch-press'] body {
+  color: var(--card);
+  background-image: var(--press-grain);
+  background-blend-mode: multiply;
+  background-size: 720px;
+  font-family: var(--body-font);
+}
+:root[data-theme='pitch-press'] ::selection {
+  background: var(--ink);
+  color: var(--card);
+}
+:root[data-theme='pitch-press'] .standard-brand {
+  display: none;
 }
 :root[data-theme='pitch-press'] .press-brand {
-  mask-image: url('../assets/press-ink.png');
-  mask-repeat: repeat;
+  display: inline;
+  white-space: nowrap;
+  color: var(--ink);
 }
-
-/* Paper, ink and ruled sections create hierarchy without changing session geometry. */
-:root[data-theme='pitch-press'] .app-header {
+:root[data-theme='pitch-press']
+  :is(button, input, select, textarea, .student-result) {
+  font-family: var(--body-font);
+  font-weight: 400;
+}
+:root[data-theme='pitch-press'] :is(button, .student-result) {
+  border: 2px solid var(--edge);
+  text-transform: uppercase;
+  text-shadow: var(--press-bleed);
+  background-image: var(--press-paper);
+  background-size: 640px;
+}
+:root[data-theme='pitch-press'] button {
+  transition:
+    translate 80ms ease-out,
+    box-shadow 80ms ease-out,
+    background-color 120ms ease-out;
+}
+:root[data-theme='pitch-press'] button:active:not(:disabled) {
+  translate: 3px 3px;
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-theme='pitch-press']
+  :is(.app-header, .session-toolbar, .panel, dialog, .behavior-settings) {
+  color: var(--ink);
   background-color: var(--card);
+  background-image: var(--press-paper);
+  background-size: 720px;
+}
+:root[data-theme='pitch-press'] .app-header {
   box-shadow:
-    0 3px 0 var(--ink),
-    0 5px 0 var(--card);
+    0 3px var(--ink),
+    0 5px var(--card);
+}
+:root[data-theme='pitch-press'] .tabs button {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  font-family: var(--heading-font);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+:root[data-theme='pitch-press'] .tabs button.on {
+  color: var(--card);
+  background: var(--ink);
+}
+:root[data-theme='pitch-press']
+  :is(h1, h2, h3, .student .name, .upcoming-student strong) {
+  font-family: var(--heading-font);
+  font-weight: 400;
+  text-transform: uppercase;
+  text-shadow: var(--press-bleed);
+  letter-spacing: 0.015em;
 }
 :root[data-theme='pitch-press'] ::placeholder {
   color: var(--muted);
   opacity: 1;
 }
+:root[data-theme='pitch-press'] .current-display {
+  position: relative;
+  color: var(--ink);
+  background-color: var(--card);
+  background-image: var(--press-paper);
+  background-size: 720px;
+  box-shadow: var(--panel-shadow);
+}
 :root[data-theme='pitch-press'] .student-heading {
-  border-bottom-color: var(--ink);
-  box-shadow:
-    0 3px 0 var(--card),
-    0 4px 0 var(--line);
+  border-bottom: 4px double var(--ink);
 }
-/* Paired vermilion rules frame the ink block like a printed poster. */
-:root[data-theme='pitch-press'] .session-target {
-  background-color: var(--ink);
+:root[data-theme='pitch-press'] #studentIdentity h2 {
+  rotate: -0.6deg;
+  text-shadow:
+    0.8px 0.5px currentColor,
+    -0.4px 0 currentColor;
+}
+:root[data-theme='pitch-press'] .upcoming-student {
+  color: var(--muted);
+}
+:root[data-theme='pitch-press'] #sessionShell .student {
+  position: relative;
+  border: 4px double var(--ink);
+  color: var(--ink);
+  background-color: var(--card);
+  background-image: var(--press-paper);
+  background-size: 620px;
+  box-shadow: var(--surface-shadow);
+}
+:root[data-theme='pitch-press'] #sessionShell .student:nth-child(3n) {
+  background-position: -143px -87px;
+}
+:root[data-theme='pitch-press'] #sessionShell .student:nth-child(3n + 2) {
+  background-position: -310px -220px;
+}
+:root[data-theme='pitch-press'] #sessionShell .student .name {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  rotate: -0.5deg;
+}
+:root[data-theme='pitch-press'] #sessionShell .student:nth-child(even) .name {
+  rotate: 0.5deg;
+  translate: 0 1px;
+}
+:root[data-theme='pitch-press'] #sessionShell .student.selected {
   color: var(--card);
-  box-shadow:
-    inset 0 4px var(--press-red),
-    inset 0 -4px var(--press-red);
+  background-color: var(--ink);
+  background-image: var(--press-grain);
+  background-blend-mode: multiply;
+  border-color: var(--card);
 }
-:root[data-theme='pitch-press'] .target-frequency {
+:root[data-theme='pitch-press']
+  #sessionShell
+  .student.selected
+  :is(.roster-instrument, .turn-label, .roster-card-actions button) {
+  color: var(--card);
+}
+:root[data-theme='pitch-press']
+  #sessionShell
+  .student.selected
+  .roster-card-actions
+  button {
+  background: transparent;
+}
+:root[data-theme='pitch-press'] #sessionShell [data-ui-click='show-current'] {
+  color: var(--card);
+}
+/* Distress only the decorative ink edge, never a control or its readable text. */
+:root[data-theme='pitch-press'] :is(.current-display, .student)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid currentColor;
+  mask-image: var(--press-wear);
+  mask-size: 180px;
+  transform: translate(1px, -1px);
+  pointer-events: none;
+}
+:root[data-theme='pitch-press'] #sessionShell .session-target {
+  position: relative;
+  color: var(--card);
+  background-color: var(--ink);
+  background-image: var(--press-grain);
+  background-size: 600px;
+  background-blend-mode: multiply;
+  box-shadow:
+    inset 0 3px var(--ink),
+    inset 0 -3px var(--ink),
+    2px 2px var(--ink);
+}
+/* Off-register impression, confined to the plate face. */
+:root[data-theme='pitch-press'] .session-target::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid var(--card);
+  mask-image: var(--press-wear);
+  mask-size: 250px;
+  pointer-events: none;
+}
+:root[data-theme='pitch-press'] .target-pitch {
+  font-family: 'Press Slab', Georgia, serif;
+  text-shadow: var(--press-bleed);
+}
+:root[data-theme='pitch-press'] :is(.target-caption, .target-frequency) {
   color: inherit;
 }
-:root[data-theme='pitch-press'] .target-caption {
-  color: var(--press-yellow);
+:root[data-theme='pitch-press']
+  :is(.target-frequency, .tuner-frequency, .tuner-cents) {
+  font-family: var(--data-font);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0.2px 0 currentColor;
 }
-:root[data-theme='pitch-press'] :is(.target-listening, .target-playback) {
+:root[data-theme='pitch-press']
+  #sessionShell
+  :is(.target-listening, .target-playback) {
   background-color: var(--card);
+  background-image: var(--press-paper);
   color: var(--ink);
   border-color: var(--card);
+  font-family: var(--body-font);
   box-shadow: var(--button-shadow);
 }
 :root[data-theme='pitch-press']
+  #sessionShell
   :is(.target-listening, .target-playback):hover:not(:disabled) {
-  background-color: var(--press-yellow);
-  border-color: var(--press-yellow);
+  background-image: none;
+  background-color: var(--soft);
 }
-:root[data-theme='pitch-press'] .student {
-  background-image: linear-gradient(var(--line), var(--line));
-  background-size: calc(100% - 24px) 1px;
-  background-position: center bottom 38px;
-  background-repeat: no-repeat;
-  box-shadow: none;
+:root[data-theme='pitch-press']
+  #sessionShell
+  :is(.target-listening, .target-playback):focus-visible {
+  outline-color: var(--card);
 }
-:root[data-theme='pitch-press'] .student .name {
-  font-family: var(--heading-font);
+:root[data-theme='pitch-press'] #sessionShell #classroomStatus {
+  color: var(--card);
+}
+:root[data-theme='pitch-press'] .current-display .tuner {
+  background-color: var(--card);
+  background-image: var(--press-paper);
+  background-size: 720px;
+  color: var(--ink);
+  border-color: var(--edge);
+  box-shadow: var(--display-shadow);
+}
+:root[data-theme='pitch-press'] .meter {
+  border-radius: 0;
+  background:
+    linear-gradient(var(--ink), var(--ink)) center / 3px 100% no-repeat,
+    repeating-linear-gradient(to right, var(--ink) 0 2px, transparent 2px 10%)
+      left bottom / 100% 90% no-repeat,
+    repeating-linear-gradient(to right, var(--ink) 0 1px, transparent 1px 2%)
+      left bottom / 100% 45% no-repeat;
+  box-shadow: inset 0 -2px var(--ink);
+  overflow: visible;
+}
+:root[data-theme='pitch-press'] #sessionShell {
+  --press-pointer: var(--ink);
+}
+:root[data-theme='pitch-press'] #sessionShell[data-range='low'] {
+  --press-pointer: var(--low);
+}
+:root[data-theme='pitch-press'] #sessionShell[data-range='correct'] {
+  --press-pointer: var(--correct);
+}
+:root[data-theme='pitch-press'] #sessionShell[data-range='high'] {
+  --press-pointer: var(--high);
+}
+:root[data-theme='pitch-press'] #sessionShell .needle {
+  background: var(--press-pointer);
+  box-shadow: 1px 0 var(--card);
+}
+:root[data-theme='pitch-press'] .needle::before {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 8px;
+  left: 50%;
+  top: -5px;
+  transform: translateX(-50%);
+  background: var(--press-pointer);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+:root[data-theme='pitch-press'] .progress {
+  border-radius: 0;
+}
+:root[data-theme='pitch-press'] #sessionShell .scorebar .low {
+  --press-wash: var(--low);
+}
+:root[data-theme='pitch-press'] #sessionShell .scorebar .correct {
+  --press-wash: var(--correct);
+}
+:root[data-theme='pitch-press'] #sessionShell .scorebar .high {
+  --press-wash: var(--high);
+}
+:root[data-theme='pitch-press'] #sessionShell .scorebar button {
+  color: var(--card);
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: var(--button-shadow);
+  font-family: var(--label-font);
   font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+:root[data-theme='pitch-press']
+  #sessionShell
+  .scorebar
+  button:hover:not(:disabled) {
+  color: var(--card);
+  background: var(--primary-hover);
+}
+:root[data-theme='pitch-press']
+  #sessionShell[data-range='low']
+  .tuner-section[data-live-practice]
+  .low,
+:root[data-theme='pitch-press']
+  #sessionShell[data-range='correct']
+  .tuner-section[data-live-practice]
+  .correct,
+:root[data-theme='pitch-press']
+  #sessionShell[data-range='high']
+  .tuner-section[data-live-practice]
+  .high,
+:root[data-theme='pitch-press']
+  #sessionShell
+  .scorebar
+  button:active:not(:disabled) {
+  color: var(--card);
+  background: var(--press-wash);
+  outline: none;
+  box-shadow: var(--button-pressed-shadow);
+}
+:root[data-theme='pitch-press']
+  #sessionShell
+  .scorebar
+  button:active:not(:disabled) {
+  translate: 3px 3px;
+  animation: none;
+}
+:root[data-theme='pitch-press']
+  #sessionShell[data-range]
+  .tuner-section[data-live-practice]
+  .scorebar
+  button:focus-visible,
+:root[data-theme='pitch-press'] #sessionShell .scorebar button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 5px;
+}
+:root[data-theme='pitch-press']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt {
+  --tuner-result-color: var(--ink);
+}
+:root[data-theme='pitch-press']
+  #sessionShell
+  .inactive-practice
+  .tuner-section--last-attempt
+  .scorebar
+  button {
+  animation: none;
+  outline-color: var(--ink);
+}
+:root[data-theme='pitch-press'] #sessionShell .student-result {
+  color: var(--ink);
+  background-color: var(--card);
+}
+:root[data-theme='pitch-press'] #sessionShell .classroom-feedback {
+  color: var(--ink);
   background: transparent;
 }
-:root[data-theme='pitch-press'] .dashboard-header h3 {
+/* Registration furniture lives in the existing outer margin, outside hit areas. */
+:root[data-theme='pitch-press'] body::before {
+  content: '';
+  position: fixed;
+  inset: 3px;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    linear-gradient(var(--card), var(--card)) left top / 18px 1px no-repeat,
+    linear-gradient(var(--card), var(--card)) left top / 1px 18px no-repeat,
+    linear-gradient(var(--card), var(--card)) right top / 18px 1px no-repeat,
+    linear-gradient(var(--card), var(--card)) right top / 1px 18px no-repeat,
+    linear-gradient(var(--card), var(--card)) left bottom / 18px 1px no-repeat,
+    linear-gradient(var(--card), var(--card)) left bottom / 1px 18px no-repeat,
+    linear-gradient(var(--card), var(--card)) right bottom / 18px 1px no-repeat,
+    linear-gradient(var(--card), var(--card)) right bottom / 1px 18px no-repeat;
+}
+:root[data-theme='pitch-press'] body::after {
+  content: '⊕  PLATE 04-B // MOUTHPIECE PRESS  ⊕' / '';
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   color: var(--card);
-  background-color: var(--ink);
-  box-shadow:
-    4px 0 var(--ink),
-    -4px 0 var(--ink);
+  background: var(--ink);
+  font: 9px/1 var(--data-font);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
 }
-:root[data-theme='pitch-press'] .session-toolbar button:not(.primary) {
-  box-shadow: none;
-  border-color: var(--line);
+@keyframes press-strike {
+  0% {
+    transform: translate(-1px, -2px);
+  }
+  45% {
+    transform: translate(3px, 3px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
-:root[data-theme='pitch-press'] .view-picker [aria-pressed='true'] {
-  border-color: var(--ink);
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='pitch-press'] button {
+    transition: none;
+  }
+  :root[data-theme='pitch-press'] #sessionShell .scorebar button {
+    animation: none;
+  }
 }
-:root[data-theme='pitch-press'] .upcoming-student strong {
-  font-family: var(--heading-font);
-  font-weight: 400;
-}
-:root[data-theme='pitch-press'] :is(.student-result, .scorebar button) {
-  box-shadow: inset 0 -3px currentColor;
+@media print {
+  :root[data-theme='pitch-press']
+    :is(.student-actions, .target-listening, .target-playback),
+  :root[data-theme='pitch-press'] body::before,
+  :root[data-theme='pitch-press'] body::after {
+    display: none;
+  }
 }
 
 :root[data-theme='pitch-press']
-  :is(.target-listening, .target-playback):focus-visible {
-  outline-color: var(--press-yellow);
-}
-
-/* Keep the shared staff preview's content width when its button is skinned. */
-:root[data-theme='pitch-press'] .clef-toggle {
-  border-width: 2px;
+  #sessionShell
+  .view-picker
+  [aria-pressed='true'] {
+  color: var(--card);
+  background: var(--ink);
 }
