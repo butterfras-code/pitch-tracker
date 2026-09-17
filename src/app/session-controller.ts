@@ -29,6 +29,12 @@ export const sessionController = {
       return;
     this.pitchFeedback.clear();
     this.cancelCheck();
+    if (this.tab === 'tuner' && tab !== 'tuner') {
+      this.tunerStreak = 0;
+      this.tunerLastStatus = '';
+      this.tunerAwaitingRelease = false;
+      this.tunerReleaseSince = null;
+    }
     this.tab = tab;
     this.render();
     $('main').scrollTop = 0;

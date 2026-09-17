@@ -6,6 +6,8 @@ import { PitchFeedback } from '../ui/pitch-feedback';
 /** Owns application-instance state; session rules use its browser-independent subset. */
 import type { SessionState } from '../domain/session-changes';
 import type { TrackerData } from '../domain/tracker';
+import type { PitchStatus } from '../domain/pitch';
+import type { TunerTransposition } from '../domain/tuner';
 import type { createTrackerStore } from '../persistence/tracker-store';
 export interface AppState extends SessionState {
   workspace: SessionView | null;
@@ -31,6 +33,12 @@ export interface AppState extends SessionState {
   historyStudent: string;
   settingsSection: 'instruments' | 'detection' | 'defaults';
   settingsInstrument: string;
+  tunerTransposition: TunerTransposition;
+  tunerTargetPitch: string;
+  tunerStreak: number;
+  tunerLastStatus: PitchStatus | '';
+  tunerAwaitingRelease: boolean;
+  tunerReleaseSince: number | null;
   toastTimer: ReturnType<typeof setTimeout> | undefined;
   pitchFeedback: PitchFeedback;
   disposed: boolean;
@@ -80,6 +88,12 @@ export function createState(
     historyStudent: 'all',
     settingsSection: 'instruments',
     settingsInstrument: Object.keys(db.configs)[0] ?? '',
+    tunerTransposition: 'concert',
+    tunerTargetPitch: 'A4',
+    tunerStreak: 0,
+    tunerLastStatus: '',
+    tunerAwaitingRelease: false,
+    tunerReleaseSince: null,
     toastTimer: undefined,
     pitchFeedback: new PitchFeedback(),
     undoStack: [],

@@ -21,13 +21,32 @@ export function bindLifecycle(app: App): () => void {
         !e.metaKey &&
         !e.shiftKey &&
         !e.isComposing &&
-        app.tab === 'session' &&
-        app.ses() &&
+        (app.tab === 'tuner' || (app.tab === 'session' && !!app.ses())) &&
         !$('modal').open &&
         !app.pitchFeedback.visible
       ) {
         e.preventDefault();
-        if (!e.repeat) void app.workspace?.fullscreen();
+        if (!e.repeat)
+          void (app.tab === 'tuner'
+            ? app.toggleTunerFullscreen()
+            : app.workspace?.fullscreen());
+        return;
+      }
+      if (
+        app.tab === 'tuner' &&
+        !$('modal').open &&
+        !['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(
+          document.activeElement?.tagName ?? '',
+        )
+      ) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          void app.startCheck();
+        } else if (e.key === 'Escape') {
+          app.classroomPaused = true;
+          app.cancelCheck();
+          app.render();
+        }
         return;
       }
       if (
@@ -59,6 +78,23 @@ export function bindLifecycle(app: App): () => void {
         app.cancelCheck();
         app.render();
       }
+    },
+    options,
+  );
+  document.addEventListener(
+    'fullscreenchange',
+    () => {
+      if (app.tab !== 'tuner') return;
+      const button = document.querySelector<HTMLElement>(
+        '[data-ui-click="tuner-fullscreen"]',
+      );
+      if (!button) return;
+      const fullscreen = !!document.fullscreenElement;
+      button.setAttribute(
+        'aria-label',
+        fullscreen ? 'Exit full screen' : 'Full screen',
+      );
+      button.setAttribute('aria-pressed', String(fullscreen));
     },
     options,
   );

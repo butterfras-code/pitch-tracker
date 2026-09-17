@@ -4,6 +4,7 @@ import { updateMicrophoneIndicator } from '../ui/microphone-indicator';
 import { errorMessage } from '../ui/helpers';
 import type { App } from '../app/application';
 import { targetFrequency } from '../domain/pitch';
+import { tunerTarget } from '../domain/tuner';
 import { $ } from '../ui/helpers';
 
 export const microphone = {
@@ -120,6 +121,21 @@ export const microphone = {
     if (findElement('cancelButton')) $('cancelButton').classList.add('hidden');
   },
   async startCheck(this: App): Promise<void> {
+    if (this.tab === 'tuner') {
+      this.classroomPaused = false;
+      const checkGeneration = this.checkGeneration;
+      if (await this.enableMic()) {
+        if (this.checkGeneration !== checkGeneration || this.tab !== 'tuner') {
+          if (!this.disposed) this.render();
+          return;
+        }
+        this.cancelCheck();
+        this.tunerAwaitingRelease = false;
+        this.tunerReleaseSince = null;
+        this.render();
+      } else if (!this.disposed) this.render();
+      return;
+    }
     const s = this.ses(),
       id = this.db.activeStudent;
     if (!s || !id || !this.pupil() || s.absent.includes(id)) return;
@@ -152,6 +168,7 @@ export const microphone = {
         .filter((d) => d.kind === 'audioinput')
         .map((d) => ({ deviceId: d.deviceId, label: d.label }));
       if (this.tab === 'session' && this.ses()) this.renderClassroom();
+      else if (this.tab === 'tuner') this.render();
     } catch {
       if (!this.disposed && generation === this.micGeneration)
         this.microphoneDevices = [];
@@ -167,11 +184,14 @@ export const microphone = {
   },
   async referenceTone(this: App): Promise<void> {
     const pupil = this.pupil();
-    if (!pupil || this.disposed) return;
+    if ((!pupil && this.tab !== 'tuner') || this.disposed) return;
     this.cancelCheck();
     this.muteUntil = performance.now() + 2200;
     const generation = this.micGeneration;
-    const target = this.db.configs[pupil.instrument],
+    const target =
+        this.tab === 'tuner'
+          ? tunerTarget(this.tunerTargetPitch, this.tunerTransposition)
+          : this.db.configs[pupil!.instrument],
       a4 = this.db.settings.a4;
     try {
       const ac = this.context();

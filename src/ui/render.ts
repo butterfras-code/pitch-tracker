@@ -15,7 +15,7 @@ export const render = {
       );
     document.body.classList.toggle(
       'session-active',
-      this.tab === 'session' && !!this.ses(),
+      (this.tab === 'session' && !!this.ses()) || this.tab === 'tuner',
     );
     document.body.classList.toggle(
       'admin-active',
@@ -24,6 +24,12 @@ export const render = {
     document.body.classList.toggle('settings-active', this.tab === 'settings');
     if (this.tab === 'session' && this.ses()) {
       this.renderClassroom();
+      return;
+    }
+    if (this.tab === 'tuner') {
+      this.pitchFeedback.clear();
+      $('main').classList.remove('focus-mode');
+      this.renderTuner();
       return;
     }
     this.pitchFeedback.clear();

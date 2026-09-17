@@ -261,3 +261,11 @@ Tuner presentation has independent placement and activity dimensions. Student an
 ## Retiring Cel-Shaded Mech
 
 Cel-Shaded Mech and its unused treatment CSS were removed. Pithcer-Frice is now the default. The existing unknown-theme fallback handles retired saved selections; tracker records and the saved-data format are unchanged.
+
+## Tuner-only mode
+
+Tuner-only mode reuses the session microphone lifecycle, input chooser, noise gate, pitch detector, display smoothing, hold duration, stability requirement, reference-pitch calibration, meter, progress bar, and theme tokens. It does not create a class session or record attempts. Its selected target, transposition, current streak, and release gate are application-instance state and are intentionally not persisted; leaving the mode or changing the target/transposition resets the streak.
+
+`src/domain/tuner.ts` owns transposition math without browser dependencies. Targets are selected as written pitches and converted to the concert pitch expected from the microphone: concert, B♭ (−2 semitones), E♭ (−9), and F (−7). The detector always remains in concert pitch. When transposition is active, the live display labels and shows both the measured concert note and corresponding written note. The selected target drives the existing low/in-range/high classification using a ±25-cent band; global A4, gate, hold, and stability settings remain shared with class sessions.
+
+A completed stable in-range hold increments the streak. A completed stable low or high hold resets it. After any completed attempt, a measured release is required before another can score, preventing one sustained note from incrementing repeatedly. Target and transposition changes cancel accumulated evidence. The responsive tuner workspace is viewport-bound on desktop and uses an internal scroll region on phones so controls remain reachable under ordinary and fullscreen layouts. Focused domain and offline browser tests cover conversion, dual display, target-driven indicators, rearming, streak increment/reset, and transient-state resets.

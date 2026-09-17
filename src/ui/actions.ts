@@ -16,6 +16,8 @@ export function createBindings(app: App): UiBindings {
       'session-view': ({ data }) =>
         app.workspace?.setView(data.view ?? 'split'),
       'session-fullscreen': () => app.workspace?.fullscreen(),
+      'tuner-fullscreen': () => void app.toggleTunerFullscreen(),
+      'reset-tuner-streak': () => app.resetTunerStreak(),
       'show-current': () => {
         app.search = '';
         app.filter = 'all';
@@ -133,6 +135,10 @@ export function createBindings(app: App): UiBindings {
       'settings-instrument': ({ value }) => app.selectSettingsInstrument(value),
       'session-defaults-auto-save': () => app.saveSessionDefaults(),
       'microphone-input': ({ value }) => app.changeMicrophone(value),
+      'tuner-transposition': ({ value }) => app.setTunerTransposition(value),
+      'tuner-target-note': ({ value }) => app.setTunerTargetPart('note', value),
+      'tuner-target-octave': ({ value }) =>
+        app.setTunerTargetPart('octave', value),
       'session-advance': ({ value }) => {
         if (!['manual', 'when-correct', 'after-attempt'].includes(value))
           return;

@@ -13,6 +13,7 @@ import { historyController } from './history-controller';
 import { rosterController } from './roster-controller';
 import { selectors } from './selectors';
 import { sessionController } from './session-controller';
+import { tunerController } from './tuner-controller';
 import { detection } from '../audio/detection';
 import { microphone } from '../audio/microphone';
 import { fresh } from '../domain/defaults';
@@ -21,6 +22,7 @@ import { dialogs } from '../ui/dialogs';
 import { historyView } from '../ui/history-view';
 import { render } from '../ui/render';
 import { sessionView } from '../ui/session-view';
+import { tunerView } from '../ui/tuner-view';
 import type { AppState } from './state';
 import { createState } from './state';
 export interface App extends AppState {
@@ -58,6 +60,14 @@ export interface App extends AppState {
   resetPitchTargets(): void;
   saveSettings(): void;
   setFeedbackDuration(value: string): void;
+  setTunerTransposition(value: string): void;
+  setTunerTargetPart(part: 'note' | 'octave', value: string): void;
+  resetTunerAttempt(resetStreak?: boolean): void;
+  completeTunerAttempt(measurement: PitchMeasurement): void;
+  resetTunerStreak(): void;
+  tunerResultText(): string;
+  tunerStatus(): string;
+  toggleTunerFullscreen(): Promise<void>;
   cls(): TrackerClass;
   ses(): Session | undefined;
   pupil(): Student | undefined;
@@ -97,6 +107,8 @@ export interface App extends AppState {
   warning(message: string): void;
   toast(t: string): void;
   sessionHTML(): string;
+  tunerHTML(): string;
+  renderTuner(): void;
   renderCards(): void;
   audioLoop(now: number): void;
   context(): AudioContext;
@@ -111,6 +123,7 @@ export function createApplication(store: AppState['trackerStore']): App {
   return Object.assign(
     createState(fresh(), store),
     sessionController,
+    tunerController,
     classroomController,
     sessionDefaultsController,
     historyController,
@@ -118,6 +131,7 @@ export function createApplication(store: AppState['trackerStore']): App {
     backupController,
     selectors,
     sessionView,
+    tunerView,
     historyView,
     adminView,
     dialogs,

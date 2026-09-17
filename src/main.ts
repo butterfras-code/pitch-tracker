@@ -5,6 +5,7 @@ import './themes/vintage-audio.css';
 import './themes/boom-pow.css';
 import './themes/b-pop-tune-hunters.css';
 import './session-layout.css';
+import './tuner.css';
 import './header-layout.css';
 import './class-overview.css';
 import './feedback.css';
