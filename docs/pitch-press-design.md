@@ -36,7 +36,7 @@ rounded:
 
 Pitch Press is a bold printed band-practice poster: oversized slab concert note, condensed black/vermilion masthead, warm grain paper, cobalt playback, and a yellow distressed result stamp. This document describes only the implemented `pitch-press` theme and `print` treatment; it is not a design system for the other themes.
 
-The authoritative implementation is [pitch-press.theme.ts](../src/themes/pitch-press.theme.ts), [pitch-press.css](../src/themes/pitch-press.css), the shared [classroom view](../src/ui/classroom-view.ts), and the masthead in [index.html](../index.html). The stylesheet owns decoration and bundled assets; the theme definition remains typed palette and typography data.
+The authoritative implementation is [pitch-press.theme.ts](../src/themes/pitch-press.theme.ts), [pitch-press.css](../src/themes/pitch-press.css), the shared [classroom view](../src/ui/classroom-view.ts), and the masthead in [index.html](../src/index.html). The stylesheet owns decoration and bundled assets; the theme definition remains typed palette and typography data.
 
 ## Colors
 

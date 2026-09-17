@@ -4,7 +4,7 @@ Checkpoint: September 9, 2026. The application is modularized, strictly typed, f
 
 ## Release requirement
 
-Distribute the single built `dist/index.html`, which opens by double-click under `file://` and works offline. No server, Node installation, internet, CDN, remote font, or adjacent runtime file is required by users. Never edit `dist` manually. `Pitch-Tracker.html` is the unchanged upstream baseline from `94777d5`; develop in `index.html` and `src/`.
+Distribute the single built `dist/index.html`, which opens by double-click under `file://` and works offline. No server, Node installation, internet, CDN, remote font, or adjacent runtime file is required by users. Never edit `dist` or the generated root `index.html` manually. `Pitch-Tracker.html` is the unchanged upstream baseline from `94777d5`; develop in `src/index.html` and the rest of `src/`.
 
 ## Completed
 

@@ -24,13 +24,13 @@ Successful manual and microphone recordings both call the application's `PitchFe
 
 ## Release contract
 
-Users double-click one self-contained `dist/index.html`. Node and npm are development tools only. Vite with vite-plugin-singlefile embeds all JavaScript and CSS; the release has no runtime imports, adjacent assets, CDN, server, service worker, or network requirement. Never edit `dist` manually. `Pitch-Tracker.html` remains the unchanged upstream baseline from `94777d5`.
+Users double-click one self-contained `dist/index.html`. Node and npm are development tools only. Vite with vite-plugin-singlefile embeds all JavaScript and CSS; the release has no runtime imports, adjacent assets, CDN, server, service worker, or network requirement. Never edit `dist` or the generated root `index.html` manually. `Pitch-Tracker.html` remains the unchanged upstream baseline from `94777d5`.
 
-GitHub Pages serves the same self-contained build as the downloadable release. Releases are deliberate and local: `npm run deploy:pages` builds `dist/index.html`, commits only that file plus `.nojekyll` to the dedicated `gh-pages` branch, and pushes the branch. Repository Pages settings use the root of `gh-pages` as the publishing source. Generated `dist` remains gitignored; the source-root `index.html` is a development entry point and must not be published directly. Source pushes do not build or deploy the site.
+GitHub Pages serves the same self-contained build as the downloadable release. Releases are deliberate and local: from a clean `main` branch, `npm run deploy:pages` builds `dist/index.html`, refreshes and commits the root `index.html`, pushes `main`, and commits the identical file plus `.nojekyll` to the dedicated `gh-pages` branch. Repository Pages settings use the root of `gh-pages` as the publishing source. Generated `dist` remains gitignored; `src/index.html` is the development entry point. Source pushes do not build or deploy the site.
 
 ## Module map
 
-The application uses strict TypeScript without a UI framework. `index.html` contains the static shell and one module entry point. There are no classic application scripts or global bootstrap bridge.
+The application uses strict TypeScript without a UI framework. `src/index.html` contains the static shell and one module entry point. There are no classic application scripts or global bootstrap bridge.
 
 | Location                                              | Responsibility                                                                                                                        |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |

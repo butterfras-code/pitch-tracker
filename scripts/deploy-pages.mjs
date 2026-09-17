@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { log } from 'node:console';
 import {
   copyFileSync,
+  existsSync,
   mkdtempSync,
   readdirSync,
   rmSync,
@@ -13,8 +14,7 @@ import process from 'node:process';
 
 const root = resolve(import.meta.dirname, '..');
 const release = join(root, 'dist', 'index.html');
-const worktree = mkdtempSync(join(tmpdir(), 'pitch-tracker-pages-'));
-const temporaryBranch = `pages-release-${process.pid}`;
+const committedRelease = join(root, 'index.html');
 
 const git = (args, options = {}) =>
   execFileSync('git', args, {
@@ -23,6 +23,41 @@ const git = (args, options = {}) =>
     stdio: options.capture ? 'pipe' : 'inherit',
     ...options,
   });
+
+const captureGit = (args) => git(args, { capture: true }).trim();
+
+if (!existsSync(release)) {
+  throw new Error(
+    'dist/index.html is missing. Run the build before deploying.',
+  );
+}
+
+const branch = captureGit(['branch', '--show-current']);
+if (branch !== 'main') {
+  throw new Error(
+    `Deployments must run from main (currently on ${branch || 'detached HEAD'}).`,
+  );
+}
+
+if (captureGit(['status', '--porcelain'])) {
+  throw new Error('Commit or stash source changes before deploying.');
+}
+
+copyFileSync(release, committedRelease);
+git(['add', 'index.html']);
+
+try {
+  git(['diff', '--cached', '--quiet']);
+  log('The downloadable index.html already matches this build.');
+} catch {
+  git(['commit', '-m', 'Update downloadable build']);
+  log('Updated the downloadable index.html on main.');
+}
+
+git(['push', 'origin', 'HEAD:main']);
+const source = captureGit(['rev-parse', '--short', 'HEAD']);
+const worktree = mkdtempSync(join(tmpdir(), 'pitch-tracker-pages-'));
+const temporaryBranch = `pages-release-${process.pid}`;
 
 let remoteBranchExists = false;
 try {
@@ -47,7 +82,7 @@ try {
     if (entry !== '.git')
       rmSync(join(worktree, entry), { recursive: true, force: true });
   }
-  copyFileSync(release, join(worktree, 'index.html'));
+  copyFileSync(committedRelease, join(worktree, 'index.html'));
   writeFileSync(join(worktree, '.nojekyll'), '');
   git(['-C', worktree, 'add', '--all']);
 
@@ -55,9 +90,6 @@ try {
     git(['-C', worktree, 'diff', '--cached', '--quiet']);
     log('GitHub Pages already has this build.');
   } catch {
-    const source = git(['rev-parse', '--short', 'HEAD'], {
-      capture: true,
-    }).trim();
     git(['-C', worktree, 'commit', '-m', `Deploy ${source}`]);
     git(['-C', worktree, 'push', 'origin', 'HEAD:gh-pages']);
     log('Published dist/index.html to the gh-pages branch.');

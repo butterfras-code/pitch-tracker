@@ -22,7 +22,9 @@ npm run verify
 
 This runs type checking, linting, formatting checks, the production build, packaging tests, and browser tests. Playwright opens file URLs directly with networking disabled; no test web server is used.
 
-Double-click `dist/index.html` to open the release. The original `Pitch-Tracker.html` remains an unchanged baseline; use `index.html` and `src/` for development. Copy `dist/index.html` anywhere to distribute it. `npm run build` only builds; `npm test` rebuilds and runs the domain, persistence, and packaging unit tests; `npm run test:e2e` rebuilds and runs browser tests.
+Double-click `dist/index.html` to open the release. The original `Pitch-Tracker.html` remains an unchanged baseline; use `src/index.html` and the rest of `src/` for development. The root `index.html` is the latest deployed build committed for convenient downloading and must not be edited by hand. Copy `dist/index.html` anywhere—including to a flash drive—to distribute it. `npm run build` only builds; `npm test` rebuilds and runs the domain, persistence, and packaging unit tests; `npm run test:e2e` rebuilds and runs browser tests.
+
+`npm run deploy:pages` must be run from a clean `main` branch. It builds the app, updates and commits the root `index.html`, pushes `main`, and then publishes the identical file to `gh-pages`.
 
 Current checks cover pitch calculations, packaging, offline launch and relocation, scoring, undo, attendance, reload, theme persistence, and backup restoration in Chromium and Firefox. Microphone hardware and permission behavior require manual testing. Records live in browser storage, not inside the HTML. Back up data before moving or renaming the file. Restore replaces existing records after validation and confirmation. Pithcer-Frice is the default theme. See [THEMES.md](THEMES.md) for theme guidance (theme definitions live in `src/themes/`).
 
