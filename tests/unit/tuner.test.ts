@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  chromaticTarget,
+  displayedTargetNotes,
   displayedTunerNotes,
   nextStreak,
+  tunerFeedbackTarget,
   tunerTarget,
 } from '../../src/domain/tuner';
 
@@ -22,6 +25,19 @@ describe('tuner transposition', () => {
       concert: 'G4',
       transposed: 'A4',
     });
+  });
+
+  it('locks feedback to a pitch class while retaining an exact reference note', () => {
+    expect(tunerFeedbackTarget('C4', 'bb')).toEqual({
+      pitch: 'A♯',
+      min: -25,
+      max: 25,
+    });
+    expect(displayedTargetNotes('C4', 'bb')).toEqual({
+      concert: 'A♯3',
+      transposed: 'C4',
+    });
+    expect(chromaticTarget(445, 440).pitch).toBe('A4');
   });
 
   it('increments only correct streaks and resets misses', () => {

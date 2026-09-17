@@ -28,6 +28,12 @@ export const tunerController = {
     this.resetTunerAttempt(true);
     this.render();
   },
+  setTunerTargetLocked(this: App, locked: boolean): void {
+    if (this.tunerTargetLocked === locked) return;
+    this.tunerTargetLocked = locked;
+    this.resetTunerAttempt(true);
+    this.render();
+  },
   resetTunerAttempt(this: App, resetStreak = false): void {
     this.cancelCheck();
     this.tunerAwaitingRelease = false;
@@ -65,7 +71,10 @@ export const tunerController = {
     this.render();
   },
   tunerResultText(this: App): string {
-    if (!this.tunerLastStatus) return 'Hold the target note to begin a streak.';
+    if (!this.tunerLastStatus)
+      return this.tunerTargetLocked
+        ? 'Hold the target note to begin a streak.'
+        : 'Hold any steady note to begin a streak.';
     return this.tunerLastStatus === 'correct'
       ? `${resultText.correct} · ${this.tunerStreak} ${this.tunerStreak === 1 ? 'note' : 'notes'} in a row`
       : resultText[this.tunerLastStatus];
@@ -79,7 +88,9 @@ export const tunerController = {
           ? 'Release the note before the next attempt'
           : this.pitchHold.active
             ? 'Keep holding'
-            : 'Play the target note';
+            : this.tunerTargetLocked
+              ? 'Play the target note'
+              : 'Play a steady note';
   },
   async toggleTunerFullscreen(this: App): Promise<void> {
     try {

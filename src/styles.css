@@ -280,6 +280,12 @@ main {
   width: 3px;
   background: var(--display-ink);
   left: 50%;
+  transition: left 140ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .needle {
+    transition: none;
+  }
 }
 .progress {
   height: 6px;

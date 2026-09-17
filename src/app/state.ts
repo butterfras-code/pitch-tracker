@@ -35,6 +35,7 @@ export interface AppState extends SessionState {
   settingsInstrument: string;
   tunerTransposition: TunerTransposition;
   tunerTargetPitch: string;
+  tunerTargetLocked: boolean;
   tunerStreak: number;
   tunerLastStatus: PitchStatus | '';
   tunerAwaitingRelease: boolean;
@@ -90,6 +91,7 @@ export function createState(
     settingsInstrument: Object.keys(db.configs)[0] ?? '',
     tunerTransposition: 'concert',
     tunerTargetPitch: 'A4',
+    tunerTargetLocked: true,
     tunerStreak: 0,
     tunerLastStatus: '',
     tunerAwaitingRelease: false,

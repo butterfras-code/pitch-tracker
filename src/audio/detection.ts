@@ -3,7 +3,13 @@ import { findElement } from '../ui/helpers';
 import { updateMicrophoneIndicator } from '../ui/microphone-indicator';
 import type { App } from '../app/application';
 import { detectPitch, evaluate } from '../domain/pitch';
-import { displayedTunerNotes, tunerTarget } from '../domain/tuner';
+import {
+  chromaticTarget,
+  displayedTargetNotes,
+  displayedTunerNotes,
+  tunerFeedbackTarget,
+  tunerTarget,
+} from '../domain/tuner';
 import { $, noteNames } from '../ui/helpers';
 
 export const detection = {
@@ -148,7 +154,14 @@ function tunerFrame(
   frequency: number | null,
 ) {
   const reliable = rms >= this.db.settings.gate ? frequency : null;
-  const target = tunerTarget(this.tunerTargetPitch, this.tunerTransposition);
+  const selectedTarget = tunerTarget(
+    this.tunerTargetPitch,
+    this.tunerTransposition,
+  );
+  const feedbackTarget = (observed: number) =>
+    this.tunerTargetLocked
+      ? tunerFeedbackTarget(this.tunerTargetPitch, this.tunerTransposition)
+      : chromaticTarget(observed, this.db.settings.a4);
   if (this.tunerAwaitingRelease) {
     if (reliable === null) {
       this.tunerReleaseSince ??= now;
@@ -162,7 +175,7 @@ function tunerFrame(
     const hold = this.pitchHold.frame(
       now,
       reliable,
-      target,
+      reliable === null ? selectedTarget : feedbackTarget(reliable),
       this.db.settings.a4,
       this.db.settings.hold,
       this.db.settings.stability,
@@ -187,16 +200,22 @@ function tunerFrame(
       setTunerIndicator('');
     }
   } else if (findElement('liveNote')) {
-    const notes = displayedTunerNotes(
-      displayFrequency,
-      this.db.settings.a4,
-      this.tunerTransposition,
-    );
+    const notes = this.tunerTargetLocked
+      ? displayedTargetNotes(this.tunerTargetPitch, this.tunerTransposition)
+      : displayedTunerNotes(
+          displayFrequency,
+          this.db.settings.a4,
+          this.tunerTransposition,
+        );
     $('liveNote').textContent = notes.concert;
     const written = findElement('writtenLiveNote');
     if (written) written.textContent = notes.transposed;
     $('liveHz').textContent = displayFrequency.toFixed(1) + ' Hz';
-    const result = evaluate(displayFrequency, target, this.db.settings.a4);
+    const result = evaluate(
+      displayFrequency,
+      feedbackTarget(displayFrequency),
+      this.db.settings.a4,
+    );
     if (shell) shell.dataset.range = result.status;
     setTunerIndicator(result.status);
     $('liveCents').textContent =

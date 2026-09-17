@@ -38,10 +38,10 @@ export const tunerView = {
         <section class="tuner-controls panel" aria-label="Tuner target settings">
           <div class="tuner-control-fields">
             <label>Transposition<select data-ui-change="tuner-transposition">${tunerTranspositions.map((item) => `<option value="${item.id}" ${item.id === this.tunerTransposition ? 'selected' : ''}>${item.label}</option>`).join('')}</select></label>
-            <label>Target note<select data-ui-change="tuner-target-note">${notes.map((item) => `<option value="${item}" ${item === note ? 'selected' : ''}>${displayPitch(item)}</option>`).join('')}</select></label>
-            <label>Octave<select data-ui-change="tuner-target-octave">${Array.from({ length: 9 }, (_, item) => `<option ${item === octave ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+            <div class="tuner-target-fields"><label>Target note<select data-ui-change="tuner-target-note">${notes.map((item) => `<option value="${item}" ${item === note ? 'selected' : ''}>${displayPitch(item)}</option>`).join('')}</select></label><label>Octave<select data-ui-change="tuner-target-octave">${Array.from({ length: 9 }, (_, item) => `<option ${item === octave ? 'selected' : ''}>${item}</option>`).join('')}</select></label></div>
+            <label class="tuner-lock-toggle"><input type="checkbox" data-ui-change="tuner-target-lock" ${this.tunerTargetLocked ? 'checked' : ''}><span><strong>Lock feedback to target</strong><small>Keep the selected note fixed; matching octaves count as the same note.</small></span></label>
           </div>
-          <div class="tuner-target-summary"><span>Target</span><strong>${displayPitch(this.tunerTargetPitch)}</strong>${this.tunerTransposition === 'concert' ? '' : `<small>Sounds ${displayPitch(target.pitch)} in concert pitch</small>`}<button class="primary target-playback" data-ui-click="reference-tone" aria-label="Hear current target">${speakerIcon}<span>Hear target</span></button></div>
+          <div class="tuner-target-summary"><span>${this.tunerTargetLocked ? 'Locked target' : 'Reference note'}</span><strong>${displayPitch(this.tunerTargetPitch)}</strong>${this.tunerTransposition === 'concert' ? '' : `<small>Sounds ${displayPitch(target.pitch)} in concert pitch</small>`}<button class="primary target-playback" data-ui-click="reference-tone" aria-label="Hear current target">${speakerIcon}<span>Hear target</span></button></div>
         </section>
         <section class="tuner-only-display current-display" aria-label="Live tuner">
           <div class="tuner-streak"><span>Streak</span><strong id="tunerStreak">${this.tunerStreak}</strong><button data-ui-click="reset-tuner-streak" ${this.tunerStreak ? '' : 'disabled'}>Reset</button></div>
@@ -54,7 +54,7 @@ export const tunerView = {
               <div id="liveHz" class="tuner-frequency">${this.mic && !this.classroomPaused ? 'Listening for a clear tone' : ''}</div>
               <div class="meter-labels" aria-hidden="true"><span>Low</span><span>High</span></div><div class="meter"><i class="needle" id="needle"></i></div>
               <div class="input-signal"><span id="inputStatus" class="input-status" role="img" aria-label="Microphone off" title="Microphone off" data-microphone="off">${microphoneIcon}</span><meter id="inputLevel" aria-label="Microphone level" min="0" max="0.25" value="0"></meter></div>
-              <div class="tuner-cents" id="liveCents" aria-label="Cents relative to target">—</div><div class="progress"><i id="holdProgress"></i></div>
+              <div class="tuner-cents" id="liveCents" aria-label="${this.tunerTargetLocked ? 'Cents relative to locked target' : 'Cents relative to nearest note'}">—</div><div class="progress"><i id="holdProgress"></i></div>
             </div>
             <div class="scorebar tuner-feedback" aria-label="Pitch feedback"><span class="low" data-status="low">Too low</span><span class="correct" data-status="correct">In range</span><span class="high" data-status="high">Too high</span></div>
           </div>

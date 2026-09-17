@@ -62,6 +62,7 @@ export interface App extends AppState {
   setFeedbackDuration(value: string): void;
   setTunerTransposition(value: string): void;
   setTunerTargetPart(part: 'note' | 'octave', value: string): void;
+  setTunerTargetLocked(locked: boolean): void;
   resetTunerAttempt(resetStreak?: boolean): void;
   completeTunerAttempt(measurement: PitchMeasurement): void;
   resetTunerStreak(): void;

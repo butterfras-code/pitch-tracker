@@ -139,6 +139,7 @@ export function createBindings(app: App): UiBindings {
       'tuner-target-note': ({ value }) => app.setTunerTargetPart('note', value),
       'tuner-target-octave': ({ value }) =>
         app.setTunerTargetPart('octave', value),
+      'tuner-target-lock': ({ checked }) => app.setTunerTargetLocked(checked),
       'session-advance': ({ value }) => {
         if (!['manual', 'when-correct', 'after-attempt'].includes(value))
           return;

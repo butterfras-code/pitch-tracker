@@ -22,6 +22,39 @@
   display: grid;
   gap: 14px;
 }
+#sessionShell.tuner-shell .tuner-target-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(80px, 1fr);
+  gap: 10px;
+}
+#sessionShell.tuner-shell .tuner-lock-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--control);
+  color: var(--control-ink);
+  cursor: pointer;
+}
+#sessionShell.tuner-shell .tuner-lock-toggle input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+}
+#sessionShell.tuner-shell .tuner-lock-toggle span {
+  display: grid;
+  gap: 2px;
+}
+#sessionShell.tuner-shell .tuner-lock-toggle small {
+  color: inherit;
+  font-family: var(--body-font);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
 #sessionShell.tuner-shell .tuner-target-summary {
   display: flex;
   flex-direction: column;
@@ -156,9 +189,6 @@
   #sessionShell.tuner-shell .tuner-only-display.current-display {
     overflow: visible;
   }
-  #sessionShell.tuner-shell .tuner-control-fields {
-    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(80px, 0.5fr));
-  }
   #sessionShell.tuner-shell .tuner-target-summary > strong {
     font-size: 56px;
   }
@@ -167,9 +197,6 @@
   }
 }
 @media (max-width: 480px) {
-  #sessionShell.tuner-shell .tuner-control-fields {
-    grid-template-columns: minmax(0, 1fr);
-  }
   #sessionShell.tuner-shell:not([data-transposition='concert'])
     .tuner-note-display
     .note {

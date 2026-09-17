@@ -51,6 +51,39 @@ export function tunerTarget(
   return { pitch: concertPitch, min, max };
 }
 
+/** Locked feedback follows the selected pitch class in the nearest octave. */
+export function tunerFeedbackTarget(
+  writtenPitch: string,
+  transpositionId: TunerTransposition,
+  min = -25,
+  max = 25,
+): PitchTarget {
+  const exact = tunerTarget(writtenPitch, transpositionId, min, max);
+  return { ...exact, pitch: exact.pitch.replace(/[0-8]$/, '') };
+}
+
+/** Unlocked feedback behaves like a chromatic tuner around the nearest note. */
+export function chromaticTarget(
+  frequency: number,
+  a4: number,
+  min = -25,
+  max = 25,
+): PitchTarget {
+  return { pitch: noteFromMidi(midiFromFrequency(frequency, a4)), min, max };
+}
+
+export function displayedTargetNotes(
+  writtenPitch: string,
+  transpositionId: TunerTransposition,
+): { concert: string; transposed: string } {
+  const written = parseNote(writtenPitch);
+  if (written.midi === null) throw Error('Tuner targets require an octave.');
+  return {
+    concert: tunerTarget(writtenPitch, transpositionId).pitch,
+    transposed: noteFromMidi(written.midi),
+  };
+}
+
 export function displayedTunerNotes(
   frequency: number,
   a4: number,
