@@ -14,10 +14,6 @@ test('corrupt saved data is preserved while the app remains usable', async ({
     'Saved data could not be read',
   );
   await page.getByRole('button', { name: 'Start session' }).first().click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
   await expect(page.locator('.focus')).toBeVisible();
   expect(await page.evaluate((key) => localStorage.getItem(key), key)).toBe(
     '{broken',
@@ -40,10 +36,6 @@ test('denied storage access does not prevent manual tracking', async ({
   );
   await page.getByRole('button', { name: 'Start session' }).first().click();
   await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
-  await page
     .locator('.focus')
     .getByRole('button', { name: 'In range' })
     .click();
@@ -64,10 +56,6 @@ test('quota failures pause saves and retain the saved data', async ({
     };
   });
   await page.getByRole('button', { name: 'Start session' }).first().click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
   await expect(page.getByRole('alert')).toContainText(
     'Browser storage is unavailable or full',
   );
@@ -97,10 +85,6 @@ test('a newer stored revision is not overwritten by a stale window', async ({
     return raw;
   }, key);
   await page.getByRole('button', { name: 'Start session' }).first().click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
   await expect(page.getByRole('alert')).toContainText(
     'Another window changed this tracker',
   );

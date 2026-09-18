@@ -83,7 +83,13 @@ export const microphone = {
     else {
       this.classroomPaused = false;
       this.cancelCheck();
-      await this.enableMic();
+      const checkGeneration = this.checkGeneration;
+      if (await this.enableMic()) {
+        if (this.checkGeneration === checkGeneration) {
+          this.classroomListener.start();
+          this.classroomListenerReady = true;
+        }
+      }
     }
     if (!this.disposed) this.render();
   },
@@ -154,7 +160,9 @@ export const microphone = {
         return;
       }
       this.cancelCheck();
-      // Automatic arming requires fresh quiet or settled-background observations.
+      // The teacher explicitly started this turn; no prior note needs releasing.
+      this.classroomListener.start();
+      this.classroomListenerReady = true;
       this.render();
     } else if (!this.disposed) this.render();
   },

@@ -130,6 +130,10 @@ export const classroomController = {
   toggleClassroomPause(this: App): void {
     this.classroomPaused = !this.classroomPaused;
     this.cancelCheck();
+    if (!this.classroomPaused && this.mic) {
+      this.classroomListener.start();
+      this.classroomListenerReady = true;
+    }
     if (this.tab === 'tuner') {
       this.tunerAwaitingRelease = false;
       this.tunerReleaseSince = null;

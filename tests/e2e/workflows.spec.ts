@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { dismissFeedback } from '../fixtures/classroom-page';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -12,12 +13,8 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
   page,
 }) => {
   await page.getByRole('button', { name: 'Start session' }).first().click();
-  await page.getByLabel('Session name').fill('Baseline rehearsal');
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
-  const focus = page.locator('.focus');
+  await page.getByLabel('Advance', { exact: true }).selectOption('manual');
+  const focus = page.locator('.current-display');
   await focus.getByRole('button', { name: 'In range' }).click();
   expect(
     await page.evaluate(
@@ -26,6 +23,7 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
       key,
     ),
   ).toBe(1);
+  await dismissFeedback(page);
   await page.getByRole('button', { name: 'Undo last change' }).click();
   expect(
     await page.evaluate(
@@ -35,13 +33,18 @@ test('manual score, undo, attendance and reload preserve session behavior', asyn
     ),
   ).toBe(0);
   await focus.getByRole('button', { name: 'Too low' }).click();
-  await page.locator('.student').nth(1).getByLabel('Absent').click();
+  await dismissFeedback(page);
+  const lucas = page.locator('.student').filter({
+    has: page.getByRole('button', { name: 'Lucas', exact: true }),
+  });
+  await lucas.getByLabel('Absent').click();
   await page.reload();
   await expect(page.locator('#sessionShell')).toBeVisible();
   await expect(page.locator('.student').first()).toContainText('Too low');
-  await expect(
-    page.locator('.student').nth(1).getByLabel('Absent'),
-  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(lucas.getByLabel('Absent')).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await expect(page.locator('.student [data-ui-click="record"]')).toHaveCount(
     0,
   );

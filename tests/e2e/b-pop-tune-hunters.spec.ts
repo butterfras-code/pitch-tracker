@@ -110,9 +110,7 @@ for (const [width, height] of [
         'background-image',
         /linear-gradient/,
       );
-      await page
-        .getByRole('button', { name: 'Start listening', exact: true })
-        .click();
+      await page.locator('#pauseListening').click();
       await expect
         .poll(() =>
           stage.evaluate(
@@ -132,9 +130,7 @@ for (const [width, height] of [
         )
         .toBe('none');
       await page.emulateMedia({ reducedMotion: 'no-preference' });
-      await page
-        .getByRole('button', { name: 'Pause listening', exact: true })
-        .click();
+      await page.locator('#pauseListening').click();
       await expect(meter).toHaveCSS('animation-name', 'none');
       await expect
         .poll(() =>
@@ -290,9 +286,7 @@ test('stage lighting follows actual pitch detection and resets for the next perf
   await page.locator('#themeSelect').selectOption(themeId);
   await sessionControl(page, 'Full screen');
   const stage = page.locator('.current-display');
-  await page
-    .getByRole('button', { name: 'Start listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await sound(page, 0, 3200);
   await sound(page, 440, 800);
   await expect(page.locator('#sessionShell')).toHaveAttribute(
@@ -366,9 +360,7 @@ test('stage lighting follows actual pitch detection and resets for the next perf
       (element) => getComputedStyle(element, '::after').content,
     ),
   ).toBe('none');
-  await page
-    .getByRole('button', { name: 'Pause listening', exact: true })
-    .click();
+  await page.locator('#pauseListening').click();
   await expect
     .poll(() =>
       selected.evaluate(

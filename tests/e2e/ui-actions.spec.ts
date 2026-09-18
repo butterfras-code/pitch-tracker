@@ -103,7 +103,7 @@ test('dynamic session controls, notes and history editing work after rerenders',
     .locator('.tuner-section[data-live-practice]')
     .getByRole('button', { name: 'In range', exact: true })
     .click();
-  await expect(page.locator('.student')).toContainText('In range');
+  await expect(page.locator('#cards .student')).toContainText('In range');
   await dismissFeedback(page);
   await page.getByLabel('Search students').fill('');
   await page.getByLabel('Filter roster').selectOption('not tested');

@@ -12,10 +12,13 @@ for (const recording of recordings) {
       const target = useLabel ? recording.label : recording.sounding;
       await page.getByRole('button', { name: 'Settings', exact: true }).click();
       await selectTarget(page, 'Flute', target);
-      await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
       await page
         .getByRole('button', { name: 'Save settings', exact: true })
         .click();
+      await page
+        .getByRole('button', { name: 'Detection', exact: true })
+        .click();
+      await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
       await page.getByRole('button', { name: 'Classes', exact: true }).click();
       await page.getByRole('button', { name: 'Resume session' }).click();
       await page.locator('#pauseListening').click();

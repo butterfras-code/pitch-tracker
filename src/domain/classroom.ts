@@ -49,6 +49,12 @@ export class ClassroomListener {
     this.releaseSince = null;
   }
 
+  /** An explicit Start/Resume supplies the turn boundary before any audio arrives. */
+  start(): void {
+    this.reset();
+    this.armed = true;
+  }
+
   frame(
     now: number,
     rms: number,

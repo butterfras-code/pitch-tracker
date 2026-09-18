@@ -40,6 +40,16 @@ describe('microphone handoff and clap commands', () => {
     l.reset();
     expect(frame(l, 2500, 0.2, 440).ready).toBe(false);
   });
+  it('accepts an explicit start without quiet but requires release after a completed attempt', () => {
+    const l = new ClassroomListener();
+    l.start();
+    expect(frame(l, 0, 0.2, 440, false).ready).toBe(true);
+    l.reset(0.2);
+    for (let t = 100; t <= 2000; t += 100)
+      expect(frame(l, t, 0.2, 440, false).ready).toBe(false);
+    l.start();
+    expect(frame(l, 2100, 0.2, 440, false).ready).toBe(true);
+  });
   it('arms over settled unpitched background and does not learn a sustained note as background', () => {
     const l = new ClassroomListener();
     for (let t = 0; t < 800; t += 100)

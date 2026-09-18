@@ -72,13 +72,6 @@ test('class cards show both periods, empty states and refresh after a finished s
       .getByRole('button', { name: 'Start session' }),
   ).toBeDisabled();
   await strings.getByRole('button', { name: 'Start session' }).click();
-  await expect(page.getByRole('dialog')).toContainText(
-    'Strings <Advanced> · 1 students',
-  );
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
   await expect(page.locator('#studentIdentity')).toContainText('Alex');
   await page.getByRole('button', { name: 'Back to classes' }).click();
   await expect(

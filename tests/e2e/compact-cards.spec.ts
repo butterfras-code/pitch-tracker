@@ -36,7 +36,7 @@ for (const width of [1366, 1920]) {
     );
     await page.locator('#pauseListening').click();
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
-      'Microphone waiting for a pause',
+      'Microphone on',
     );
     await expect(card.locator('#pauseListening')).toHaveAttribute(
       'aria-pressed',
@@ -95,7 +95,7 @@ for (const width of [1366, 1920]) {
   });
 }
 
-test('target surface uses paired theme colors and direct toggle preserves attendance and scores', async ({
+test('target surface uses paired theme surface colors and direct toggle preserves attendance and scores', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
@@ -111,11 +111,17 @@ test('target surface uses paired theme colors and direct toggle preserves attend
     await page.locator('#themeSelect').selectOption(theme);
     const colors = await page
       .locator('.selected .session-target[data-live-practice]')
-      .evaluate((el) => {
+      .evaluate((el, theme) => {
         const style = getComputedStyle(el);
         const sample = document.createElement('span');
-        sample.style.color = 'var(--control-ink)';
-        sample.style.backgroundColor = 'var(--control)';
+        const [background, ink] =
+          theme === 'lisa-lives'
+            ? ['card', 'ink']
+            : theme === 'vintage-audio'
+              ? ['display-bg', 'display-ink']
+              : ['control', 'control-ink'];
+        sample.style.color = `var(--${ink})`;
+        sample.style.backgroundColor = `var(--${background})`;
         el.append(sample);
         const expected = getComputedStyle(sample);
         const result = [
@@ -126,7 +132,7 @@ test('target surface uses paired theme colors and direct toggle preserves attend
         ];
         sample.remove();
         return result;
-      });
+      }, theme);
     expect(colors[0]).toBe(colors[1]);
     expect(colors[2]).toBe(colors[3]);
     expect(colors[0]).not.toBe('rgba(0, 0, 0, 0)');
@@ -134,7 +140,7 @@ test('target surface uses paired theme colors and direct toggle preserves attend
       path: testInfo.outputPath(`compact-${theme}.png`),
     });
   }
-  const maya = page.locator('.student').first();
+  const maya = page.locator('.student[data-student-id="student-1"]');
   await maya.locator('.tuner-section .low').click();
   await dismissFeedback(page);
   await maya.getByRole('button', { name: 'Absent' }).click();

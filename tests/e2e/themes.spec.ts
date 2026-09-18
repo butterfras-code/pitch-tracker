@@ -82,10 +82,6 @@ for (const width of [390, 1440]) {
       '"Trebuchet MS", system-ui, sans-serif',
     );
     await expect(page.locator('h1')).toHaveCSS('font-weight', '900');
-    await expect(page.locator('.detection-control output').first()).toHaveCSS(
-      'font-family',
-      'monospace',
-    );
     await expect(page.locator('.range-readouts b').first()).toHaveCSS(
       'font-family',
       'monospace',
@@ -127,6 +123,12 @@ for (const width of [390, 1440]) {
     await expect(button).toHaveCSS('color', 'rgb(21, 21, 21)');
     await themePicker.selectOption('big-button');
     await applyOverrides();
+    page.once('dialog', (dialog) => dialog.accept());
+    await page.getByRole('button', { name: 'Detection', exact: true }).click();
+    await expect(page.locator('.detection-control output').first()).toHaveCSS(
+      'font-family',
+      'monospace',
+    );
     await page.getByRole('button', { name: 'Classes', exact: true }).click();
     await page.getByRole('button', { name: 'Resume session' }).click();
     await expect(page.locator('.current-display')).toHaveCSS(

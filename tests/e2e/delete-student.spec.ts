@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test } from '@playwright/test';
+import { dismissFeedback } from '../fixtures/classroom-page';
 
 test('student deletion supports cancellation, persists, and preserves session history', async ({
   page,
@@ -10,15 +11,11 @@ test('student deletion supports cancellation, persists, and preserves session hi
     .getByRole('button', { name: 'Start session', exact: true })
     .first()
     .click();
-  await page.getByLabel('Session name').fill('Before deletion');
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
-    .click();
   await page
     .locator('.tuner-section[data-live-practice]')
     .getByRole('button', { name: 'In range' })
     .click();
+  await dismissFeedback(page);
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Edit class' }).first().click();
   const row = page
@@ -60,10 +57,6 @@ test('student deletion supports cancellation, persists, and preserves session hi
   await page
     .getByRole('button', { name: 'Start session', exact: true })
     .first()
-    .click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Start session' })
     .click();
   await expect(page.locator('.student')).toHaveCount(8);
   await expect(

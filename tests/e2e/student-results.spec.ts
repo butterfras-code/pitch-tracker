@@ -12,7 +12,7 @@ test('fullscreen split cards show latest session results across rounds and reloa
   await page.setViewportSize({ width: 1920, height: 1080 });
   await classroomPage(page);
   await sessionControl(page, 'Full screen');
-  const card = page.locator('.student').first();
+  const card = page.locator('.student[data-student-id="student-1"]');
   await expect(card.locator('.student-result, .badge')).toHaveCount(0);
   for (const result of ['Too low', 'Too high', 'In range']) {
     await page
@@ -45,7 +45,7 @@ for (const width of [390, 1920]) {
   }, testInfo) => {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1080 });
     await classroomPage(page);
-    const card = page.locator('.student').first();
+    const card = page.locator('.student[data-student-id="student-1"]');
     for (const theme of ['pitch-press', 'big-button', 'lisa-lives']) {
       await page.evaluate(
         (theme) =>

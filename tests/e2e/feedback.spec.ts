@@ -12,6 +12,7 @@ import { readFile } from 'node:fs/promises';
 
 async function openFeedbackSettings(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Defaults', exact: true }).click();
 }
 async function returnToSession(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
@@ -33,7 +34,7 @@ for (const mode of ['Split view', 'Class view']) {
     await closeSettings(page);
     await page.locator('#pauseListening').click();
     await expect(page.locator('#inputStatus')).toHaveAccessibleName(
-      'Microphone waiting for a pause',
+      'Microphone on',
     );
     await sound(page, 0);
     await sound(page, 440, 900);
@@ -375,6 +376,7 @@ test('user duration saves from Settings, controls timing across themes and round
   expect(backup.settings.feedbackDurationMs).toBe(1500);
   await page.reload();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Defaults', exact: true }).click();
   await page.getByRole('button', { name: 'Defaults', exact: true }).click();
   await expect(duration).toHaveValue('1.5');
   await duration.fill('5');

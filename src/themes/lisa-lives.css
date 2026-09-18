@@ -188,16 +188,24 @@
   svg {
   filter: drop-shadow(0 0 2px var(--primary-ink));
 }
-:root[data-theme='lisa-lives'] #sessionShell .scorebar .low {
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.scorebar .low, .student-result.low) {
   --candy: var(--low);
 }
-:root[data-theme='lisa-lives'] #sessionShell .scorebar .correct {
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.scorebar .correct, .student-result.correct) {
   --candy: var(--correct);
 }
-:root[data-theme='lisa-lives'] #sessionShell .scorebar .high {
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.scorebar .high, .student-result.high) {
   --candy: var(--high);
 }
-:root[data-theme='lisa-lives'] #sessionShell .scorebar button {
+:root[data-theme='lisa-lives']
+  #sessionShell
+  :is(.scorebar button, .student-result) {
   color: var(--ink);
   background-color: var(--candy);
   background-image: var(--control-pattern);

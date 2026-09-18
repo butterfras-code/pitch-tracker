@@ -943,6 +943,55 @@ body.session-active {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
+/* Reserve control widths independently of theme font metrics. Row breaks are
+   shared geometry, so changing paint or listening labels cannot resize panes. */
+#sessionShell .session-toolbar {
+  font-size: var(--session-small);
+}
+#sessionShell .session-toolbar > button,
+#sessionShell .session-toolbar .view-picker button {
+  width: 2.444444em;
+  padding-inline: 4px;
+}
+#sessionShell .session-toolbar > .icon-action {
+  width: 2.666667em;
+}
+#sessionShell .session-toolbar .view-picker {
+  flex: 0 0 7.333333em;
+}
+#sessionShell .session-toolbar .toolbar-class {
+  flex: 1 0 8.333333em;
+  max-width: 16em;
+}
+#sessionShell .session-toolbar .toolbar-advance {
+  flex: 0 0 15.555556em;
+}
+#sessionShell .session-toolbar .toolbar-field select {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  max-width: none;
+}
+#sessionShell .session-toolbar .toolbar-field > span {
+  flex: none;
+  white-space: nowrap;
+}
+#sessionShell .session-toolbar .microphone-split {
+  flex: 0 0 13.333333em;
+}
+#sessionShell .session-toolbar .toolbar-listening {
+  flex: 1;
+  min-width: 0;
+  padding-inline: 8px;
+  white-space: nowrap;
+}
+#sessionShell .session-toolbar #sessionUndo {
+  width: 5.333333em;
+}
+#sessionShell .session-toolbar [data-ui-click='end-session'] {
+  width: 8.444444em;
+  white-space: nowrap;
+}
 #sessionShell .session-toolbar .session-meta {
   flex: 1 1 240px;
   gap: 4px 12px;

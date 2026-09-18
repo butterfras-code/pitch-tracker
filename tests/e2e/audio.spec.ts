@@ -45,21 +45,17 @@ test('audio loop uses current tuning and gate and records a hold exactly once', 
   page,
 }) => {
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
   await setSlider(page.getByLabel('A4 reference'), '442');
   await setSlider(page.getByLabel('Noise gate'), '0.2');
-  await page
-    .getByRole('button', { name: 'Save settings', exact: true })
-    .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
   await page.locator('#pauseListening').click();
   await sound(page, 442);
   await expect(page.locator('#liveCents')).toHaveText('—');
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
   await setSlider(page.getByLabel('Noise gate'), '0.01');
-  await page
-    .getByRole('button', { name: 'Save settings', exact: true })
-    .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
   await sound(page, 0);
@@ -172,10 +168,8 @@ test('Escape during pending permission cannot start a later automatic check', as
 
 async function twoSecondHold(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Detection', exact: true }).click();
   await setSlider(page.getByLabel('Steady hold (seconds)'), '2');
-  await page
-    .getByRole('button', { name: 'Save settings', exact: true })
-    .click();
   await page.getByRole('button', { name: 'Classes', exact: true }).click();
   await page.getByRole('button', { name: 'Resume session' }).click();
   await page.locator('#pauseListening').click();
@@ -262,4 +256,43 @@ test('a sustained flat note in moderate noise still saves a measured low result'
   expect(Math.abs(1200 * Math.log2(attempts[0].frequency! / 392))).toBeLessThan(
     10,
   );
+});
+
+test('explicit start and resume score the first sustained note without preceding silence', async ({
+  page,
+}) => {
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await page.getByRole('button', { name: 'Full screen', exact: true }).click();
+  await page.evaluate(() => {
+    window.syntheticAudio.frequency = 440;
+    window.syntheticAudio.amplitude = 0.2;
+    window.syntheticAudio.pending = true;
+  });
+  await page.locator('#pauseListening').click();
+  await expect
+    .poll(() => page.evaluate(() => window.syntheticAudio.requests))
+    .toBe(1);
+  await page.evaluate(() => window.syntheticAudio.release?.());
+  await expect(page.locator('#classroomStatus')).toHaveText('Your turn - play');
+  await page.clock.runFor(320);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(0);
+  await page.clock.runFor(600);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await dismissFeedback(page);
+  await page.clock.runFor(2000);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await page.locator('#pauseListening').click();
+  await expect(page.locator('#classroomStatus')).toHaveText('Paused');
+  await page.locator('#pauseListening').click();
+  await page.clock.runFor(320);
+  expect((await saved(page)).sessions[0].attempts).toHaveLength(1);
+  await page.clock.runFor(600);
+  const attempts = (await saved(page)).sessions[0].attempts;
+  expect(attempts).toHaveLength(2);
+  expect(
+    attempts.every(
+      (attempt) =>
+        attempt.source === 'microphone' && attempt.status === 'correct',
+    ),
+  ).toBe(true);
 });

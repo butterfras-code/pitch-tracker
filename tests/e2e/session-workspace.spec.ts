@@ -145,21 +145,19 @@ for (const [width, height] of [
               elements.map((el) => parseFloat(getComputedStyle(el).fontSize)),
             );
           expect(Math.min(...textSizes)).toBeGreaterThanOrEqual(18);
-          if (state === 'idle') {
-            signatures.push(
-              await page.locator('.session-content').evaluate((el) =>
-                [...el.children].map((child) => {
-                  const r = child.getBoundingClientRect();
-                  return [
-                    Math.round(r.x),
-                    Math.round(r.y),
-                    Math.round(r.width),
-                    Math.round(r.height),
-                  ];
-                }),
-              ),
-            );
-          }
+          signatures.push(
+            await page.locator('.session-content').evaluate((el) =>
+              [...el.children].map((child) => {
+                const r = child.getBoundingClientRect();
+                return [
+                  Math.round(r.x),
+                  Math.round(r.y),
+                  Math.round(r.width),
+                  Math.round(r.height),
+                ];
+              }),
+            ),
+          );
           if (state === 'result') {
             expect(
               await page.evaluate(() => {
